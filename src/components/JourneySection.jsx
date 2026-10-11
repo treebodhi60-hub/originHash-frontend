@@ -39,10 +39,12 @@ const JourneySection = ({ product, journey, buyerVerifiedAt, journeyScope, scann
             <div className="oh-details-product-label">Producer</div>
             <div className="oh-details-product-producer">{product.producer}</div>
             {product.packedAt && <div className="oh-details-product-meta">Packed {formatDateShort(product.packedAt)}</div>}
-            {scannedBy && !scannedBy.isYou && (
+            {scannedBy && (!scannedBy.isYou || scannedBy.userCode) && (
               <div className="oh-details-product-meta">
-                Scanned by {scannedBy.name || 'an unnamed user'}
+                Scanned by {scannedBy.isYou ? 'you' : scannedBy.name || 'an unnamed user'}
                 {scannedBy.userType ? ` (${capitalize(scannedBy.userType)})` : ''}
+                {scannedBy.userCode && <span className="oh-user-code">{scannedBy.userCode}</span>}
+                {scannedBy.currentName && <span className="oh-now-called"> · now {scannedBy.currentName}</span>}
               </div>
             )}
           </div>
@@ -68,7 +70,7 @@ const JourneySection = ({ product, journey, buyerVerifiedAt, journeyScope, scann
                   Scan {i + 1}
                   {step.userType ? ` · ${capitalize(step.userType)}` : ''}
                 </strong>
-                <span>{formatDateTimeShort(step.createdAt)}</span>
+                <span>{formatDateTimeShort(step.createdAt, { seconds: true })}</span>
               </div>
               <div className="oh-journey-line">
                 <UserIcon size={14} />
@@ -86,7 +88,7 @@ const JourneySection = ({ product, journey, buyerVerifiedAt, journeyScope, scann
           <span className="oh-journey-dot">{buyerVerifiedAt && <CheckIcon size={12} />}</span>
           <div className="oh-journey-end">
             {buyerVerifiedAt
-              ? `Verified by the final buyer · ${formatDateTimeShort(buyerVerifiedAt)}`
+              ? `Verified by the final buyer · ${formatDateTimeShort(buyerVerifiedAt, { seconds: true })}`
               : 'Awaiting verification by the final buyer'}
           </div>
         </li>

@@ -5,6 +5,7 @@ import BrandPanel from '../components/BrandPanel.jsx';
 import { Spinner } from '../components/Loader.jsx';
 import { sendOtp, adminLogin, clearError } from '../store/authSlice';
 import '../styles/auth.css';
+import { takeReturn } from '../utils/returnTo';
 
 const Login = () => {
   const [mode, setMode] = useState('user'); // 'user' | 'admin'
@@ -50,7 +51,7 @@ const Login = () => {
 
     const result = await dispatch(adminLogin({ username: username.trim(), password }));
     if (adminLogin.fulfilled.match(result)) {
-      navigate('/admin/users');
+      navigate(takeReturn() || '/admin/users');
     }
   };
 

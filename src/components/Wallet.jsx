@@ -1,26 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import api from '../api/axios';
-import { fetchWallet, setBalance, setWalletState } from '../store/walletSlice';
+import { PLAN_NAMES, fetchWallet, setTabs, stickerTabs } from '../store/walletSlice';
 import { formatINR } from '../utils/money';
 import { loadRazorpay } from '../utils/razorpay';
 import { formatDateTimeShort } from '../utils/format';
 import { Spinner } from './Loader.jsx';
 import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, CrossIcon, QrIcon } from './ScanIcons.jsx';
 
-const QUICK_AMOUNTS = [500, 1000, 2000, 5000]; // rupees
-
 const Svg = ({ size = 20, children }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     {children}
   </svg>
-);
-
-const WalletIcon = ({ size }) => (
-  <Svg size={size}>
-    <path d="M19 7V5.5A1.5 1.5 0 0 0 17.5 4h-12A2.5 2.5 0 0 0 3 6.5v11A2.5 2.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15" />
-    <path d="M3 6.5A2.5 2.5 0 0 0 5.5 9h13A1.5 1.5 0 0 1 20 10.5V15h-4a2 2 0 0 1 0-4h4" />
-  </Svg>
 );
 
 const PlusIcon = ({ size }) => (
@@ -49,8 +40,9 @@ const LockIcon = ({ size }) => (
   </Svg>
 );
 
-const stickersFor = (paise, pricePerQrPaise) => (pricePerQrPaise ? Math.floor(paise / pricePerQrPaise) : 0);
 const plural = (n, word) => `${n.toLocaleString('en-IN')} ${word}${n === 1 ? '' : 's'}`;
+const shortDate = (iso) => new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+const longDate = (iso) => new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
 // A centred dialog: Esc and the backdrop close it unless `locked` (a payment step is running).
 export const Modal = ({ title, labelId, onClose, locked = false, children, className = '' }) => {
@@ -86,37 +78,103 @@ export const Modal = ({ title, labelId, onClose, locked = false, children, class
   );
 };
 
-// ---------- Balance bar (top of Generate) ----------
+// ---------- Sticker balances (top of Generate) ----------
 
-const PLAN_LABELS = { SUBSCRIPTION: 'Subscription', FIXED_VARIABLE: 'Fixed + Variable' };
+// One line about when a tab's stickers run out. Packs come soonest-expiring first.
+const tabDetail = (tab) => {
+  const [first] = tab.packs;
+  if (tab.planType === 'PAYG') {
+    return tab.packs.length > 1
+      ? `${plural(first.stickersLeft, 'sticker')} valid until ${longDate(first.expiresAt)}, the rest later`
+      : `Valid until ${longDate(first.expiresAt)}`;
+  }
+  if (tab.planType === 'FIXED_VARIABLE') {
+    const extras = tab.packs.reduce((sum, p) => sum + p.extrasBought, 0);
+    return `Expire ${shortDate(first.expiresAt)}${extras ? ` · ${plural(extras, 'extra sticker')} bought this month` : ''}`;
+  }
+  return first.billingCycle === 'YEARLY'
+    ? `${plural(first.monthlyQuota, 'sticker')} a month until ${longDate(first.periodEnd)} · this month's expire ${shortDate(first.expiresAt)}`
+    : `${plural(first.monthlyQuota, 'sticker')} a month · expire ${shortDate(first.expiresAt)}`;
+};
 
-export const WalletBar = ({ onAdd, onActivity, onPlans }) => {
+// Admins, test mode: clear the stickers on one plan's tab, or on all of them. Starts on the tab
+// that's selected in the bar, the smaller step.
+const ResetModal = ({ tabs, initial, onClose }) => {
   const dispatch = useDispatch();
-  const { status, balancePaise, pricePerQrPaise, plan, razorpayKeyId } = useSelector((s) => s.wallet);
-  const [resetting, setResetting] = useState(false);
-  // Only with Razorpay test keys (the server refuses otherwise too).
-  const testMode = razorpayKeyId?.startsWith('rzp_test_');
+  const [choice, setChoice] = useState(tabs.some((t) => t.planType === initial) ? initial : 'ALL');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const total = tabs.reduce((sum, t) => sum + t.stickers, 0);
+  const options = [{ key: 'ALL', name: 'All plans', stickers: total, hint: `${tabs.length} ${tabs.length === 1 ? 'plan' : 'plans'}` }, ...tabs.map((t) => ({ key: t.planType, name: t.name, stickers: t.stickers }))];
+  const chosen = options.find((o) => o.key === choice);
+
   const reset = async () => {
-    if (!window.confirm('Test mode: reset your wallet to ₹0 and clear your plan?')) return;
-    setResetting(true);
+    setBusy(true);
+    setError('');
     try {
-      const { data } = await api.post('/wallet/reset');
-      dispatch(setWalletState({ balancePaise: data.balancePaise, plan: data.plan }));
+      const { data } = await api.post('/wallet/reset', choice === 'ALL' ? {} : { planType: choice });
+      dispatch(setTabs(data.tabs));
+      onClose();
     } catch (err) {
-      window.alert(err.response?.data?.message || 'Could not reset the wallet.');
-    } finally {
-      setResetting(false);
+      setError(err.response?.data?.message || 'Could not reset your stickers.');
+      setBusy(false);
     }
   };
+
+  return (
+    <Modal title="Reset stickers" labelId="oh-reset-title" onClose={onClose} locked={busy}>
+      <div className="oh-reset">
+        <p className="oh-reset-note">Test mode · clears your own stickers so purchases can be tried again. It shows in Activity.</p>
+        <div className="oh-reset-options" role="radiogroup" aria-label="Which stickers to clear">
+          {options.map((o) => (
+            <label key={o.key} className={`oh-reset-option ${choice === o.key ? 'active' : ''}`}>
+              <input type="radio" name="oh-reset-plan" value={o.key} checked={choice === o.key} onChange={() => setChoice(o.key)} disabled={busy} />
+              <span className="oh-reset-option-name">
+                {o.name}
+                {o.hint && <small>{o.hint}</small>}
+              </span>
+              <b>{plural(o.stickers, 'sticker')}</b>
+            </label>
+          ))}
+        </div>
+        {error && (
+          <div className="oh-error" role="alert">
+            {error}
+          </div>
+        )}
+        <button type="button" className="oh-wallet-pay danger" onClick={reset} disabled={busy}>
+          {busy ? (
+            <>
+              <Spinner /> Resetting…
+            </>
+          ) : (
+            `Clear ${plural(chosen.stickers, 'sticker')}${choice === 'ALL' ? ' on every plan' : ` · ${chosen.name}`}`
+          )}
+        </button>
+      </div>
+    </Modal>
+  );
+};
+
+// Every plan the user has bought stickers from is a tab; the selected tab is the balance the next
+// batch is generated from.
+export const StickerBar = ({ source, onSource, onBuy, onActivity }) => {
+  const dispatch = useDispatch();
+  const { status, tabs: allTabs, razorpayKeyId } = useSelector((s) => s.wallet);
+  const tabs = stickerTabs(allTabs);
+  const user = useSelector((s) => s.auth.user);
+  const [resetOpen, setResetOpen] = useState(false);
+  // Admins only, and only with Razorpay test keys (the server refuses otherwise too).
+  const canReset = Boolean(user?.isAdmin || user?.isSuperAdmin) && razorpayKeyId?.startsWith('rzp_test_');
   if (status === 'failed') {
     return (
-      <section className="oh-wallet-bar" aria-label="Wallet">
+      <section className="oh-wallet-bar" aria-label="Sticker balance">
         <span className="oh-wallet-bar-icon">
-          <WalletIcon size={22} />
+          <QrIcon size={22} />
         </span>
         <div className="oh-wallet-bar-main">
-          <span className="oh-wallet-bar-label">Wallet balance</span>
-          <span className="oh-wallet-bar-sub">Couldn't load your wallet. Check your connection.</span>
+          <span className="oh-wallet-bar-label">Sticker balance</span>
+          <span className="oh-wallet-bar-sub">Couldn't load your stickers. Check your connection.</span>
         </div>
         <div className="oh-wallet-bar-actions">
           <button type="button" className="oh-wallet-primary" onClick={() => dispatch(fetchWallet())}>
@@ -126,118 +184,111 @@ export const WalletBar = ({ onAdd, onActivity, onPlans }) => {
       </section>
     );
   }
-  // Same size as the real bar, so nothing jumps when the balance arrives.
+  // Same size as the real bar, so nothing jumps when the balances arrive.
   if (status !== 'ready') {
     return (
-      <section className="oh-wallet-bar loading" aria-busy="true" aria-label="Wallet">
+      <section className="oh-wallet-bar loading" aria-busy="true" aria-label="Sticker balance">
         <span className="oh-wallet-bar-icon">
-          <WalletIcon size={22} />
+          <QrIcon size={22} />
         </span>
         <div className="oh-wallet-bar-main">
-          <span className="oh-wallet-bar-label">Wallet balance</span>
+          <span className="oh-wallet-bar-label">Sticker balance</span>
           <span className="oh-wallet-skel wide" />
           <span className="oh-wallet-skel" />
         </div>
       </section>
     );
   }
-  const active = plan?.status === 'ACTIVE' ? plan : null;
-  const canAfford = stickersFor(balancePaise, active ? active.overagePricePaise : pricePerQrPaise);
-  const low = !active && canAfford < 10;
+  const current = tabs.find((t) => t.planType === source) || null;
 
   return (
-    <section className={`oh-wallet-bar ${low ? 'low' : ''}`} aria-label="Wallet">
+    <section className={`oh-wallet-bar ${current && current.stickers < 10 ? 'low' : ''}`} aria-label="Sticker balance">
       <span className="oh-wallet-bar-icon">
-        <WalletIcon size={22} />
+        <QrIcon size={22} />
       </span>
-      <div className="oh-wallet-bar-main">
-        <span className="oh-wallet-bar-label">Wallet balance</span>
-        <strong className="oh-wallet-bar-balance">{formatINR(balancePaise)}</strong>
-        <span className="oh-wallet-bar-sub">
-          {active
-            ? `${plural(active.remaining, 'plan QR code')} left this month · then ${formatINR(active.overagePricePaise)} each from the wallet`
-            : `${canAfford > 0 ? `Enough for ${plural(canAfford, 'sticker')}` : 'Add balance to generate stickers'} · ${formatINR(pricePerQrPaise)} per sticker`}
-        </span>
+      <div className="oh-wallet-bar-main" aria-live="polite">
+        <span className="oh-wallet-bar-label">{current ? `${current.name} balance` : 'Sticker balance'}</span>
+        <strong className="oh-wallet-bar-balance">{plural(current ? current.stickers : 0, 'sticker')}</strong>
+        <span className="oh-wallet-bar-sub">{current ? tabDetail(current) : 'Buy a plan to start generating stickers.'}</span>
       </div>
-      {onPlans && (
-        <button type="button" className={`oh-wallet-plan ${plan?.status === 'PAUSED' ? 'paused' : ''}`} onClick={onPlans}>
-          <span>{plan?.status === 'PAUSED' ? 'Plan paused' : 'Your plan'}</span>
-          <strong>{plan ? PLAN_LABELS[plan.planType] : 'Pay As You Go'}</strong>
-          <small>{plan?.status === 'PAUSED' ? 'Resume' : plan ? 'Manage' : 'View plans'} →</small>
-        </button>
-      )}
       <div className="oh-wallet-bar-actions">
-        {testMode && (
-          <button type="button" className="oh-wallet-ghost" onClick={reset} disabled={resetting} title="Test mode only: set the balance to ₹0 and clear the plan">
+        {canReset && (
+          <button
+            type="button"
+            className="oh-wallet-ghost"
+            onClick={() => setResetOpen(true)}
+            disabled={!allTabs.length}
+            title={allTabs.length ? 'Admins, test mode only: clear one plan\'s stickers or all of them' : 'No stickers to reset'}
+          >
             <ResetIcon size={16} />
-            {resetting ? 'Resetting…' : 'Reset'}
+            Reset
           </button>
         )}
         <button type="button" className="oh-wallet-ghost" onClick={onActivity}>
           <ReceiptIcon size={16} />
           Activity
         </button>
-        <button type="button" className="oh-wallet-primary" onClick={() => onAdd()}>
+        <button type="button" className="oh-wallet-primary" onClick={onBuy}>
           <PlusIcon size={16} />
-          Add balance
+          Buy stickers
         </button>
       </div>
+      {tabs.length > 0 && (
+        <div className="oh-sticker-tabs" role="radiogroup" aria-label="Generate from">
+          <span className="oh-sticker-tabs-label">Generate from</span>
+          {tabs.map((t) => (
+            <button
+              key={t.planType}
+              type="button"
+              role="radio"
+              aria-checked={t.planType === source}
+              className={`oh-sticker-tab ${t.planType === source ? 'active' : ''}`}
+              onClick={() => onSource(t.planType)}
+            >
+              <span>{t.name}</span>
+              <b>{t.stickers.toLocaleString('en-IN')}</b>
+            </button>
+          ))}
+        </div>
+      )}
+      {/* Fixed-position dialog: the bar's overflow doesn't clip it. */}
+      {resetOpen && <ResetModal tabs={allTabs} initial={source} onClose={() => setResetOpen(false)} />}
     </section>
   );
 };
 
-// ---------- Add balance (Razorpay Checkout) ----------
+// ---------- Buying stickers (Razorpay Checkout) ----------
 
+// `purchase`: { planType, billingCycle, quantity, title, lines: [[label, value]], amountPaise } —
+// what the plan card shows. The server prices it again and Razorpay charges the server's amount.
 // phase: idle → starting (creating the order) → checkout (Razorpay open) → verifying → success
-export const AddBalanceModal = ({ suggestedPaise = 0, onClose }) => {
+export const CheckoutModal = ({ purchase, onClose, onDone }) => {
   const dispatch = useDispatch();
-  const { balancePaise, pricePerQrPaise, minTopupPaise, maxTopupPaise, maxBalancePaise } = useSelector((s) => s.wallet);
-
-  // A shortfall is rounded up to whole rupees and at least the minimum top-up.
-  const suggestedRupees = suggestedPaise > 0 ? Math.max(Math.ceil(suggestedPaise / 100), minTopupPaise / 100) : 0;
-  const [rupees, setRupees] = useState(String(suggestedRupees || 1000));
   const [phase, setPhase] = useState('idle');
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
-  const inputRef = useRef(null);
   const checkoutRef = useRef(null);
-
-  useEffect(() => {
-    inputRef.current?.select();
-  }, []);
 
   // If this dialog goes away while Razorpay is open, close Razorpay too.
   useEffect(() => () => checkoutRef.current?.close?.(), []);
 
-  const amountPaise = (Number(rupees) || 0) * 100;
-  const roomPaise = Math.max(0, maxBalancePaise - balancePaise);
-  const validation =
-    !rupees
-      ? 'Enter an amount.'
-      : amountPaise < minTopupPaise
-        ? `The minimum is ${formatINR(minTopupPaise, { whole: true })}.`
-        : amountPaise > Math.min(maxTopupPaise, roomPaise)
-          ? `You can add up to ${formatINR(Math.min(maxTopupPaise, roomPaise), { whole: true })} right now.`
-          : '';
   const busy = phase === 'starting' || phase === 'verifying';
-
-  const chips = [...new Set([suggestedRupees, ...QUICK_AMOUNTS].filter(Boolean))].slice(0, 5);
 
   const verify = useCallback(
     async (response) => {
       setPhase('verifying');
       try {
-        const { data } = await api.post('/wallet/topups/verify', {
+        const { data } = await api.post('/wallet/purchases/verify', {
           razorpayOrderId: response.razorpay_order_id,
           razorpayPaymentId: response.razorpay_payment_id,
           razorpaySignature: response.razorpay_signature,
         });
-        dispatch(setBalance(data.balancePaise));
+        dispatch(setTabs(data.tabs));
         setResult(data);
         setPhase('success');
       } catch (err) {
         setError(
-          `${err.response?.data?.message || 'We could not confirm your payment yet.'} If money was deducted, it will be added to your wallet automatically within a few minutes.`
+          `${err.response?.data?.message || 'We could not confirm your payment yet.'} If money was deducted, your stickers will be added automatically within a few minutes.`
         );
         setPhase('idle');
         dispatch(fetchWallet());
@@ -247,13 +298,17 @@ export const AddBalanceModal = ({ suggestedPaise = 0, onClose }) => {
   );
 
   const pay = async () => {
-    if (validation || busy) return;
+    if (busy) return;
     setError('');
     setPhase('starting');
     try {
       const [Razorpay, { data: order }] = await Promise.all([
         loadRazorpay(),
-        api.post('/wallet/topups', { amountPaise }),
+        api.post('/wallet/purchases', {
+          planType: purchase.planType,
+          billingCycle: purchase.billingCycle,
+          quantity: purchase.quantity,
+        }),
       ]);
       let lastFailure = '';
       const checkout = new Razorpay({
@@ -262,16 +317,16 @@ export const AddBalanceModal = ({ suggestedPaise = 0, onClose }) => {
         amount: order.amountPaise,
         currency: order.currency,
         name: 'OriginHash',
-        description: `Wallet top-up · ${formatINR(order.amountPaise)}`,
+        description: order.description,
         prefill: order.prefill,
-        notes: { purpose: 'wallet_topup' },
+        notes: { purpose: 'sticker_purchase' },
         theme: { color: '#163832' },
         handler: verify,
         modal: {
           confirm_close: true,
           ondismiss: () => {
             setPhase((p) => (p === 'checkout' ? 'idle' : p));
-            if (lastFailure) setError(`Payment failed: ${lastFailure} No money was added. You can try again.`);
+            if (lastFailure) setError(`Payment failed: ${lastFailure} No money was taken. You can try again.`);
           },
         },
       });
@@ -289,19 +344,19 @@ export const AddBalanceModal = ({ suggestedPaise = 0, onClose }) => {
   };
 
   if (phase === 'success' && result) {
-    const nowAfford = stickersFor(result.balancePaise, pricePerQrPaise);
+    const tab = result.tabs.find((t) => t.planType === result.planType);
     return (
-      <Modal title="Balance added" labelId="oh-wallet-add-title" onClose={onClose}>
+      <Modal title="Stickers added" labelId="oh-checkout-title" onClose={onClose}>
         <div className="oh-wallet-success" role="status">
           <span className="oh-wallet-success-icon">
             <CheckIcon size={30} />
           </span>
-          <strong>{formatINR(result.amountPaise)} added</strong>
+          <strong>{plural(result.stickers, 'sticker')} added</strong>
           <p>
-            New balance <b>{formatINR(result.balancePaise)}</b> — enough for {plural(nowAfford, 'sticker')}.
+            Your {PLAN_NAMES[result.planType]} balance is now <b>{plural(tab ? tab.stickers : result.stickers, 'sticker')}</b>.
           </p>
-          <button type="button" className="oh-wallet-pay" onClick={onClose}>
-            Continue
+          <button type="button" className="oh-wallet-pay" onClick={() => onDone(result.planType)}>
+            Start generating
           </button>
         </div>
       </Modal>
@@ -309,55 +364,20 @@ export const AddBalanceModal = ({ suggestedPaise = 0, onClose }) => {
   }
 
   return (
-    <Modal title="Add balance" labelId="oh-wallet-add-title" onClose={onClose} locked={busy}>
-      <form
-        className="oh-wallet-form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          pay();
-        }}
-      >
-        <p className="oh-wallet-current">
-          Current balance <b>{formatINR(balancePaise)}</b>
-        </p>
-
-        <label className="oh-wallet-amount-label" htmlFor="oh-wallet-amount">
-          Amount to add
-        </label>
-        <div className={`oh-wallet-amount ${validation && rupees ? 'invalid' : ''}`}>
-          <span aria-hidden="true">₹</span>
-          <input
-            id="oh-wallet-amount"
-            ref={inputRef}
-            inputMode="numeric"
-            autoComplete="off"
-            value={rupees}
-            onChange={(e) => setRupees(e.target.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, 7))}
-            disabled={busy || phase === 'checkout'}
-            aria-describedby="oh-wallet-amount-hint"
-          />
-        </div>
-
-        <div className="oh-wallet-chips" role="group" aria-label="Quick amounts">
-          {chips.map((value) => (
-            <button
-              key={value}
-              type="button"
-              className={`oh-wallet-chip ${Number(rupees) === value ? 'active' : ''}`}
-              onClick={() => setRupees(String(value))}
-              disabled={busy || phase === 'checkout'}
-            >
-              {formatINR(value * 100, { whole: true })}
-              {value === suggestedRupees && <small>needed</small>}
-            </button>
+    <Modal title={purchase.title} labelId="oh-checkout-title" onClose={onClose} locked={busy}>
+      <div className="oh-plan-confirm">
+        <dl>
+          {purchase.lines.map(([label, value]) => (
+            <div key={label}>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
+            </div>
           ))}
-        </div>
-
-        <p id="oh-wallet-amount-hint" className={`oh-wallet-hint ${validation && rupees ? 'error' : ''}`}>
-          {validation && rupees
-            ? validation
-            : `Generates up to ${plural(stickersFor(amountPaise, pricePerQrPaise), 'sticker')} at ${formatINR(pricePerQrPaise)} each.`}
-        </p>
+          <div className="total">
+            <dt>To pay</dt>
+            <dd>{formatINR(purchase.amountPaise)}</dd>
+          </div>
+        </dl>
 
         {error && (
           <div className="oh-error" role="alert">
@@ -365,7 +385,7 @@ export const AddBalanceModal = ({ suggestedPaise = 0, onClose }) => {
           </div>
         )}
 
-        <button type="submit" className="oh-wallet-pay" disabled={Boolean(validation) || busy || phase === 'checkout'}>
+        <button type="button" className="oh-wallet-pay" disabled={busy || phase === 'checkout'} onClick={pay}>
           {phase === 'starting' ? (
             <>
               <Spinner /> Opening Razorpay…
@@ -378,16 +398,15 @@ export const AddBalanceModal = ({ suggestedPaise = 0, onClose }) => {
             'Complete the payment in the Razorpay window'
           ) : (
             <>
-              <LockIcon size={16} /> Pay {amountPaise ? formatINR(amountPaise) : ''} securely
+              <LockIcon size={16} /> Pay {formatINR(purchase.amountPaise)} securely
             </>
           )}
         </button>
-
         <p className="oh-wallet-secure">
           Payments are processed by Razorpay (UPI, cards, net banking, wallets). OriginHash never sees your card or bank
           details.
         </p>
-      </form>
+      </div>
     </Modal>
   );
 };
@@ -395,10 +414,11 @@ export const AddBalanceModal = ({ suggestedPaise = 0, onClose }) => {
 // ---------- Activity (ledger) ----------
 
 const TYPE_LABELS = {
-  TOPUP: 'Balance added',
-  STICKER_CHARGE: 'Stickers generated',
-  REFUND: 'Refund',
-  ADJUSTMENT: 'Adjustment',
+  PURCHASE: 'Stickers bought',
+  GENERATE: 'Stickers used',
+  REFILL: 'New month of stickers',
+  EXPIRE: 'Stickers expired',
+  RESET: 'Reset (test mode)',
 };
 
 export const WalletActivityModal = ({ onClose }) => {
@@ -423,19 +443,19 @@ export const WalletActivityModal = ({ onClose }) => {
   }, [page]);
 
   return (
-    <Modal title="Wallet activity" labelId="oh-wallet-activity-title" onClose={onClose} className="wide">
+    <Modal title="Sticker activity" labelId="oh-wallet-activity-title" onClose={onClose} className="wide">
       {status === 'loading' && !data && (
         <div className="oh-wallet-empty">
           <Spinner /> Loading…
         </div>
       )}
       {status === 'failed' && <div className="oh-wallet-empty">Couldn't load your activity. Please try again.</div>}
-      {data && data.total === 0 && <div className="oh-wallet-empty">No activity yet. Add balance to get started.</div>}
+      {data && data.total === 0 && <div className="oh-wallet-empty">No activity yet. Buy stickers to get started.</div>}
       {data && data.total > 0 && (
         <>
           <ul className={`oh-wallet-ledger ${status === 'loading' ? 'refreshing' : ''}`}>
             {data.transactions.map((t) => {
-              const credit = t.amountPaise > 0;
+              const credit = t.stickers > 0;
               return (
                 <li key={t.id}>
                   <span className={`oh-wallet-ledger-icon ${credit ? 'credit' : 'debit'}`}>
@@ -444,14 +464,19 @@ export const WalletActivityModal = ({ onClose }) => {
                   <div className="oh-wallet-ledger-main">
                     <strong>{TYPE_LABELS[t.type] || t.type}</strong>
                     <span>{t.description}</span>
-                    <time dateTime={t.createdAt}>{formatDateTimeShort(t.createdAt)}</time>
+                    <time dateTime={t.createdAt}>
+                      {formatDateTimeShort(t.createdAt)}
+                      {t.amountPaise ? ` · paid ${formatINR(t.amountPaise)}` : ''}
+                    </time>
                   </div>
                   <div className="oh-wallet-ledger-amount">
                     <strong className={credit ? 'credit' : 'debit'}>
                       {credit ? '+' : '−'}
-                      {formatINR(Math.abs(t.amountPaise))}
+                      {Math.abs(t.stickers).toLocaleString('en-IN')}
                     </strong>
-                    <span>Balance {formatINR(t.balanceAfterPaise)}</span>
+                    <span>
+                      {PLAN_NAMES[t.planType]} · {t.balanceAfter.toLocaleString('en-IN')} left
+                    </span>
                   </div>
                 </li>
               );

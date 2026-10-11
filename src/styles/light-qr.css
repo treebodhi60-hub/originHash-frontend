@@ -1,0 +1,645 @@
+/* ==========================================================================
+   Light QR public pages (landing, add update, history): a phone-sized card
+   on the app's cream background, in the app's forest / gold / cream palette.
+   ========================================================================== */
+
+.olq-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: clamp(0px, 4vh, 40px) 0 32px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(201, 164, 100, 0.18), transparent 40%),
+    var(--oh-cream);
+}
+
+.olq-card {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100%;
+  overflow: hidden;
+  background: var(--oh-white);
+  animation: olq-rise 0.3s var(--oh-ease, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
+}
+
+@media (min-width: 480px) {
+  .olq-card {
+    border-radius: 28px;
+    box-shadow: 0 24px 60px rgba(22, 56, 50, 0.16);
+  }
+}
+
+@keyframes olq-rise {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+}
+
+/* ---------- Headers ---------- */
+.olq-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 22px 20px 18px;
+  border-bottom: 1px solid #f1ebe0;
+}
+
+.olq-brand-logo {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--oh-forest);
+}
+
+.olq-brand strong {
+  display: block;
+  font-family: var(--oh-font-display);
+  font-size: 1.35rem;
+  line-height: 1.1;
+  color: var(--oh-forest);
+}
+
+.olq-brand span {
+  font-size: 0.78rem;
+  color: var(--oh-text-muted);
+}
+
+.olq-bar {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid #f1ebe0;
+}
+
+.olq-back {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--oh-forest);
+}
+
+.olq-back:hover {
+  background: var(--oh-hover, #f7f2ea);
+}
+
+.olq-bar-title {
+  text-align: center;
+}
+
+.olq-bar-title h1 {
+  font-size: 1.05rem;
+  color: var(--oh-forest);
+}
+
+.olq-bar-title span {
+  font-size: 0.74rem;
+  color: var(--oh-text-muted);
+}
+
+/* ---------- Body ---------- */
+.olq-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 18px 22px;
+}
+
+.olq-loading {
+  padding: 56px 0;
+}
+
+.olq-missing {
+  padding: 44px 24px;
+  text-align: center;
+}
+
+.olq-missing > span {
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: var(--oh-red-bg);
+  color: var(--oh-red);
+  font-weight: 700;
+}
+
+.olq-missing h2 {
+  font-size: 1.2rem;
+  color: var(--oh-forest);
+}
+
+.olq-missing p {
+  margin: 6px 0 0;
+  font-size: 0.88rem;
+  color: var(--oh-text-muted);
+}
+
+/* Product */
+.olq-product {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #fdf8ef 0%, var(--oh-cream) 100%);
+}
+
+.olq-product-tile {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  border-radius: 16px;
+  background: var(--oh-forest);
+  color: var(--oh-gold);
+  box-shadow: 0 8px 20px rgba(22, 56, 50, 0.18);
+}
+
+.olq-product.compact .olq-product-tile {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+}
+
+.olq-product-text {
+  min-width: 0;
+}
+
+.olq-product h2 {
+  font-family: var(--oh-font-display);
+  font-size: 1.25rem;
+  line-height: 1.2;
+  color: var(--oh-forest);
+}
+
+.olq-product.compact h2 {
+  font-size: 1.05rem;
+}
+
+.olq-product dl {
+  margin: 6px 0 0;
+}
+
+.olq-product dl > div {
+  display: flex;
+  gap: 6px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.olq-product dt {
+  color: var(--oh-text-muted);
+}
+
+.olq-product dt::after {
+  content: ':';
+}
+
+.olq-product dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--oh-text);
+  overflow-wrap: anywhere;
+}
+
+/* QR ID */
+.olq-qrid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid #f1ebe0;
+  border-radius: 16px;
+  background: #faf6ef;
+}
+
+.olq-qrid span {
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--oh-text-muted);
+}
+
+.olq-qrid strong {
+  font-family: var(--oh-font-display);
+  font-size: 1.9rem;
+  letter-spacing: 0.5px;
+  color: var(--oh-forest);
+}
+
+/* Verified / scan recorded rows */
+.olq-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 4px 4px;
+}
+
+.olq-row.recorded {
+  padding: 14px;
+  border: 1px solid #cfe9d9;
+  border-radius: 16px;
+  background: #effaf3;
+}
+
+.olq-tick {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--oh-green);
+  color: var(--oh-white);
+}
+
+.olq-row div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 0.86rem;
+  color: var(--oh-text-muted);
+}
+
+.olq-row strong {
+  font-size: 0.98rem;
+  color: var(--oh-forest);
+}
+
+.olq-place {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.olq-note {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--oh-text-muted);
+}
+
+.olq-privacy {
+  margin: 2px 0 0;
+  font-size: 0.7rem;
+  line-height: 1.45;
+  text-align: center;
+  color: #9a948a;
+}
+
+/* Buttons */
+.olq-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 18px;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.olq-btn.primary {
+  border: none;
+  background: var(--oh-forest);
+  color: var(--oh-white);
+  box-shadow: 0 10px 22px rgba(22, 56, 50, 0.18);
+}
+
+.olq-btn.primary:hover:not(:disabled) {
+  background: var(--oh-forest-light);
+}
+
+.olq-btn.ghost {
+  border: 1.5px solid var(--oh-border);
+  background: var(--oh-white);
+  color: var(--oh-forest);
+}
+
+.olq-btn.ghost:hover:not(:disabled) {
+  background: var(--oh-hover, #f7f2ea);
+}
+
+.olq-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.olq-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.olq-btn.small {
+  min-height: 44px;
+  font-size: 0.86rem;
+  border-radius: 12px;
+}
+
+/* Your update */
+.olq-mine {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #ecdcbc;
+  border-radius: 16px;
+  background: #fbf2e1;
+}
+
+.olq-mine img {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.olq-mine div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 0.8rem;
+  color: var(--oh-text-muted);
+}
+
+.olq-mine strong {
+  font-size: 0.92rem;
+  color: var(--oh-forest);
+}
+
+.olq-mine p {
+  margin: 2px 0 0;
+  font-size: 0.86rem;
+  color: var(--oh-text);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Add update ---------- */
+.olq-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.olq-label {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--oh-text);
+}
+
+.olq-label em {
+  font-style: normal;
+  color: var(--oh-red);
+}
+
+.olq-photo {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #111;
+}
+
+.olq-photo img {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+}
+
+.olq-photo-remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(15, 30, 26, 0.75);
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.olq-photo-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 180px;
+  border: 1.5px dashed #d8c9aa;
+  border-radius: 16px;
+  background: #faf6ef;
+  color: #8a6d35;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.olq-photo-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.olq-field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--oh-border);
+  border-radius: 14px;
+  background: var(--oh-cream);
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--oh-text);
+  resize: vertical;
+}
+
+.olq-field textarea:focus {
+  outline: none;
+  border-color: var(--oh-forest);
+  background: var(--oh-white);
+  box-shadow: 0 0 0 3px rgba(22, 56, 50, 0.1);
+}
+
+.olq-count {
+  align-self: flex-end;
+  font-size: 0.74rem;
+  color: var(--oh-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- History ---------- */
+.olq-chip {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: var(--oh-badge-farmer-bg);
+  color: var(--oh-badge-farmer-text);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.olq-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  border: 1px solid var(--oh-border);
+  border-radius: 12px;
+  background: #faf6ef;
+}
+
+.olq-tabs button {
+  padding: 9px 0;
+  border: none;
+  border-radius: 9px;
+  background: none;
+  color: var(--oh-text-muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.olq-tabs button.active {
+  background: var(--oh-forest);
+  color: var(--oh-white);
+}
+
+.olq-timeline {
+  position: relative;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.olq-timeline li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 12px;
+  padding-bottom: 20px;
+}
+
+/* The line joining one event to the next. */
+.olq-timeline li:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 40px;
+  bottom: 0;
+  left: 19px;
+  border-left: 2px dashed #e3d9c6;
+}
+
+.olq-dot {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--oh-badge-retailer-bg);
+  color: var(--oh-badge-retailer-text);
+}
+
+.type-scan .olq-dot {
+  background: var(--oh-badge-farmer-bg);
+  color: var(--oh-green);
+}
+
+.type-update .olq-dot {
+  background: #fdebd7;
+  color: #b45309;
+}
+
+.olq-event {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.olq-event strong {
+  font-size: 0.95rem;
+  color: var(--oh-text);
+}
+
+.olq-event time,
+.olq-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: var(--oh-text-muted);
+}
+
+.olq-event time {
+  font-variant-numeric: tabular-nums;
+}
+
+.olq-event-photo img {
+  display: block;
+  width: 168px;
+  max-width: 100%;
+  height: 112px;
+  margin-top: 6px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.olq-comment {
+  margin: 4px 0 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #faf6ef;
+  font-size: 0.86rem;
+  color: var(--oh-text);
+  overflow-wrap: anywhere;
+}
+
+.olq-details {
+  margin: 0;
+}
+
+.olq-details > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 0;
+  border-bottom: 1px solid #f1ebe0;
+  font-size: 0.88rem;
+}
+
+.olq-details dt {
+  color: var(--oh-text-muted);
+}
+
+.olq-details dd {
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+  color: var(--oh-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .olq-card {
+    animation: none;
+  }
+}

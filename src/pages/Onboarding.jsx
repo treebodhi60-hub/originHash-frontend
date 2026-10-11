@@ -5,6 +5,7 @@ import BrandPanel from '../components/BrandPanel.jsx';
 import { Spinner } from '../components/Loader.jsx';
 import { updateProfile, skipOnboarding } from '../store/authSlice';
 import '../styles/auth.css';
+import { takeReturn } from '../utils/returnTo';
 
 const USER_TYPES = [
   { value: 'farmer', label: 'Farmer', emoji: '🌾' },
@@ -45,7 +46,7 @@ const Onboarding = () => {
     const result = await dispatch(updateProfile(fd));
     setSubmitting(false);
     if (updateProfile.fulfilled.match(result)) {
-      navigate('/home', { replace: true });
+      navigate(takeReturn() || '/home', { replace: true });
     } else {
       setError(result.payload || 'Could not save your details.');
     }
@@ -54,7 +55,7 @@ const Onboarding = () => {
   const handleSkip = async () => {
     setSkipping(true);
     await dispatch(skipOnboarding());
-    navigate('/home', { replace: true });
+    navigate(takeReturn() || '/home', { replace: true });
   };
 
   return (

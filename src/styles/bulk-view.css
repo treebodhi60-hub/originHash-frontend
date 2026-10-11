@@ -1,0 +1,211 @@
+/* ==========================================================================
+   Public page a bulk QR label opens: the product's recorded details.
+   ========================================================================== */
+
+.obv-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(16px, 6vh, 64px) 16px 32px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(201, 164, 100, 0.18), transparent 40%),
+    var(--oh-cream);
+}
+
+.obv-card {
+  width: 100%;
+  max-width: 440px;
+  overflow: hidden;
+  border-radius: var(--oh-radius-lg);
+  background: var(--oh-white);
+  box-shadow: 0 20px 50px rgba(22, 56, 50, 0.14);
+  animation: obv-rise 0.35s var(--oh-ease, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
+}
+
+@keyframes obv-rise {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+}
+
+.obv-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: var(--oh-forest);
+  color: var(--oh-white);
+}
+
+.obv-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--oh-font-display);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.obv-logo {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(201, 164, 100, 0.45);
+  border-radius: 50%;
+}
+
+.obv-back {
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--oh-white);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.obv-loading {
+  padding: 48px 0;
+}
+
+.obv-hero {
+  padding: 26px 22px 18px;
+  text-align: center;
+  background: linear-gradient(180deg, #fdf8ef 0%, var(--oh-white) 100%);
+}
+
+.obv-eyebrow {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #a5813f;
+}
+
+.obv-hero h1 {
+  margin-top: 6px;
+  font-family: var(--oh-font-display);
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: var(--oh-forest);
+}
+
+.obv-pack {
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+  color: var(--oh-text-muted);
+}
+
+.obv-expiry {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--oh-badge-farmer-bg);
+  color: var(--oh-badge-farmer-text);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.obv-expiry.expired {
+  background: var(--oh-red-bg);
+  color: var(--oh-red);
+}
+
+.obv-details {
+  margin: 0;
+  padding: 4px 22px 8px;
+}
+
+.obv-details > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1ebe0;
+  font-size: 0.9rem;
+}
+
+.obv-details > div:last-child {
+  border-bottom: none;
+}
+
+.obv-details dt {
+  color: var(--oh-text-muted);
+}
+
+.obv-details dd {
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+  color: var(--oh-text);
+  overflow-wrap: anywhere;
+}
+
+.obv-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 22px;
+  border-top: 1px solid #f1ebe0;
+  background: #faf6ef;
+  font-size: 0.78rem;
+  color: var(--oh-text-muted);
+}
+
+.obv-foot code {
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: var(--oh-white);
+  color: var(--oh-forest);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.obv-missing {
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.obv-missing-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: var(--oh-red-bg);
+  color: var(--oh-red);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.obv-missing h1 {
+  font-size: 1.25rem;
+  color: var(--oh-forest);
+}
+
+.obv-missing p {
+  margin: 6px 0 0;
+  font-size: 0.88rem;
+  color: var(--oh-text-muted);
+}
+
+.obv-privacy {
+  margin: 0;
+  padding: 0 22px 14px;
+  background: #faf6ef;
+  font-size: 0.7rem;
+  line-height: 1.45;
+  color: #9a948a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .obv-card {
+    animation: none;
+  }
+}

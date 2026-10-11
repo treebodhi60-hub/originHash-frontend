@@ -2,10 +2,15 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../api/axios';
 import { generateBatch } from './qrStickerSlice';
 
+export const PLAN_NAMES = { PAYG: 'Pay As You Go', SUBSCRIPTION: 'Subscription', FIXED_VARIABLE: 'Fixed + Variable', LIGHT: 'Light QR' };
+// The balances "Generate QR stickers" can use; LIGHT is only for light QR stickers.
+export const STICKER_SOURCES = ['PAYG', 'SUBSCRIPTION', 'FIXED_VARIABLE'];
+export const stickerTabs = (tabs) => tabs.filter((t) => STICKER_SOURCES.includes(t.planType));
+
 // Whether billing is on and the price list are the same for everyone and rarely change, so they're
 // remembered between visits: the Plans tab and price cards show at once on a reload while the
-// user's own balance and plan load. (Balance is never cached — it always comes from the server.)
-const CACHE_KEY = 'oh_billing';
+// user's own sticker balances load. (Balances are never cached — they always come from the server.)
+const CACHE_KEY = 'oh_billing_v5'; // bumped when the price list's shape changes
 const readCache = () => {
   try {
     return JSON.parse(localStorage.getItem(CACHE_KEY)) || {};
@@ -15,19 +20,15 @@ const readCache = () => {
 };
 const cached = readCache();
 
-// The signed-in user's prepaid wallet (all amounts in paise). `enabled` is false until the
-// server has Razorpay configured — stickers are free and no wallet UI is shown until then.
+// The signed-in user's sticker balances: one tab per plan they've bought stickers from (see
+// stickerService.tabsJson on the server). `enabled` is false until the server has Razorpay
+// configured — stickers are free and no balance UI is shown until then.
 const initialState = {
   status: 'idle', // idle | loading | ready | failed
   enabled: Boolean(cached.enabled),
   catalog: cached.catalog || null, // the price list (config/plans.js on the server)
-  balancePaise: 0,
-  pricePerQrPaise: 0,
-  minTopupPaise: 10000,
-  maxTopupPaise: 20000000,
-  maxBalancePaise: 100000000,
   razorpayKeyId: null,
-  plan: null, // the user's ACTIVE or PAUSED plan (see planService.planJson), or null = Pay As You Go
+  tabs: [], // [{ planType, name, stickers, packs: [{ id, stickersLeft, expiresAt, … }] }]
 };
 
 export const fetchWallet = createAsyncThunk('wallet/fetch', async (_, { rejectWithValue }) => {
@@ -35,7 +36,7 @@ export const fetchWallet = createAsyncThunk('wallet/fetch', async (_, { rejectWi
     const { data } = await api.get('/wallet');
     return data;
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || 'Could not load your wallet.');
+    return rejectWithValue(err.response?.data?.message || 'Could not load your stickers.');
   }
 });
 
@@ -43,13 +44,9 @@ const walletSlice = createSlice({
   name: 'wallet',
   initialState,
   reducers: {
-    setBalance(state, action) {
-      state.balancePaise = action.payload;
-    },
-    // After a plan change: { balancePaise, plan }.
-    setWalletState(state, action) {
-      state.balancePaise = action.payload.balancePaise;
-      state.plan = action.payload.plan;
+    // After a purchase or reset: the server's new tabs.
+    setTabs(state, action) {
+      state.tabs = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -58,11 +55,8 @@ const walletSlice = createSlice({
         if (state.status !== 'ready') state.status = 'loading';
       })
       .addCase(fetchWallet.fulfilled, (state, action) => {
-        const { enabled, balancePaise, pricePerQrPaise, minTopupPaise, maxTopupPaise, maxBalancePaise, razorpayKeyId } =
-          action.payload;
-        Object.assign(state, { enabled, balancePaise, pricePerQrPaise, minTopupPaise, maxTopupPaise, maxBalancePaise, razorpayKeyId });
-        state.plan = action.payload.plan ?? null;
-        state.catalog = action.payload.catalog ?? null;
+        const { enabled, razorpayKeyId, tabs, catalog } = action.payload;
+        Object.assign(state, { enabled, razorpayKeyId, tabs: tabs || [], catalog: catalog ?? null });
         try {
           localStorage.setItem(CACHE_KEY, JSON.stringify({ enabled, catalog: state.catalog }));
         } catch {
@@ -73,31 +67,18 @@ const walletSlice = createSlice({
       .addCase(fetchWallet.rejected, (state) => {
         if (state.status !== 'ready') state.status = 'failed';
       })
-      // The server reports the balance after every charge (or refusal), so no refetch is needed.
+      // The server reports the balances after every batch (or refusal), so no refetch is needed.
       .addCase(generateBatch.fulfilled, (state, action) => {
-        if (action.payload.wallet) {
-          state.balancePaise = action.payload.wallet.balancePaise;
-          state.plan = action.payload.wallet.plan ?? null;
-        }
+        if (action.payload.stickers) state.tabs = action.payload.stickers.tabs;
       })
       .addCase(generateBatch.rejected, (state, action) => {
-        if (action.payload?.code === 'INSUFFICIENT_BALANCE') {
-          state.balancePaise = action.payload.balancePaise;
-          if ('plan' in action.payload) state.plan = action.payload.plan;
-        }
+        if (action.payload?.code === 'INSUFFICIENT_STICKERS') state.tabs = action.payload.tabs;
       });
   },
 });
 
-export const { setBalance, setWalletState } = walletSlice.actions;
+export const { setTabs } = walletSlice.actions;
 
-// How a batch of `count` stickers would be paid — the same rule the server applies: the plan's
-// remaining monthly allowance first, the rest at the plan's overage price (or Pay As You Go).
-export const quoteStickers = (count, { plan, pricePerQrPaise }) => {
-  const active = plan?.status === 'ACTIVE' ? plan : null;
-  const coveredCount = active ? Math.min(count, active.remaining) : 0;
-  const extraCount = count - coveredCount;
-  const extraPricePaise = active ? active.overagePricePaise : pricePerQrPaise;
-  return { coveredCount, extraCount, extraPricePaise, totalPaise: extraCount * extraPricePaise };
-};
+export const tabFor = (tabs, planType) => tabs.find((t) => t.planType === planType) || null;
+
 export default walletSlice.reducer;

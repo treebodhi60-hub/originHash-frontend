@@ -1,5 +1,6 @@
 /* ==========================================================================
-   Wallet: balance bar, Add balance / Activity dialogs, sticker cost line
+   Sticker balances: balance bar with one tab per plan, checkout / activity
+   dialogs, the "uses N stickers" line above Generate
    ========================================================================== */
 
 /* ---------- Balance bar ---------- */
@@ -110,6 +111,82 @@
   .oh-wallet-bar-actions button {
     flex: 1;
     justify-content: center;
+  }
+}
+
+/* ---------- Balance tabs: one per plan the user has stickers from ---------- */
+.oh-sticker-tabs {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.oh-sticker-tabs-label {
+  margin-right: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.oh-sticker-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--oh-white);
+  font-size: 0.84rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.oh-sticker-tab:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.oh-sticker-tab:focus-visible {
+  outline: 2px solid var(--oh-gold);
+  outline-offset: 2px;
+}
+
+.oh-sticker-tab b {
+  min-width: 30px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.oh-sticker-tab.active {
+  border-color: var(--oh-gold);
+  background: var(--oh-gold);
+  color: var(--oh-forest);
+}
+
+.oh-sticker-tab.active b {
+  background: var(--oh-forest);
+  color: var(--oh-gold);
+}
+
+@media (max-width: 560px) {
+  .oh-sticker-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .oh-sticker-tabs-label {
+    display: none;
   }
 }
 
@@ -259,23 +336,86 @@
   cursor: not-allowed;
 }
 
-/* ---------- Add balance ---------- */
-.oh-wallet-form {
-  display: flex;
-  flex-direction: column;
-}
-
-.oh-wallet-current {
-  margin: 0 0 16px;
+/* ---------- Reset (admins, test mode) ---------- */
+.oh-reset-note {
+  margin: 0 0 14px;
   padding: 10px 12px;
   border-radius: 10px;
   background: var(--oh-cream);
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   color: var(--oh-text-muted);
 }
 
-.oh-wallet-current b {
+.oh-reset-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.oh-reset-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--oh-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.oh-reset-option:hover {
+  background: var(--oh-hover, #f7f2ea);
+}
+
+.oh-reset-option.active {
+  border-color: var(--oh-red);
+  background: #fff5f5;
+}
+
+.oh-reset-option input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--oh-red);
+}
+
+.oh-reset-option-name {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
   color: var(--oh-text);
+}
+
+.oh-reset-option-name small {
+  font-size: 0.74rem;
+  font-weight: 400;
+  color: var(--oh-text-muted);
+}
+
+.oh-reset-option b {
+  font-variant-numeric: tabular-nums;
+  color: var(--oh-text);
+}
+
+.oh-wallet-pay.danger {
+  background: var(--oh-red);
+}
+
+.oh-wallet-pay.danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.oh-wallet-ghost:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- Checkout ---------- */
+.oh-wallet-form {
+  display: flex;
+  flex-direction: column;
 }
 
 .oh-wallet-amount-label {
@@ -308,8 +448,7 @@
 }
 
 .oh-wallet-amount span {
-  font-family: var(--oh-font-display);
-  font-size: 1.5rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--oh-text-muted);
 }
@@ -365,13 +504,56 @@
 }
 
 .oh-wallet-hint {
-  margin: 10px 0 16px;
+  margin: 10px 0 0;
   font-size: 0.8rem;
   color: var(--oh-text-muted);
 }
 
 .oh-wallet-hint.error {
   color: var(--oh-red);
+}
+
+/* Buying light QR stickers: price, validity, total. */
+.oh-buy-light-lines {
+  margin: 16px 0 14px;
+}
+
+.oh-buy-light-lines > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid #f1ebe0;
+  font-size: 0.86rem;
+}
+
+.oh-buy-light-lines dt {
+  color: var(--oh-text-muted);
+}
+
+.oh-buy-light-lines dd {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 0;
+  font-weight: 700;
+  color: var(--oh-text);
+}
+
+.oh-buy-light-lines dd small {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--oh-text-muted);
+}
+
+.oh-buy-light-lines > div.total {
+  border-bottom: none;
+}
+
+.oh-buy-light-lines > div.total dd {
+  font-family: var(--oh-font-display);
+  font-size: 1.35rem;
+  color: var(--oh-forest);
 }
 
 .oh-wallet-pay {

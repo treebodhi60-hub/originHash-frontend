@@ -14,7 +14,7 @@ import {
   UndoIcon,
   WarningIcon,
 } from '../components/ScanIcons.jsx';
-import { formatCoords, formatDateTimeShort, formatShortDate } from '../utils/format';
+import { formatCoords, formatDateTimeShort } from '../utils/format';
 import { scanRoutes } from '../utils/scanRoutes';
 import '../styles/app-shell.css';
 import '../styles/scan.css';
@@ -161,6 +161,18 @@ const History = () => {
   const [reloadKey, setReloadKey] = useState(0);
   const requestRef = useRef(0);
   const panelRef = useRef(null);
+
+  // Phones swipe the filter chips sideways: keep the selected one in view (e.g. when coming back to
+  // History with "Scanned" selected), without moving the page itself.
+  useEffect(() => {
+    const row = document.querySelector('.oh-history-body .oh-history-filters');
+    const chip = row?.querySelector('.oh-history-chip.active');
+    if (!row || !chip || row.scrollWidth <= row.clientWidth) return;
+    const left = chip.offsetLeft - row.offsetLeft;
+    if (left < row.scrollLeft || left + chip.offsetWidth > row.scrollLeft + row.clientWidth - 36) {
+      row.scrollTo({ left: Math.max(0, left - 18), behavior: 'smooth' });
+    }
+  }, [filter]);
 
   // Change some URL params; anything that changes the result set goes back to page 1.
   const updateParams = (changes, { keepPage = false } = {}) => {
@@ -359,6 +371,8 @@ const History = () => {
                           {scope === 'all' && scan.scannedBy && (
                             <div className="oh-history-by">
                               by {scan.scannedBy.isYou ? 'you' : scan.scannedBy.name || 'an unnamed user'}
+                              {scan.scannedBy.userCode && <span className="oh-user-code">{scan.scannedBy.userCode}</span>}
+                              {scan.scannedBy.currentName && <span className="oh-now-called"> · now {scan.scannedBy.currentName}</span>}
                             </div>
                           )}
                           <div className="oh-history-meta">
@@ -368,7 +382,7 @@ const History = () => {
                                 {formatCoords(scan.location)} ·
                               </span>
                             )}
-                            <span>{formatShortDate(scan.createdAt)}</span>
+                            <span>{formatDateTimeShort(scan.createdAt, { seconds: true })}</span>
                           </div>
                         </div>
                         <div className="oh-history-side">
@@ -416,7 +430,16 @@ const History = () => {
                               {scan.productName && scan.code && <div className="oh-history-cell-code">{scan.code}</div>}
                             </td>
                             <td>{scan.producer || <span className="oh-history-cell-none">—</span>}</td>
-                            {scope === 'all' && <td>{scannerLabel(scan)}</td>}
+                            {scope === 'all' && (
+                              <td>
+                                {/* The name they had when they scanned; the ID ties every name to one account. */}
+                                <div className="oh-history-cell-main">{scannerLabel(scan)}</div>
+                                {scan.scannedBy?.userCode && <div className="oh-history-cell-code">{scan.scannedBy.userCode}</div>}
+                                {scan.scannedBy?.currentName && (
+                                  <div className="oh-now-called">now {scan.scannedBy.currentName}</div>
+                                )}
+                              </td>
+                            )}
                             <td>
                               {scan.location ? (
                                 <>
@@ -429,7 +452,7 @@ const History = () => {
                                 <span className="oh-history-cell-none">Not shared</span>
                               )}
                             </td>
-                            <td className="oh-history-cell-date">{formatDateTimeShort(scan.createdAt)}</td>
+                            <td className="oh-history-cell-date">{formatDateTimeShort(scan.createdAt, { seconds: true })}</td>
                             <td className="oh-history-cell-action">
                               <button
                                 type="button"

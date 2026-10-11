@@ -18,7 +18,7 @@ import {
   WarningIcon,
 } from '../components/ScanIcons.jsx';
 import useRollbackOnLeave, { rollBackScan } from '../hooks/useRollbackOnLeave';
-import { createQrDecoder, drawToCanvas, extractCode } from '../utils/qr';
+import { createQrDecoder, drawToCanvas, extractBulkCode, extractCode, extractLightToken } from '../utils/qr';
 import { scanRoutes } from '../utils/scanRoutes';
 import '../styles/app-shell.css';
 import '../styles/scan.css';
@@ -228,6 +228,14 @@ const Scan = () => {
   // Freeze the frame the QR was read from and turn the camera off. Nothing is sent
   // yet — the user picks "Scan to record" or "Verify to authenticate" next.
   const handleCaptured = (raw, sourceCanvas, source = 'camera') => {
+    // Bulk and light QR labels aren't stickers to record or verify here: open their own pages.
+    const bulkCode = extractBulkCode(raw);
+    const lightToken = extractLightToken(raw);
+    if (bulkCode || lightToken) {
+      stopCamera();
+      navigate(bulkCode ? `/b/${bulkCode}` : `/l/${lightToken}`);
+      return;
+    }
     const snapshot = snapshotRef.current;
     if (sourceCanvas && snapshot) {
       snapshot.width = sourceCanvas.width;
@@ -373,6 +381,13 @@ const Scan = () => {
 
   const submitCode = (e) => {
     e.preventDefault();
+    const bulkCode = extractBulkCode(manualCode);
+    const lightToken = extractLightToken(manualCode);
+    if (bulkCode || lightToken) {
+      stopCamera();
+      navigate(bulkCode ? `/b/${bulkCode}` : `/l/${lightToken}`);
+      return;
+    }
     const code = extractCode(manualCode);
     if (!code) {
       setCodeError('Enter the code printed on the sticker, e.g. V-HUB-00110.');

@@ -2,6 +2,25 @@ import { NavLink } from 'react-router-dom';
 import '../styles/app-shell.css';
 
 const icons = {
+  light: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="15" y="3" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="3" y="15" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M17.6 11.5 14 17h3l-1.2 4.5L20 15.6h-3.1l1.3-4.1h-.6Z" fill="currentColor" />
+    </svg>
+  ),
+  bulk: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <rect x="8.5" y="2.5" width="13" height="13" rx="2.2" stroke="currentColor" strokeWidth="1.4" opacity="0.45" />
+      <rect x="5.5" y="5.5" width="13" height="13" rx="2.2" stroke="currentColor" strokeWidth="1.4" opacity="0.7" />
+      <rect x="2.5" y="8.5" width="13" height="13" rx="2.2" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="5" y="11" width="3" height="3" fill="currentColor" />
+      <rect x="10" y="11" width="3" height="3" fill="currentColor" />
+      <rect x="5" y="16" width="3" height="3" fill="currentColor" />
+      <rect x="10.5" y="16.5" width="2" height="2" fill="currentColor" />
+    </svg>
+  ),
   dashboard: (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
       <path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" stroke="currentColor" strokeWidth="1.8" />
@@ -69,6 +88,8 @@ export const adminMenuItems = [
   { to: '/admin/users', label: 'Users', icon: icons.users },
   { to: '/admin/images', label: 'Image stock', icon: icons.images },
   { to: '/admin/qr-stickers', label: 'QR stickers', icon: icons.qr },
+  { to: '/admin/bulk-qr', label: 'Bulk QR stickers', icon: icons.bulk },
+  { to: '/admin/light-qr', label: 'Light QR stickers', icon: icons.light },
 ];
 
 const AdminBottomNav = () => (

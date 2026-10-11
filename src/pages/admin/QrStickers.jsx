@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { scanRoutes } from '../../utils/scanRoutes';
 import { PROFILE_FIELD_LABELS } from '../../utils/profileFields';
-import UserHistoryPanel from './UserHistoryPanel.jsx';
+import { DEFAULT_PER_PAGE, gridFor, maxPerPage, stickerMm } from '../../utils/stickerLayout';
+import PrintLayout from '../../components/PrintLayout.jsx';
 import { LoadingState, RefreshingNote, Spinner } from '../../components/Loader.jsx';
 import { fetchFolders } from '../../store/imageStockSlice';
 import {
@@ -17,10 +18,10 @@ import {
   setBatchNoFilter,
   clearLastResult,
 } from '../../store/qrStickerSlice';
-import { fetchWallet, quoteStickers } from '../../store/walletSlice';
-import { AddBalanceModal, WalletActivityModal, WalletBar } from '../../components/Wallet.jsx';
+import { PLAN_NAMES, fetchWallet, stickerTabs, tabFor } from '../../store/walletSlice';
+import { CheckoutModal, StickerBar, WalletActivityModal } from '../../components/Wallet.jsx';
 import { PlansTab } from '../../components/Plans.jsx';
-import { formatINR } from '../../utils/money';
+import StickerUsage from './StickerUsage.jsx';
 import '../../styles/admin.css';
 import '../../styles/wallet.css';
 import '../../styles/plans.css';
@@ -30,20 +31,20 @@ const SPLIT_TYPES = [
   { value: 'horizontal-50-50', label: 'Horizontal 50:50' },
 ];
 
-const PAGE_SIZES = ['A4', 'A3'];
-
-// Mirrors the backend's pageLayout() in qrStickerController.js: sticker size and how many fit
-// on each paper size (A3 horizontal stickers are laid out sideways, 8 × 4).
-const STICKER_LAYOUTS = {
-  'vertical-50-50': { size: '89 × 51 mm, business-card size', perPage: { A4: 10, A3: 21 } },
-  'horizontal-50-50': { size: '45 × 65 mm', perPage: { A4: 16, A3: 32 } },
-};
-
-const layoutSummary = (splitType, pageSize, count) => {
-  const layout = STICKER_LAYOUTS[splitType] || STICKER_LAYOUTS['vertical-50-50'];
-  const perPage = layout.perPage[pageSize] || layout.perPage.A4;
-  const pages = Math.max(1, Math.ceil((Number(count) || 0) / perPage));
-  return { perPage, pages, size: layout.size };
+// What the PDF will look like for a number of labels per page: the grid, each label's printed size
+// (shrunk evenly only when that many don't fit at full size) and how many pages the batch takes.
+const layoutSummary = (splitType, pageSize, perPage, count) => {
+  const grid = gridFor(pageSize, splitType, perPage);
+  const size = stickerMm(splitType, grid.scale);
+  return {
+    perPage,
+    cols: grid.cols,
+    rows: grid.rows,
+    sideways: !grid.upright,
+    scaled: grid.scale < 0.999,
+    size: `${size.w} × ${size.h} mm`,
+    pages: Math.max(1, Math.ceil((Number(count) || 0) / perPage)),
+  };
 };
 
 const slugifyForCode = (name) =>
@@ -186,7 +187,9 @@ const StickerPreview = ({ form }) => {
   );
 };
 
-const GenerateTab = ({ onAddBalance, onActivity, onShowPlans }) => {
+const plural = (n, word) => `${n.toLocaleString('en-IN')} ${word}${n === 1 ? '' : 's'}`;
+
+const GenerateTab = ({ source, onSource, onBuy, onActivity }) => {
   const dispatch = useDispatch();
   const { folders } = useSelector((s) => s.imageStock);
   const { generating, generateError, lastResult } = useSelector((s) => s.qrSticker);
@@ -200,6 +203,7 @@ const GenerateTab = ({ onAddBalance, onActivity, onShowPlans }) => {
     numberOfQrs: 10,
     splitType: 'vertical-50-50',
     pageSize: 'A4',
+    labelsPerPage: DEFAULT_PER_PAGE,
     folderId: '',
   });
 
@@ -228,7 +232,15 @@ const GenerateTab = ({ onAddBalance, onActivity, onShowPlans }) => {
     };
   }, [form.batchNo]);
 
-  const update = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+  // A new paper size or split type can hold fewer labels: keep labels per page within what it takes.
+  const update = (key, value) =>
+    setForm((f) => {
+      const next = { ...f, [key]: value };
+      if (key === 'pageSize' || key === 'splitType') {
+        next.labelsPerPage = Math.min(next.labelsPerPage, maxPerPage(next.pageSize, next.splitType));
+      }
+      return next;
+    });
 
   const selectedFolder = useMemo(
     () => folders.find((f) => String(f.id) === String(form.folderId)),
@@ -257,8 +269,10 @@ const GenerateTab = ({ onAddBalance, onActivity, onShowPlans }) => {
         batchNo: form.batchNo.trim(),
         splitType: form.splitType,
         pageSize: form.pageSize,
+        labelsPerPage: Number(form.labelsPerPage),
         numberOfQrs: Number(form.numberOfQrs),
         folderId: Number(form.folderId),
+        ...(billing && { source }),
       })
     );
     if (action.meta.requestStatus === 'fulfilled') {
@@ -276,20 +290,20 @@ const GenerateTab = ({ onAddBalance, onActivity, onShowPlans }) => {
       numberOfQrs: 10,
       splitType: 'vertical-50-50',
       pageSize: 'A4',
+      labelsPerPage: DEFAULT_PER_PAGE,
+    labelsPerPage: DEFAULT_PER_PAGE,
       folderId: '',
     });
   };
 
-  const summary = layoutSummary(form.splitType, form.pageSize, form.numberOfQrs);
 
-  // Stickers are paid from the wallet once billing is on (the server checks again when generating).
+  // Once billing is on, stickers come out of the balance (plan tab) picked in the bar above; the
+  // server checks again when generating.
   const billing = wallet.enabled && wallet.status === 'ready';
   const stickerCount = Math.max(0, Math.trunc(Number(form.numberOfQrs)) || 0);
-  // The plan's monthly allowance is used first; the rest is charged from the wallet.
-  const quote = quoteStickers(stickerCount, wallet);
-  const costPaise = quote.totalPaise;
-  const shortfallPaise = billing ? Math.max(0, costPaise - wallet.balancePaise) : 0;
-  const activePlan = wallet.plan?.status === 'ACTIVE' ? wallet.plan : null;
+  const sourceTab = billing ? tabFor(wallet.tabs, source) : null;
+  const available = sourceTab ? sourceTab.stickers : 0;
+  const shortBy = billing ? Math.max(0, stickerCount - available) : 0;
 
   if (lastResult) {
     return (
@@ -311,17 +325,15 @@ const GenerateTab = ({ onAddBalance, onActivity, onShowPlans }) => {
         </div>
         <p className="oh-qr-success-note">
           {(() => {
-            const { perPage, size } = layoutSummary(lastResult.batch.splitType, lastResult.batch.pageSize, 0);
-            return `${perPage} stickers per ${lastResult.batch.pageSize || 'A4'} page, each ${size}.`;
+            const { batch } = lastResult;
+            const { perPage, size, pages } = layoutSummary(batch.splitType, batch.pageSize, batch.labelsPerPage, batch.numberOfQrs);
+            return `${perPage} labels per ${batch.pageSize} page, each ${size} · ${pages} ${pages === 1 ? 'page' : 'pages'}.`;
           })()}
         </p>
-        {lastResult.wallet && (
+        {lastResult.stickers && (
           <p className="oh-qr-success-charge">
-            {lastResult.wallet.coveredCount > 0 && `${lastResult.wallet.coveredCount} covered by your plan · `}
-            {formatINR(lastResult.wallet.chargedPaise)} charged to your wallet · balance{' '}
-            <b>{formatINR(lastResult.wallet.balancePaise)}</b>
-            {lastResult.wallet.plan?.status === 'ACTIVE' &&
-              ` · ${lastResult.wallet.plan.remaining.toLocaleString('en-IN')} plan QR codes left this month`}
+            {plural(lastResult.stickers.used, 'sticker')} used from your {PLAN_NAMES[lastResult.stickers.source]} balance ·{' '}
+            <b>{plural(lastResult.stickers.left, 'sticker')}</b> left
           </p>
         )}
       </div>
@@ -334,7 +346,7 @@ const GenerateTab = ({ onAddBalance, onActivity, onShowPlans }) => {
         Fill the details — the sticker preview updates live
       </p>
 
-      {wallet.enabled && <WalletBar onAdd={() => onAddBalance(0)} onActivity={onActivity} onPlans={onShowPlans} />}
+      {wallet.enabled && <StickerBar source={source} onSource={onSource} onBuy={onBuy} onActivity={onActivity} />}
 
       {generateError && <div className="oh-error">{generateError}</div>}
 
@@ -393,18 +405,15 @@ const GenerateTab = ({ onAddBalance, onActivity, onShowPlans }) => {
               </select>
             </div>
             <div className="oh-field oh-field-span2">
-              <label>Paper size</label>
-              <select value={form.pageSize} onChange={(e) => update('pageSize', e.target.value)}>
-                {PAGE_SIZES.map((size) => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
-              </select>
-              <div className="oh-qr-folder-hint">
-                {summary.perPage} stickers per {form.pageSize} page ({summary.size} each) · this batch prints on{' '}
-                {summary.pages} {summary.pages === 1 ? 'page' : 'pages'}
-              </div>
+              <label>Print layout</label>
+              <PrintLayout
+                pageSize={form.pageSize}
+                splitType={form.splitType}
+                labelsPerPage={form.labelsPerPage}
+                count={form.numberOfQrs}
+                onPageSize={(size) => update('pageSize', size)}
+                onLabelsPerPage={(n) => update('labelsPerPage', n)}
+              />
             </div>
             <div className="oh-field oh-field-span2">
               <label>Image folder</label>
@@ -424,40 +433,31 @@ const GenerateTab = ({ onAddBalance, onActivity, onShowPlans }) => {
           </div>
 
           {billing && stickerCount > 0 && (
-            <div className={`oh-qr-cost ${shortfallPaise ? 'short' : ''}`} aria-live="polite">
+            <div className={`oh-qr-cost ${shortBy ? 'short' : ''}`} aria-live="polite">
               <div className="oh-qr-cost-row">
-                <span>
-                  {quote.coveredCount > 0 && quote.extraCount === 0
-                    ? `${stickerCount} ${stickerCount === 1 ? 'sticker' : 'stickers'} · covered by your plan`
-                    : quote.coveredCount > 0
-                      ? `${quote.coveredCount} from your plan + ${quote.extraCount} × ${formatINR(quote.extraPricePaise)}`
-                      : `${stickerCount} ${stickerCount === 1 ? 'sticker' : 'stickers'} × ${formatINR(quote.extraPricePaise)}`}
-                </span>
-                <strong>{formatINR(costPaise)}</strong>
+                <span>{sourceTab ? `Uses your ${sourceTab.name} stickers` : 'Stickers for this batch'}</span>
+                <strong>{plural(stickerCount, 'sticker')}</strong>
               </div>
-              {activePlan && (
-                <div className="oh-qr-cost-row muted">
-                  <span>Plan QR codes left this month after this batch</span>
-                  <span>
-                    {(activePlan.remaining - quote.coveredCount).toLocaleString('en-IN')} of{' '}
-                    {activePlan.monthlyQuota.toLocaleString('en-IN')}
-                  </span>
-                </div>
-              )}
-              {shortfallPaise ? (
+              {shortBy ? (
                 <div className="oh-qr-cost-row short">
                   <span>
-                    Your balance is {formatINR(wallet.balancePaise)} — add <b>{formatINR(shortfallPaise)}</b> more to
-                    generate this batch.
+                    {sourceTab ? (
+                      <>
+                        Your {sourceTab.name} balance has {plural(available, 'sticker')}, <b>{shortBy.toLocaleString('en-IN')} short</b>.
+                        Buy more, or pick another balance above.
+                      </>
+                    ) : (
+                      'You have no stickers yet. Buy a plan to start generating.'
+                    )}
                   </span>
-                  <button type="button" className="oh-qr-cost-add" onClick={() => onAddBalance(shortfallPaise)}>
-                    Add balance
+                  <button type="button" className="oh-qr-cost-add" onClick={onBuy}>
+                    Buy stickers
                   </button>
                 </div>
               ) : (
                 <div className="oh-qr-cost-row muted">
-                  <span>Balance after generating</span>
-                  <span>{formatINR(wallet.balancePaise - costPaise)}</span>
+                  <span>{sourceTab.name} balance after generating</span>
+                  <span>{plural(available - stickerCount, 'sticker')}</span>
                 </div>
               )}
             </div>
@@ -466,7 +466,7 @@ const GenerateTab = ({ onAddBalance, onActivity, onShowPlans }) => {
           <button
             type="submit"
             className="oh-btn-generate"
-            disabled={generating || checking || !form.folderId || Boolean(batchNoError) || shortfallPaise > 0}
+            disabled={generating || checking || !form.folderId || Boolean(batchNoError) || shortBy > 0}
           >
             {generating ? (
               <>
@@ -479,7 +479,7 @@ const GenerateTab = ({ onAddBalance, onActivity, onShowPlans }) => {
                 Checking batch no…
               </>
             ) : (
-              `⊞ Generate ${form.numberOfQrs || 0} stickers${billing && stickerCount ? ` · ${formatINR(costPaise)}` : ''}`
+              `⊞ Generate ${form.numberOfQrs || 0} stickers${sourceTab ? ` from ${sourceTab.name}` : ''}`
             )}
           </button>
         </form>
@@ -496,7 +496,6 @@ const HistoryTab = () => {
   const { user } = useSelector((s) => s.auth);
   const journeyPath = scanRoutes(user).journey;
   const { codes, codesStatus, filters, search, producerFilter, batchNoFilter } = useSelector((s) => s.qrSticker);
-  const [historyUserId, setHistoryUserId] = useState(null);
 
   useEffect(() => {
     dispatch(fetchFilters());
@@ -523,7 +522,9 @@ const HistoryTab = () => {
           folderDeleted: code.folderDeleted,
           splitType: code.splitType,
           pageSize: code.pageSize,
+          labelsPerPage: code.labelsPerPage,
           createdAt: code.createdAt,
+          stickerSource: code.stickerSource,
           creator: code.creator,
           items: [],
         });
@@ -586,9 +587,11 @@ const HistoryTab = () => {
                 {group.variantSize ? ` · ${group.variantSize}` : ''} · {group.folderName}
                 {group.folderDeleted ? ' (deleted folder)' : ''} ·{' '}
                 {group.items.length} codes · {group.splitType === 'horizontal-50-50' ? 'Horizontal' : 'Vertical'},{' '}
-                {group.pageSize || 'A4'} · {formatDate(group.createdAt)}
+                {group.pageSize || 'A4'}
+                {group.labelsPerPage ? `, ${group.labelsPerPage}/page` : ''} · {formatDate(group.createdAt)}
+                {group.stickerSource ? ` · from ${PLAN_NAMES[group.stickerSource]} stickers` : ''}
               </div>
-              <BatchCreator creator={group.creator} onOpenHistory={setHistoryUserId} />
+              <BatchCreator creator={group.creator} onOpenHistory={(userId) => navigate(`/admin/users/${userId}`)} />
             </div>
             <DownloadPdfButton batchId={group.batchId} productName={group.productName} />
           </div>
@@ -619,7 +622,6 @@ const HistoryTab = () => {
         </div>
       ))}
 
-      {historyUserId && <UserHistoryPanel userId={historyUserId} onClose={() => setHistoryUserId(null)} />}
     </div>
   );
 };
@@ -627,8 +629,13 @@ const HistoryTab = () => {
 const QrStickers = () => {
   const dispatch = useDispatch();
   const wallet = useSelector((s) => s.wallet);
-  const [tab, setTab] = useState('generate');
-  const [addBalance, setAddBalance] = useState(null); // { suggestedPaise } while the dialog is open
+  const user = useSelector((s) => s.auth.user);
+  const isAdmin = Boolean(user?.isAdmin || user?.isSuperAdmin);
+  // ?tab=usage opens the report straight away (the dashboard links to it).
+  const [searchParams] = useSearchParams();
+  const [tab, setTab] = useState(() => (isAdmin && searchParams.get('tab') === 'usage' ? 'usage' : 'generate'));
+  const [chosenSource, setChosenSource] = useState(null); // the balance (plan tab) to generate from
+  const [checkout, setCheckout] = useState(null); // the purchase being paid for
   const [activityOpen, setActivityOpen] = useState(false);
   // Known from the last visit (see walletSlice), so the tab is there immediately on a reload.
   const billing = wallet.enabled;
@@ -637,7 +644,11 @@ const QrStickers = () => {
     dispatch(fetchWallet());
   }, [dispatch]);
 
-  const openAddBalance = (suggestedPaise = 0) => setAddBalance({ suggestedPaise });
+  // The chosen balance while it exists; otherwise the first one with stickers left.
+  const sourceTabs = stickerTabs(wallet.tabs);
+  const source = tabFor(sourceTabs, chosenSource)
+    ? chosenSource
+    : ((sourceTabs.find((t) => t.stickers > 0) || sourceTabs[0])?.planType ?? null);
 
   return (
     <div>
@@ -659,15 +670,31 @@ const QrStickers = () => {
         <button type="button" className={`oh-tab ${tab === 'history' ? 'active' : ''}`} onClick={() => setTab('history')}>
           Generated QRs
         </button>
+        {billing && isAdmin && (
+          <button type="button" className={`oh-tab ${tab === 'usage' ? 'active' : ''}`} onClick={() => setTab('usage')}>
+            Sticker usage
+          </button>
+        )}
       </div>
 
       {tab === 'generate' && (
-        <GenerateTab onAddBalance={openAddBalance} onActivity={() => setActivityOpen(true)} onShowPlans={() => setTab('plans')} />
+        <GenerateTab source={source} onSource={setChosenSource} onBuy={() => setTab('plans')} onActivity={() => setActivityOpen(true)} />
       )}
-      {tab === 'plans' && billing && <PlansTab onAddBalance={openAddBalance} />}
+      {tab === 'plans' && billing && <PlansTab onBuy={setCheckout} />}
       {tab === 'history' && <HistoryTab />}
+      {tab === 'usage' && billing && isAdmin && <StickerUsage />}
 
-      {addBalance && <AddBalanceModal suggestedPaise={addBalance.suggestedPaise} onClose={() => setAddBalance(null)} />}
+      {checkout && (
+        <CheckoutModal
+          purchase={checkout}
+          onClose={() => setCheckout(null)}
+          onDone={(planType) => {
+            setCheckout(null);
+            setChosenSource(planType);
+            setTab('generate');
+          }}
+        />
+      )}
       {activityOpen && <WalletActivityModal onClose={() => setActivityOpen(false)} />}
     </div>
   );

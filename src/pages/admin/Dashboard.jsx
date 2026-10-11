@@ -27,8 +27,11 @@ import {
   UsersIcon,
   XCircleIcon,
 } from '../../components/DashboardIcons.jsx';
+import StickerUsageBar from '../../components/StickerUsageBar.jsx';
+import { PLAN_NAMES } from '../../store/walletSlice';
 import '../../styles/admin.css';
 import '../../styles/dashboard.css';
+import '../../styles/sticker-usage.css';
 
 // ---------- formatting ----------
 
@@ -198,14 +201,52 @@ const Hero = ({ user, onRefresh, refreshing, loaded }) => {
 
 const KpiRow = ({ stats }) => {
   const { users, qrStickers, scans, imageStock } = stats;
-  const scansThisWeek = scans?.daily.slice(-7).reduce((sum, d) => sum + d.count, 0);
   const availableShare = percent(imageStock.availableImages, imageStock.images);
 
   return (
-    <div className={`oh-kpi-row ${scans ? '' : 'cols-3'}`}>
+    <div className="oh-kpi-row">
+      {scans && (
+        <>
+          <Kpi
+            icon={ScanIcon}
+            tone="blue"
+            label="Total Scanned"
+            value={scans.records}
+            foot="Scan to record, along the supply chain"
+            delta={<WeekDelta value={scans.recordsLast7Days} noun="scans" />}
+          />
+          <Kpi
+            icon={ShieldCheckIcon}
+            tone="forest"
+            label="Total Verified"
+            value={scans.verifications}
+            foot={
+              scans.firstVerifications == null
+                ? 'Verify to authenticate presses'
+                : `${plural(scans.firstVerifications, 'sticker')} verified for the first time`
+            }
+            delta={<WeekDelta value={scans.verificationsLast7Days} noun="verifications" />}
+          />
+          {/* A sticker's FIRST verification that wasn't reported as a mismatch. */}
+          <Kpi
+            icon={CheckCircleIcon}
+            tone="green"
+            label="Total Success"
+            value={scans.success}
+            foot={
+              scans.firstVerifications
+                ? `${percent(scans.success, scans.firstVerifications)}% of first verifications · ${formatNumber(
+                    scans.firstVerifications - scans.success
+                  )} mismatched`
+                : 'First verifications not reported as mismatched'
+            }
+            delta={<WeekDelta value={scans.successLast7Days} noun="successes" />}
+          />
+        </>
+      )}
       <Kpi
         icon={UsersIcon}
-        tone="forest"
+        tone="purple"
         label="Users"
         value={users.total}
         foot={`${formatNumber(users.active)} active · ${formatNumber(users.blocked)} blocked`}
@@ -219,19 +260,9 @@ const KpiRow = ({ stats }) => {
         foot={`Across ${plural(qrStickers.batches, 'batch', 'batches')}`}
         delta={<WeekDelta value={qrStickers.codesLast7Days} noun="codes" />}
       />
-      {scans && (
-        <Kpi
-          icon={ScanIcon}
-          tone="green"
-          label="Scans"
-          value={scans.total}
-          foot={`${formatNumber(scans.records)} recorded · ${formatNumber(scans.verifications)} verified`}
-          delta={<WeekDelta value={scansThisWeek} noun="scans" />}
-        />
-      )}
       <Kpi
         icon={ImageIcon}
-        tone="purple"
+        tone="warning"
         label="Images available"
         value={imageStock.availableImages}
         foot={`${availableShare}% of ${plural(imageStock.images, 'image')} · ${plural(imageStock.folders, 'folder')}`}
@@ -602,6 +633,58 @@ const RecentBatchesCard = ({ qrStickers }) => (
   </Card>
 );
 
+// Where every user's stickers went, with a link to the per-user report (admins).
+const StickersCard = ({ stickers }) => {
+  const { totals, byPlan, expiringSoonDays, users, usersWithExpired } = stickers;
+  return (
+    <Card
+      icon={QrIcon}
+      title="Sticker balances"
+      subtitle={`${plural(users, 'user')} bought stickers · ${plural(usersWithExpired, 'user')} had some expire`}
+      action={<CardLink to="/admin/qr-stickers?tab=usage">Usage report</CardLink>}
+      className="area-stickers"
+    >
+      <dl className="oh-dash-stickers-figures">
+        <div>
+          <dt>Bought</dt>
+          <dd>{formatNumber(totals.bought)}</dd>
+        </div>
+        <div>
+          <dt>Used</dt>
+          <dd>
+            {formatNumber(totals.used)}
+            <small>{percent(totals.used, totals.bought)}% of bought</small>
+          </dd>
+        </div>
+        <div className="expired">
+          <dt>Expired</dt>
+          <dd>
+            {formatNumber(totals.expired)}
+            <small>{formatNumber(totals.expiredRecent)} in the last {expiringSoonDays} days</small>
+          </dd>
+        </div>
+        <div>
+          <dt>Left</dt>
+          <dd>{formatNumber(totals.left)}</dd>
+        </div>
+        <div>
+          <dt>Expiring in {expiringSoonDays} days</dt>
+          <dd>{formatNumber(totals.expiringSoon)}</dd>
+        </div>
+      </dl>
+      <StickerUsageBar figures={totals} label="All stickers" />
+      <ul className="oh-dash-stickers-plans">
+        {['PAYG', 'SUBSCRIPTION', 'FIXED_VARIABLE', 'LIGHT'].map((p) => (
+          <li key={p} className={`plan-${p.toLowerCase()}`}>
+            <strong>{PLAN_NAMES[p]}</strong>
+            <b>{formatNumber(byPlan[p].expired)}</b> expired of {formatNumber(byPlan[p].bought)} · {formatNumber(byPlan[p].left)} left
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+};
+
 const DashboardSkeleton = () => (
   <div aria-hidden="true">
     <div className="oh-kpi-row">
@@ -632,11 +715,18 @@ const normalizeStats = (data) => {
             total: 0,
             records: 0,
             verifications: 0,
+            // Older servers don't send these; shown as "—" rather than a misleading 0.
+            recordsLast7Days: null,
+            verificationsLast7Days: null,
+            firstVerifications: null,
+            success: null,
+            successLast7Days: null,
             ...scans,
             outcomes: { matched: 0, unmatched: 0, flagged: 0, abandoned: 0, ...scans.outcomes },
           }
         : null,
     admins: data?.admins || null,
+    stickers: data?.stickers?.totals ? data.stickers : null,
   };
 };
 
@@ -703,6 +793,7 @@ const Dashboard = () => {
           <div className={`oh-dash-grid ${stats.admins ? 'with-admins' : ''}`}>
             {stats.scans && <ActivityChart daily={stats.scans.daily} />}
             {stats.scans && <VerificationCard scans={stats.scans} />}
+            {stats.stickers && <StickersCard stickers={stats.stickers} />}
             <UsersCard users={stats.users} className={bottomSpan} />
             <ImageStockCard imageStock={stats.imageStock} className={bottomSpan} />
             {stats.admins && <AdminsCard admins={stats.admins} className={bottomSpan} />}

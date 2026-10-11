@@ -75,157 +75,6 @@
   white-space: nowrap;
 }
 
-.oh-plans-notice {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-  padding: 11px 14px;
-  border-radius: var(--oh-radius-sm);
-  background: var(--oh-badge-farmer-bg);
-  color: var(--oh-badge-farmer-text);
-  font-size: 0.86rem;
-  font-weight: 600;
-}
-
-.oh-plans-notice button {
-  border: none;
-  background: none;
-  color: inherit;
-  font-size: 1.2rem;
-  line-height: 1;
-}
-
-/* ---------- Current plan ---------- */
-.oh-plan-current {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px 24px;
-  margin-bottom: 18px;
-  padding: 18px 20px;
-  border: 1px solid var(--oh-border);
-  border-left: 4px solid var(--oh-forest);
-  border-radius: var(--oh-radius-md);
-  background: var(--oh-white);
-  box-shadow: var(--oh-shadow);
-}
-
-.oh-plan-current.paused {
-  border-left-color: var(--oh-orange);
-  background: #fffaf4;
-}
-
-.oh-plan-current-main {
-  flex: 1 1 380px;
-  min-width: 0;
-}
-
-.oh-plan-current h3 {
-  margin-top: 8px;
-  font-size: 1.05rem;
-  color: var(--oh-forest);
-}
-
-.oh-plan-current p {
-  margin: 6px 0 0;
-  font-size: 0.84rem;
-  color: var(--oh-text-muted);
-}
-
-.oh-plan-pill {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--oh-badge-farmer-bg);
-  color: var(--oh-badge-farmer-text);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-}
-
-.oh-plan-pill.paused {
-  background: var(--oh-badge-changed-bg);
-  color: var(--oh-badge-changed-text);
-}
-
-.oh-plan-meter {
-  height: 8px;
-  margin-top: 12px;
-  border-radius: 999px;
-  background: #efe7da;
-  overflow: hidden;
-}
-
-.oh-plan-meter span {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  background: var(--oh-forest);
-  transition: width 0.4s ease;
-}
-
-.oh-plan-current .oh-plan-meter-text b {
-  color: var(--oh-text);
-}
-
-.oh-plan-current .oh-plan-scheduled {
-  color: var(--oh-text);
-}
-
-.oh-plan-current .oh-plan-warning {
-  color: #9a3412;
-  font-weight: 600;
-}
-
-.oh-plan-current-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.oh-plan-btn {
-  padding: 9px 16px;
-  border-radius: 999px;
-  font-size: 0.84rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.oh-plan-btn.primary {
-  border: none;
-  background: var(--oh-forest);
-  color: var(--oh-white);
-}
-
-.oh-plan-btn.primary:hover:not(:disabled) {
-  background: var(--oh-forest-light);
-}
-
-.oh-plan-btn.ghost {
-  border: 1.5px solid var(--oh-border);
-  background: var(--oh-white);
-  color: var(--oh-text);
-}
-
-.oh-plan-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.oh-plan-link {
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--oh-forest);
-  font-size: inherit;
-  font-weight: 700;
-  text-decoration: underline;
-}
-
 /* ---------- Cards ---------- */
 .oh-plans-grid {
   display: grid;
@@ -763,16 +612,7 @@
   color: var(--oh-text-muted);
 }
 
-/* ---------- Confirm dialog ---------- */
-.oh-plan-confirm-name {
-  margin: 0 0 12px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: var(--oh-cream);
-  font-weight: 700;
-  color: var(--oh-forest);
-}
-
+/* ---------- Checkout dialog ---------- */
 .oh-plan-confirm dl {
   margin: 0 0 14px;
 }
@@ -797,62 +637,43 @@
   color: var(--oh-text);
 }
 
-.oh-plan-short {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 14px;
-  padding: 10px 12px;
-  border: 1px solid #f3c6a0;
-  border-radius: 10px;
-  background: #fff6ee;
-  font-size: 0.82rem;
-  color: #9a3412;
+.oh-plan-confirm dl > div.total {
+  align-items: baseline;
+  padding-top: 12px;
+  border-bottom: none;
 }
 
-/* ---------- Plan chip in the wallet bar ---------- */
-.oh-wallet-plan {
+.oh-plan-confirm dl > div.total dt {
+  font-weight: 700;
+  color: var(--oh-text);
+}
+
+.oh-plan-confirm dl > div.total dd {
+  font-family: var(--oh-font-display);
+  font-size: 1.35rem;
+  color: var(--oh-forest);
+}
+
+/* Fixed + Variable while a month is running: what's left, instead of the fee. */
+.oh-plan-running {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  padding: 8px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.07);
-  color: var(--oh-white);
-  text-align: left;
-  line-height: 1.25;
+  gap: 2px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: var(--oh-radius-sm);
+  background: var(--tone-soft);
 }
 
-.oh-wallet-plan:hover {
-  background: rgba(255, 255, 255, 0.14);
+.oh-plan-running strong {
+  font-family: var(--oh-font-display);
+  font-size: 1.3rem;
+  color: var(--tone);
 }
 
-.oh-wallet-plan span {
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.oh-wallet-plan strong {
-  font-size: 0.9rem;
-}
-
-.oh-wallet-plan small {
-  font-size: 0.72rem;
-  color: var(--oh-gold);
-}
-
-.oh-wallet-plan.paused {
-  border-color: rgba(242, 166, 90, 0.6);
-}
-
-.oh-wallet-plan.paused span {
-  color: #f6c98f;
+.oh-plan-running span:last-child {
+  font-size: 0.78rem;
+  color: var(--oh-text-muted);
 }
 
 /* Tabs stay on one line on phones and scroll sideways if they don't fit. */

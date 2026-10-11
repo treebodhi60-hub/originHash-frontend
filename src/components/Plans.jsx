@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import api from '../api/axios';
-import { setWalletState } from '../store/walletSlice';
+import { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { tabFor } from '../store/walletSlice';
 import { formatINR } from '../utils/money';
 import { Spinner } from './Loader.jsx';
-import { Modal } from './Wallet.jsx';
 
 // ---------- icons ----------
 const Svg = ({ size = 22, children }) => (
@@ -80,22 +78,30 @@ const GearIcon = () => (
 );
 
 // ---------- helpers ----------
-export const PLAN_NAMES = { SUBSCRIPTION: 'Subscription', FIXED_VARIABLE: 'Fixed + Variable' };
 const qty = (n) => n.toLocaleString('en-IN');
 const longDate = (iso) => new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-const shortDate = (iso) => new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-export const describePlan = (p) =>
-  `${PLAN_NAMES[p.planType]} · ${qty(p.monthlyQuota)} QR/month · ${p.billingCycle === 'YEARLY' ? 'Yearly' : 'Monthly'}`;
+const whole = (paise) => formatINR(paise, { whole: true });
 
-// Same arithmetic as the server's planTerms (config/plans.js).
-const termsFor = (catalog, { planType, billingCycle, monthlyQuota }) => {
-  const fixed = planType === 'FIXED_VARIABLE';
-  const quota = fixed ? catalog.fixed.includedQr : monthlyQuota;
-  const monthly = fixed ? catalog.fixed.feePaise : quota * catalog.subscription.pricePerQrPaise;
+// Same arithmetic as the server (config/plans.js).
+// Subscription volume price: every QR costs the same, ₹15 up to the tier (1,000 a month), ₹10 above.
+const subPricePerQr = ({ subscription: s }, quota) => (quota <= s.tierQr ? s.pricePerQrPaise : s.priceAboveTierPaise);
+const subTermsFor = (catalog, billingCycle, quota) => {
+  const monthly = quota * subPricePerQr(catalog, quota);
   const yearly = billingCycle === 'YEARLY';
   const price = yearly ? Math.round((monthly * 12 * (100 - catalog.yearlyDiscountPct)) / 100) : monthly;
-  return { planType, billingCycle, monthlyQuota: quota, monthlyPricePaise: monthly, pricePaise: price, perMonthPaise: yearly ? Math.round(price / 12) : monthly };
+  return { monthlyPricePaise: monthly, pricePaise: price, perMonthPaise: yearly ? Math.round(price / 12) : monthly };
 };
+// Fixed + Variable extras: [[count, price], …] — the month's first `extraTierQr` at ₹15, the rest at
+// ₹10, counting `alreadyBought` extras bought earlier in the same month.
+const fixedExtraSplit = ({ fixed: f }, extras, alreadyBought = 0) => {
+  const full = Math.max(0, Math.min(extras, f.extraTierQr - alreadyBought));
+  return [
+    [full, f.extraPricePaise],
+    [extras - full, f.extraPriceAboveTierPaise],
+  ].filter(([n]) => n > 0);
+};
+const splitTotal = (split) => split.reduce((sum, [n, price]) => sum + n * price, 0);
+const splitText = (split) => split.map(([n, price]) => `${qty(n)} × ${whole(price)}`).join(' + ');
 
 // The slider moves evenly between these stops (as in the design: 100 · 500 · 1,000 · 5,000 · 10,000).
 const SLIDER_STOPS = [100, 500, 1000, 5000, 10000];
@@ -214,201 +220,16 @@ const Stepper = ({ value, onChange, min, max, step, label }) => {
   );
 };
 
-// ---------- current plan ----------
-const CurrentPlan = ({ plan, balancePaise, busy, onAction, onAddBalance }) => {
-  if (!plan) return null;
-  const renewalShort = plan.renewal.pricePaise > balancePaise;
-
-  if (plan.status === 'PAUSED') {
-    return (
-      <section className="oh-plan-current paused" aria-label="Your plan">
-        <div className="oh-plan-current-main">
-          <span className="oh-plan-pill paused">Paused</span>
-          <h3>{describePlan(plan.renewal)}</h3>
-          <p>
-            Your plan couldn't renew: it needs {formatINR(plan.renewal.pricePaise)} and your wallet has {formatINR(balancePaise)}.
-            Until you resume, stickers are charged as Pay As You Go.
-          </p>
-        </div>
-        <div className="oh-plan-current-actions">
-          {renewalShort ? (
-            <button type="button" className="oh-plan-btn primary" onClick={() => onAddBalance(plan.renewal.pricePaise - balancePaise)}>
-              Add {formatINR(plan.renewal.pricePaise - balancePaise, { whole: true })}
-            </button>
-          ) : (
-            <button type="button" className="oh-plan-btn primary" disabled={busy} onClick={() => onAction('resume')}>
-              Resume for {formatINR(plan.renewal.pricePaise)}
-            </button>
-          )}
-          <button type="button" className="oh-plan-btn ghost" disabled={busy} onClick={() => onAction('cancel')}>
-            Cancel plan
-          </button>
-        </div>
-      </section>
-    );
-  }
-
-  const usedPct = Math.min(100, Math.round((plan.cycleUsed / plan.monthlyQuota) * 100));
-  return (
-    <section className="oh-plan-current" aria-label="Your plan">
-      <div className="oh-plan-current-main">
-        <span className="oh-plan-pill">Current plan</span>
-        <h3>{describePlan(plan)}</h3>
-        <div className="oh-plan-meter" role="meter" aria-valuemin={0} aria-valuemax={plan.monthlyQuota} aria-valuenow={plan.cycleUsed} aria-label="QR codes used this month">
-          <span style={{ width: `${usedPct}%` }} />
-        </div>
-        <p className="oh-plan-meter-text">
-          <b>{qty(plan.remaining)}</b> of {qty(plan.monthlyQuota)} QR codes left this month · resets {shortDate(plan.cycleEnd)}
-        </p>
-        <p className="oh-plan-renews">
-          {plan.autoRenew
-            ? `Renews on ${longDate(plan.periodEnd)} for ${formatINR(plan.renewal.pricePaise)} from your wallet.`
-            : `Auto-renewal is off: the plan ends on ${longDate(plan.periodEnd)}, then stickers are Pay As You Go.`}
-        </p>
-        {plan.scheduledChange && (
-          <p className="oh-plan-scheduled">
-            Changes to <b>{describePlan(plan.scheduledChange)}</b> on {longDate(plan.periodEnd)}.{' '}
-            <button type="button" className="oh-plan-link" disabled={busy} onClick={() => onAction('discard')}>
-              Keep current plan
-            </button>
-          </p>
-        )}
-        {plan.autoRenew && renewalShort && (
-          <p className="oh-plan-warning">
-            Your balance is {formatINR(balancePaise)}. Add {formatINR(plan.renewal.pricePaise - balancePaise)} before{' '}
-            {longDate(plan.periodEnd)} so your plan renews.
-          </p>
-        )}
-      </div>
-      <div className="oh-plan-current-actions">
-        {plan.autoRenew && renewalShort && (
-          <button type="button" className="oh-plan-btn primary" onClick={() => onAddBalance(plan.renewal.pricePaise - balancePaise)}>
-            Add balance
-          </button>
-        )}
-        {plan.autoRenew ? (
-          <button type="button" className="oh-plan-btn ghost" disabled={busy} onClick={() => onAction('cancel')}>
-            Turn off auto-renewal
-          </button>
-        ) : (
-          <button type="button" className="oh-plan-btn primary" disabled={busy} onClick={() => onAction('resume')}>
-            Turn on auto-renewal
-          </button>
-        )}
-      </div>
-    </section>
-  );
-};
-
-// ---------- confirmation ----------
-const ConfirmPlan = ({ terms, currentPlan, balancePaise, busy, error, onConfirm, onClose, onAddBalance }) => {
-  const scheduled = currentPlan?.status === 'ACTIVE';
-  const shortfall = scheduled ? 0 : Math.max(0, terms.pricePaise - balancePaise);
-  const yearly = terms.billingCycle === 'YEARLY';
-  const renewOn = new Date();
-  renewOn.setMonth(renewOn.getMonth() + (yearly ? 12 : 1));
-
-  return (
-    <Modal title={scheduled ? 'Change your plan' : 'Confirm your plan'} labelId="oh-plan-confirm-title" onClose={onClose} locked={busy}>
-      <div className="oh-plan-confirm">
-        <p className="oh-plan-confirm-name">{describePlan(terms)}</p>
-        <dl>
-          {scheduled ? (
-            <>
-              <div>
-                <dt>Starts on</dt>
-                <dd>{longDate(currentPlan.periodEnd)}, when your current plan renews</dd>
-              </div>
-              <div>
-                <dt>Charged now</dt>
-                <dd>{formatINR(0)}</dd>
-              </div>
-              <div>
-                <dt>Charged on {shortDate(currentPlan.periodEnd)}</dt>
-                <dd>{formatINR(terms.pricePaise)} from your wallet</dd>
-              </div>
-            </>
-          ) : (
-            <>
-              <div>
-                <dt>Charged now from your wallet</dt>
-                <dd>{formatINR(terms.pricePaise)}</dd>
-              </div>
-              <div>
-                <dt>Wallet after</dt>
-                <dd>{shortfall ? '—' : formatINR(balancePaise - terms.pricePaise)}</dd>
-              </div>
-              <div>
-                <dt>Renews automatically</dt>
-                <dd>
-                  {longDate(renewOn)} for {formatINR(terms.pricePaise)}
-                </dd>
-              </div>
-            </>
-          )}
-          <div>
-            <dt>Included each month</dt>
-            <dd>{qty(terms.monthlyQuota)} QR codes (unused ones expire at month end)</dd>
-          </div>
-        </dl>
-
-        {shortfall > 0 && (
-          <div className="oh-plan-short">
-            <span>
-              Your wallet has {formatINR(balancePaise)}. Add <b>{formatINR(shortfall)}</b> to buy this plan.
-            </span>
-            <button type="button" className="oh-plan-btn primary" onClick={() => onAddBalance(shortfall)}>
-              Add balance
-            </button>
-          </div>
-        )}
-        {error && (
-          <div className="oh-error" role="alert">
-            {error}
-          </div>
-        )}
-
-        <button type="button" className="oh-wallet-pay" disabled={busy || shortfall > 0} onClick={onConfirm}>
-          {busy ? (
-            <>
-              <Spinner /> Please wait…
-            </>
-          ) : scheduled ? (
-            `Switch on ${shortDate(currentPlan.periodEnd)}`
-          ) : (
-            `Pay ${formatINR(terms.pricePaise)} from wallet`
-          )}
-        </button>
-        <p className="oh-wallet-secure">You can turn off auto-renewal any time; the plan then runs until the end of its period.</p>
-      </div>
-    </Modal>
-  );
-};
-
 // ---------- the page ----------
-export const PlansTab = ({ onAddBalance }) => {
-  const dispatch = useDispatch();
-  // The price list comes with the wallet (and is remembered between visits), so the cards show at
-  // once; the buttons wait for the user's own balance and plan.
-  const { balancePaise, plan, catalog, status } = useSelector((s) => s.wallet);
+// Each card buys stickers straight into that plan's own balance — its tab on Generate — paid
+// through Razorpay. A user can hold stickers from all three plans at once.
+export const PlansTab = ({ onBuy }) => {
+  const { tabs, catalog, status } = useSelector((s) => s.wallet);
   const ready = status === 'ready';
-  // Yearly billing is offered on Subscription only; Fixed + Variable is billed monthly.
-  const [subCycle, setSubCycle] = useState(plan?.planType === 'SUBSCRIPTION' ? plan.billingCycle : 'MONTHLY');
+  const [subCycle, setSubCycle] = useState('MONTHLY');
   const [paygQty, setPaygQty] = useState(100);
-  const [subQuota, setSubQuota] = useState(plan?.planType === 'SUBSCRIPTION' ? plan.monthlyQuota : 1000);
+  const [subQuota, setSubQuota] = useState(1000);
   const [fixedExtra, setFixedExtra] = useState(500);
-  const [confirming, setConfirming] = useState(null); // terms being confirmed
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
-
-  // A plan bought elsewhere (or loaded after first render) shows its own billing on the card.
-  useEffect(() => {
-    if (plan?.planType === 'SUBSCRIPTION') setSubCycle(plan.billingCycle);
-  }, [plan?.planType, plan?.billingCycle]);
-
-  const subTerms = useMemo(() => catalog && termsFor(catalog, { planType: 'SUBSCRIPTION', billingCycle: subCycle, monthlyQuota: subQuota }), [catalog, subCycle, subQuota]);
-  const fixedTerms = useMemo(() => catalog && termsFor(catalog, { planType: 'FIXED_VARIABLE', billingCycle: 'MONTHLY' }), [catalog]);
 
   if (!catalog) {
     return (
@@ -418,83 +239,106 @@ export const PlansTab = ({ onAddBalance }) => {
     );
   }
 
-  const active = plan?.status === 'ACTIVE' ? plan : null;
-  const isCurrent = (t) => active && active.planType === t.planType && active.billingCycle === t.billingCycle && active.monthlyQuota === t.monthlyQuota;
-  const isScheduled = (t) => {
-    const next = active?.scheduledChange;
-    return next && next.planType === t.planType && next.billingCycle === t.billingCycle && next.monthlyQuota === t.monthlyQuota;
-  };
-  const planButtonLabel = (t, fallback) => (isCurrent(t) ? 'Your current plan' : isScheduled(t) ? `Starts ${shortDate(active.periodEnd)}` : active ? 'Switch at renewal' : fallback);
+  const { payg, subscription, fixed, yearlyDiscountPct } = catalog;
+  const { minQr, maxQr, stepQr, tierQr, pricePerQrPaise, priceAboveTierPaise } = subscription;
+  const { feePaise, includedQr, extraTierQr, extraPricePaise, extraPriceAboveTierPaise, maxExtraQr, minAddQr } = fixed;
+  const owned = (planType) => (ready ? tabFor(tabs, planType) : null);
 
-  const run = async (request, { closeConfirm = false } = {}) => {
-    setBusy(true);
-    setError('');
-    try {
-      const { data } = await request();
-      dispatch(setWalletState({ balancePaise: data.balancePaise, plan: data.plan }));
-      setNotice(data.message);
-      if (closeConfirm) setConfirming(null);
-    } catch (err) {
-      const body = err.response?.data || {};
-      if (body.code === 'INSUFFICIENT_BALANCE') dispatch(setWalletState({ balancePaise: body.balancePaise, plan }));
-      setError(body.message || 'Something went wrong. Please try again.');
-    } finally {
-      setBusy(false);
-    }
-  };
+  // Pay As You Go
+  const paygTotal = paygQty * payg.pricePerQrPaise;
+  const months = payg.validityMonths || 24;
+  const validity = months % 12 ? `${months} months` : `${months / 12} year${months === 12 ? '' : 's'}`;
 
-  const onAction = (action) => {
-    if (action === 'cancel' && !window.confirm(plan?.status === 'PAUSED' ? 'Cancel this plan? Stickers will be Pay As You Go.' : 'Turn off auto-renewal? Your plan stays active until the end of this period.')) return;
-    const path = { cancel: '/plans/cancel', resume: '/plans/resume', discard: '/plans/scheduled/cancel' }[action];
-    run(() => api.post(path));
+  // Subscription
+  const subTerms = subTermsFor(catalog, subCycle, subQuota);
+  const subYearly = subCycle === 'YEARLY';
+
+  // Fixed + Variable: while a month is running, the card adds extras to it (no fee) instead of
+  // starting a new one — the same month the server adds to (the one that ends last).
+  const fixedTab = owned('FIXED_VARIABLE');
+  const running = fixedTab ? [...fixedTab.packs].sort((a, b) => new Date(b.periodEnd) - new Date(a.periodEnd))[0] : null;
+  const extras = running ? Math.max(minAddQr, fixedExtra) : fixedExtra;
+  const fixedSplit = fixedExtraSplit(catalog, extras, running ? running.extrasBought : 0);
+  const fixedTotal = (running ? 0 : feePaise) + splitTotal(fixedSplit);
+  const fixedStickers = (running ? 0 : includedQr) + extras;
+
+  const ribbon = (planType) => {
+    const tab = owned(planType);
+    return tab && <span className="oh-plan-ribbon">{qty(tab.stickers)} in balance</span>;
   };
 
-  const paygTotal = paygQty * catalog.paygPricePerQrPaise;
-  const fixedMonthlyTotal = fixedTerms.perMonthPaise + fixedExtra * catalog.fixed.extraPricePaise;
-  const { minQr, maxQr, stepQr } = catalog.subscription;
+  const buyPayg = () =>
+    onBuy({
+      planType: 'PAYG',
+      quantity: paygQty,
+      title: 'Buy Pay As You Go stickers',
+      amountPaise: paygTotal,
+      lines: [
+        ['Stickers', qty(paygQty)],
+        ['Price per sticker', formatINR(payg.pricePerQrPaise)],
+        ['Valid', `${validity} from today`],
+      ],
+    });
+  const buySub = () =>
+    onBuy({
+      planType: 'SUBSCRIPTION',
+      billingCycle: subCycle,
+      quantity: subQuota,
+      title: 'Buy a Subscription',
+      amountPaise: subTerms.pricePaise,
+      lines: [
+        ['Stickers each month', qty(subQuota)],
+        ['Price per sticker', formatINR(subPricePerQr(catalog, subQuota))],
+        ['Billing', subYearly ? `12 months upfront (−${yearlyDiscountPct}%)` : 'One month'],
+        ['Unused stickers', 'Expire at the end of each month'],
+      ],
+    });
+  const buyFixed = () =>
+    onBuy({
+      planType: 'FIXED_VARIABLE',
+      billingCycle: 'MONTHLY',
+      quantity: extras,
+      title: running ? 'Add Fixed + Variable stickers' : 'Buy Fixed + Variable',
+      amountPaise: fixedTotal,
+      lines: running
+        ? [
+            ['Adding to this month', `${qty(extras)} stickers`],
+            ['Price', splitText(fixedSplit)],
+            ['Expire', longDate(running.expiresAt)],
+          ]
+        : [
+            ['Fixed monthly fee', `${whole(feePaise)} · ${qty(includedQr)} stickers`],
+            ['Additional stickers', extras ? splitText(fixedSplit) : 'None'],
+            ['Stickers for the month', qty(fixedStickers)],
+          ],
+    });
 
   return (
     <div className="oh-plans">
       <header className="oh-plans-head">
         <div>
           <h2>Choose your plan</h2>
-          <p>Flexible options for your QR code needs. Plans are paid from your wallet, and you can change or upgrade anytime.</p>
+          <p>Buy stickers with any plan. Each plan keeps its own sticker balance, and you choose which one to generate from.</p>
         </div>
-        <span className="oh-plans-save">Save {catalog.yearlyDiscountPct}% with a yearly Subscription</span>
+        <span className="oh-plans-save">Save {yearlyDiscountPct}% with a yearly Subscription</span>
       </header>
-
-      {notice && (
-        <div className="oh-plans-notice" role="status">
-          {notice}
-          <button type="button" onClick={() => setNotice('')} aria-label="Dismiss">
-            ×
-          </button>
-        </div>
-      )}
-      {error && !confirming && (
-        <div className="oh-error" role="alert">
-          {error}
-        </div>
-      )}
-
-      {ready && <CurrentPlan plan={plan} balancePaise={balancePaise} busy={busy} onAction={onAction} onAddBalance={onAddBalance} />}
 
       <div className="oh-plans-grid">
         {/* Pay As You Go */}
-        <article className={`oh-plan-card tone-payg ${ready && !plan ? 'current' : ''}`}>
-          {ready && !plan && <span className="oh-plan-ribbon">Current</span>}
+        <article className={`oh-plan-card tone-payg ${owned('PAYG') ? 'current' : ''}`}>
+          {ribbon('PAYG')}
           <span className="oh-plan-icon">
             <CartIcon />
           </span>
           <h3>Pay As You Go</h3>
-          <p className="oh-plan-sub">Pay only for what you use. No subscription.</p>
+          <p className="oh-plan-sub">Pay only for what you use. Stickers stay valid for {validity}.</p>
           <div className="oh-plan-panel">
             <label className="oh-plan-label">How many QR codes do you need?</label>
-            <Stepper value={paygQty} onChange={setPaygQty} min={5} max={10000} step={10} label="QR codes" />
+            <Stepper value={paygQty} onChange={setPaygQty} min={payg.minQr} max={payg.maxQr} step={10} label="QR codes" />
             <div className="oh-plan-lines">
               <div>
                 <span>Price per QR code</span>
-                <strong>{formatINR(catalog.paygPricePerQrPaise)}</strong>
+                <strong>{formatINR(payg.pricePerQrPaise)}</strong>
               </div>
               <div className="total">
                 <span>Total amount</span>
@@ -502,27 +346,27 @@ export const PlansTab = ({ onAddBalance }) => {
               </div>
             </div>
           </div>
-          <button type="button" className="oh-plan-cta" onClick={() => onAddBalance(paygTotal)}>
+          <button type="button" className="oh-plan-cta" onClick={buyPayg}>
             Buy now <ArrowIcon />
           </button>
-          <p className="oh-plan-foot">Adds {formatINR(paygTotal, { whole: true })} to your wallet; each sticker deducts {formatINR(catalog.paygPricePerQrPaise, { whole: true })} as you generate.</p>
+          <p className="oh-plan-foot">Adds {qty(paygQty)} stickers to your Pay As You Go balance.</p>
         </article>
 
         {/* Subscription */}
-        <article className={`oh-plan-card tone-sub ${isCurrent(subTerms) ? 'current' : ''}`}>
-          {isCurrent(subTerms) && <span className="oh-plan-ribbon">Current</span>}
+        <article className={`oh-plan-card tone-sub ${owned('SUBSCRIPTION') ? 'current' : ''}`}>
+          {ribbon('SUBSCRIPTION')}
           <span className="oh-plan-icon">
             <CrownIcon />
           </span>
           <h3>Subscription</h3>
-          <p className="oh-plan-sub">Fixed monthly fee with included QR codes.</p>
+          <p className="oh-plan-sub">A fresh set of stickers every month.</p>
           <div className="oh-plan-panel">
             <div className="oh-plan-cycle-row">
               <span className="oh-plan-label">Billing</span>
               <div className="oh-segment small" role="group" aria-label="Subscription billing">
                 {['MONTHLY', 'YEARLY'].map((c) => (
                   <button key={c} type="button" className={subCycle === c ? 'active' : ''} aria-pressed={subCycle === c} onClick={() => setSubCycle(c)}>
-                    {c === 'MONTHLY' ? 'Monthly' : `Yearly · −${catalog.yearlyDiscountPct}%`}
+                    {c === 'MONTHLY' ? 'Monthly' : `Yearly · −${yearlyDiscountPct}%`}
                   </button>
                 ))}
               </div>
@@ -552,68 +396,91 @@ export const PlansTab = ({ onAddBalance }) => {
             </div>
             <div className="oh-plan-lines">
               <div>
+                <span>Price per QR code</span>
+                <strong>{formatINR(subPricePerQr(catalog, subQuota))}</strong>
+              </div>
+              <div>
                 <span>Monthly price</span>
                 <strong>
-                  {subCycle === 'YEARLY' && <s>{formatINR(subTerms.monthlyPricePaise, { whole: true })}</s>} {formatINR(subTerms.perMonthPaise)}
+                  {subYearly && <s>{whole(subTerms.monthlyPricePaise)}</s>} {formatINR(subTerms.perMonthPaise)}
                 </strong>
               </div>
               <div className="total">
-                <span>{subCycle === 'YEARLY' ? 'Billed yearly (12 months)' : 'Billed monthly'}</span>
+                <span>{subYearly ? 'Billed yearly (12 months)' : 'Billed monthly'}</span>
                 <strong>{formatINR(subTerms.pricePaise)}</strong>
               </div>
               <p className="oh-plan-note">
-                {subCycle === 'YEARLY' && `You save ${formatINR(subTerms.monthlyPricePaise * 12 - subTerms.pricePaise, { whole: true })} · `}
-                Beyond {qty(subQuota)} a month: {formatINR(catalog.paygPricePerQrPaise, { whole: true })} per QR
+                {subYearly && `You save ${whole(subTerms.monthlyPricePaise * 12 - subTerms.pricePaise)} · `}
+                {qty(subQuota)} stickers every month{subYearly ? ' for 12 months' : ''}
               </p>
             </div>
           </div>
-          <button type="button" className="oh-plan-cta" disabled={!ready || isCurrent(subTerms) || isScheduled(subTerms)} onClick={() => { setError(''); setConfirming(subTerms); }}>
-            {planButtonLabel(subTerms, 'Subscribe now')} {!isCurrent(subTerms) && !isScheduled(subTerms) && <ArrowIcon />}
+          <button type="button" className="oh-plan-cta" onClick={buySub}>
+            Subscribe now <ArrowIcon />
           </button>
-          <p className="oh-plan-foot">{formatINR(catalog.subscription.pricePerQrPaise, { whole: true })} per QR code each month · renews automatically from your wallet.</p>
+          <p className="oh-plan-foot">
+            {whole(pricePerQrPaise)} per QR code up to {qty(tierQr)} a month, {whole(priceAboveTierPaise)} each above · unused stickers
+            expire at month end.
+          </p>
         </article>
 
         {/* Fixed + Variable */}
-        <article className={`oh-plan-card tone-fixed ${isCurrent(fixedTerms) ? 'current' : ''}`}>
-          {isCurrent(fixedTerms) && <span className="oh-plan-ribbon">Current</span>}
+        <article className={`oh-plan-card tone-fixed ${fixedTab ? 'current' : ''}`}>
+          {ribbon('FIXED_VARIABLE')}
           <span className="oh-plan-icon">
             <CoinsIcon />
           </span>
           <h3>Fixed + Variable</h3>
-          <p className="oh-plan-sub">A fixed monthly fee plus additional QR codes as you need them. Billed monthly.</p>
+          <p className="oh-plan-sub">A fixed monthly fee plus as many additional QR codes as you need that month.</p>
           <div className="oh-plan-panel">
-            <div className="oh-plan-fixed-row">
-              <div>
-                <span className="oh-plan-label">Fixed monthly fee</span>
-                <strong className="oh-plan-big">{formatINR(catalog.fixed.feePaise, { whole: true })}</strong>
+            {running ? (
+              <div className="oh-plan-running">
+                <span className="oh-plan-label">This month</span>
+                <strong>{qty(fixedTab.stickers)} stickers left</strong>
+                <span>
+                  Expire {longDate(running.expiresAt)} · {qty(running.extrasBought)} additional bought so far
+                </span>
               </div>
-              <div className="oh-plan-includes">
-                <span>Includes</span>
-                <strong>{qty(catalog.fixed.includedQr)}</strong>
-                <span>QR codes per month</span>
+            ) : (
+              <div className="oh-plan-fixed-row">
+                <div>
+                  <span className="oh-plan-label">Fixed monthly fee</span>
+                  <strong className="oh-plan-big">{whole(feePaise)}</strong>
+                </div>
+                <div className="oh-plan-includes">
+                  <span>Includes</span>
+                  <strong>{qty(includedQr)}</strong>
+                  <span>QR codes per month</span>
+                </div>
               </div>
-            </div>
-            <label className="oh-plan-label">Expected additional QR codes (per month)</label>
-            <Stepper value={fixedExtra} onChange={setFixedExtra} min={0} max={100000} step={100} label="additional QR codes" />
+            )}
+            <label className="oh-plan-label">{running ? 'Add more QR codes this month' : 'Additional QR codes (this month)'}</label>
+            <Stepper value={extras} onChange={setFixedExtra} min={running ? minAddQr : 0} max={maxExtraQr} step={100} label="additional QR codes" />
             <div className="oh-plan-lines">
               <div>
                 <span>Price per additional QR code</span>
-                <strong>{formatINR(catalog.fixed.extraPricePaise)}</strong>
+                <strong>{formatINR(extraPricePaise)}</strong>
+              </div>
+              <div>
+                <span>After {qty(extraTierQr)} additional a month</span>
+                <strong>{formatINR(extraPriceAboveTierPaise)}</strong>
               </div>
               <div className="total">
-                <span>Estimated monthly total</span>
-                <strong>{formatINR(fixedMonthlyTotal)}</strong>
+                <span>{running ? 'To pay' : 'Total for the month'}</span>
+                <strong>{formatINR(fixedTotal)}</strong>
               </div>
               <p className="oh-plan-note">
-                {formatINR(fixedTerms.perMonthPaise, { whole: true })} fixed + ({qty(fixedExtra)} × {formatINR(catalog.fixed.extraPricePaise, { whole: true })}) ·{' '}
-                extras are charged as you use them
+                {[running ? null : `${whole(feePaise)} fixed`, ...fixedSplit.map(([n, price]) => `(${qty(n)} × ${whole(price)})`)]
+                  .filter(Boolean)
+                  .join(' + ')}{' '}
+                · you get {qty(fixedStickers)} stickers
               </p>
             </div>
           </div>
-          <button type="button" className="oh-plan-cta" disabled={!ready || isCurrent(fixedTerms) || isScheduled(fixedTerms)} onClick={() => { setError(''); setConfirming(fixedTerms); }}>
-            {planButtonLabel(fixedTerms, 'Choose this plan')} {!isCurrent(fixedTerms) && !isScheduled(fixedTerms) && <ArrowIcon />}
+          <button type="button" className="oh-plan-cta" disabled={!ready} onClick={buyFixed}>
+            {running ? `Add ${qty(extras)} stickers` : 'Choose this plan'} <ArrowIcon />
           </button>
-          <p className="oh-plan-foot">Only the fixed fee is paid upfront; additional QR codes come out of your wallet when used.</p>
+          <p className="oh-plan-foot">Paid upfront · every sticker bought for the month expires at its end.</p>
         </article>
       </div>
 
@@ -629,13 +496,17 @@ export const PlansTab = ({ onAddBalance }) => {
           </thead>
           <tbody>
             {[
-              ['Price per QR code', formatINR(catalog.paygPricePerQrPaise, { whole: true }), `${formatINR(catalog.subscription.pricePerQrPaise, { whole: true })} within the allowance`, `${formatINR(catalog.fixed.extraPricePaise, { whole: true })} beyond ${qty(catalog.fixed.includedQr)}`],
+              [
+                'Price per QR code',
+                whole(payg.pricePerQrPaise),
+                `${whole(pricePerQrPaise)} up to ${qty(tierQr)} a month · ${whole(priceAboveTierPaise)} above`,
+                `${whole(feePaise)} for ${qty(includedQr)} · then ${whole(extraPricePaise)}, ${whole(extraPriceAboveTierPaise)} after ${qty(extraTierQr)}`,
+              ],
               ['Monthly fee', false, true, true],
-              ['QR codes included each month', false, `You choose (${qty(minQr)}–${qty(maxQr)})`, qty(catalog.fixed.includedQr)],
-              ['QR codes beyond the allowance', '—', `${formatINR(catalog.paygPricePerQrPaise, { whole: true })} each`, `${formatINR(catalog.fixed.extraPricePaise, { whole: true })} each`],
-              [`Yearly billing (save ${catalog.yearlyDiscountPct}%)`, false, true, false],
-              ['Unused QR codes', '—', 'Expire at month end', 'Expire at month end'],
-              ['Change anytime', true, 'From next renewal', 'From next renewal'],
+              ['QR codes each month', false, `You choose (${qty(minQr)}–${qty(maxQr)})`, `${qty(includedQr)} + any you add`],
+              [`Yearly billing (save ${yearlyDiscountPct}%)`, false, true, false],
+              ['Unused QR codes', `Expire after ${validity}`, 'Expire at month end', 'Expire at month end'],
+              ['Own balance to generate from', true, true, true],
             ].map(([feature, ...cells]) => (
               <tr key={feature}>
                 <th scope="row">{feature}</th>
@@ -668,8 +539,8 @@ export const PlansTab = ({ onAddBalance }) => {
         {[
           [GearIcon, 'Choose a plan', 'Pick the option that fits your needs'],
           [SlidersIcon, 'Enter numbers', 'See the price for your quantity instantly'],
-          [WalletIcon, 'Add balance', 'Pay securely with Razorpay into your wallet'],
-          [QrIcon, 'Start using', 'Generate and download your QR stickers'],
+          [WalletIcon, 'Pay securely', "Razorpay adds the stickers to that plan's balance"],
+          [QrIcon, 'Start using', 'Pick a balance and generate your QR stickers'],
         ].map(([Icon, title, text], i) => (
           <div key={title} className="oh-plans-step">
             <span className="oh-plans-step-no">{i + 1}</span>
@@ -683,26 +554,6 @@ export const PlansTab = ({ onAddBalance }) => {
           </div>
         ))}
       </section>
-
-      {confirming && (
-        <ConfirmPlan
-          terms={confirming}
-          currentPlan={active}
-          balancePaise={balancePaise}
-          busy={busy}
-          error={error}
-          onClose={() => setConfirming(null)}
-          onAddBalance={(shortfall) => {
-            setConfirming(null);
-            onAddBalance(shortfall);
-          }}
-          onConfirm={() =>
-            run(() => api.post('/plans/subscribe', { planType: confirming.planType, billingCycle: confirming.billingCycle, monthlyQuota: confirming.monthlyQuota }), {
-              closeConfirm: true,
-            })
-          }
-        />
-      )}
     </div>
   );
 };

@@ -37,6 +37,7 @@
 .oh-dash .tone-gold { --tone-ink: var(--dash-ink-gold); --tone-bg: var(--dash-tint-gold); --tone-fill: var(--oh-gold); }
 .oh-dash .tone-green,
 .oh-dash .tone-good { --tone-ink: var(--oh-green); --tone-bg: var(--dash-tint-green); --tone-fill: var(--oh-green); }
+.oh-dash .tone-blue { --tone-ink: var(--oh-badge-retailer-text); --tone-bg: var(--oh-badge-retailer-bg); --tone-fill: var(--oh-badge-retailer-text); }
 .oh-dash .tone-purple { --tone-ink: var(--oh-purple); --tone-bg: var(--dash-tint-purple); --tone-fill: var(--oh-purple); }
 .oh-dash .tone-critical { --tone-ink: var(--oh-red); --tone-bg: var(--dash-tint-red); --tone-fill: var(--oh-red); }
 .oh-dash .tone-warning { --tone-ink: var(--dash-ink-orange); --tone-bg: var(--dash-tint-orange); --tone-fill: var(--oh-orange); }
@@ -224,11 +225,8 @@
 }
 
 @media (min-width: 1100px) {
+  /* Six cards: Total Scanned · Total Verified · Total Success, then Users · QR codes · Images. */
   .oh-kpi-row {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .oh-kpi-row.cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

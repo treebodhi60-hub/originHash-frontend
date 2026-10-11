@@ -5,6 +5,7 @@ import BrandPanel from '../components/BrandPanel.jsx';
 import { Spinner } from '../components/Loader.jsx';
 import { sendOtp, verifyOtp, clearError } from '../store/authSlice';
 import '../styles/auth.css';
+import { takeReturn } from '../utils/returnTo';
 
 const OtpVerify = () => {
   const [otp, setOtp] = useState('');
@@ -33,11 +34,12 @@ const OtpVerify = () => {
   useEffect(() => {
     if (token && user) {
       if (user.isAdmin) {
-        navigate('/admin/users', { replace: true });
+        navigate(takeReturn() || '/admin/users', { replace: true });
       } else if (!user.profileCompleted) {
+        // The page they came from is still remembered; onboarding sends them back to it.
         navigate('/onboarding', { replace: true });
       } else {
-        navigate('/home', { replace: true });
+        navigate(takeReturn() || '/home', { replace: true });
       }
     }
   }, [token, user, navigate]);

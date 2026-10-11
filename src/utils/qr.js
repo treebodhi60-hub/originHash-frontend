@@ -2,6 +2,40 @@
 // holds the code) resolves the same way.
 const CODE_PATTERN = /^[A-Z0-9][A-Z0-9-]{2,59}$/;
 
+// Bulk (identical) QR labels link to `<app>/b/OHB-XXXXXXXX`, or hold just that code.
+const BULK_PATTERN = /^OHB-[A-Z0-9]{8}$/;
+export const extractBulkCode = (raw) => {
+  const text = (raw || '').trim();
+  let candidate = text;
+  if (/^https?:\/\//i.test(text)) {
+    try {
+      candidate = decodeURIComponent(new URL(text).pathname.match(/\/b\/([^/]+)\/?$/)?.[1] || '');
+    } catch {
+      return null;
+    }
+  }
+  const code = candidate.toUpperCase();
+  return BULK_PATTERN.test(code) ? code : null;
+};
+
+// Light QR labels link to `<app>/l/<10-character token>`, or hold `OHL-<token>`.
+const LIGHT_PATTERN = /^[A-Z0-9]{10}$/;
+export const extractLightToken = (raw) => {
+  const text = (raw || '').trim();
+  let candidate = '';
+  if (/^https?:\/\//i.test(text)) {
+    try {
+      candidate = decodeURIComponent(new URL(text).pathname.match(/\/l\/([^/]+)\/?$/)?.[1] || '');
+    } catch {
+      return null;
+    }
+  } else if (/^OHL-/i.test(text)) {
+    candidate = text.slice(4);
+  }
+  const token = candidate.toUpperCase();
+  return LIGHT_PATTERN.test(token) ? token : null;
+};
+
 export const extractCode = (raw) => {
   const text = (raw || '').trim();
   if (!text) return null;

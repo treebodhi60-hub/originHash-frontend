@@ -119,6 +119,38 @@ const AdminLayout = () => {
           </SidebarIcon>
         </NavLink>
 
+        <NavLink
+          to="/admin/bulk-qr"
+          className={({ isActive }) => `oh-sidebar-item ${isActive ? 'active' : ''}`}
+          title="Generate bulk QR stickers"
+        >
+          <SidebarIcon>
+            <rect x="8.5" y="2.5" width="13" height="13" rx="2.2" stroke="currentColor" strokeWidth="1.3" opacity="0.45" />
+            <rect x="5.5" y="5.5" width="13" height="13" rx="2.2" stroke="currentColor" strokeWidth="1.3" opacity="0.7" />
+            <rect x="2.5" y="8.5" width="13" height="13" rx="2.2" fill="var(--oh-forest, #163832)" stroke="currentColor" strokeWidth="1.6" />
+            <rect x="5" y="11" width="3" height="3" fill="currentColor" />
+            <rect x="10" y="11" width="3" height="3" fill="currentColor" />
+            <rect x="5" y="16" width="3" height="3" fill="currentColor" />
+            <rect x="10.5" y="16.5" width="2" height="2" fill="currentColor" />
+          </SidebarIcon>
+        </NavLink>
+
+        <NavLink
+          to="/admin/light-qr"
+          className={({ isActive }) => `oh-sidebar-item ${isActive ? 'active' : ''}`}
+          title="Generate light QR stickers"
+        >
+          <SidebarIcon>
+            <rect x="3" y="3" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.6" />
+            <rect x="15" y="3" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.6" />
+            <rect x="3" y="15" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.6" />
+            <rect x="5.2" y="5.2" width="1.6" height="1.6" fill="currentColor" />
+            <rect x="17.2" y="5.2" width="1.6" height="1.6" fill="currentColor" />
+            <rect x="5.2" y="17.2" width="1.6" height="1.6" fill="currentColor" />
+            <path d="M17.6 11.5 14 17h3l-1.2 4.5L20 15.6h-3.1l1.3-4.1h-.6Z" fill="currentColor" />
+          </SidebarIcon>
+        </NavLink>
+
         <span className="oh-sidebar-item disabled" title="Coming soon">
           <SidebarIcon>
             <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z" stroke="currentColor" strokeWidth="1.6" />

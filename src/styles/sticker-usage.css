@@ -1,0 +1,621 @@
+/* ==========================================================================
+   Sticker usage: where stickers went (used / expired / left), per user and plan.
+   The bar is shared by the admin report, the dashboard and a user's page.
+   ========================================================================== */
+
+/* Plan colours match the plan cards: orange, the retailer blue, green. */
+:root {
+  --su-payg: var(--oh-orange-dark);
+  --su-sub: var(--oh-badge-retailer-text);
+  --su-fixed: var(--oh-green);
+  --su-light: var(--oh-purple);
+  --su-used: var(--oh-forest);
+  --su-expired: var(--oh-red);
+  --su-left: var(--oh-gold);
+  --su-cleared: #c7c2b8;
+}
+
+/* ---------- Usage bar ---------- */
+.oh-usage-bar {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #efe7da;
+}
+
+.oh-usage-bar span {
+  min-width: 3px;
+  transition: flex-grow 0.4s var(--oh-ease, ease);
+}
+
+.oh-usage-bar .empty {
+  flex: 1;
+  background: #efe7da;
+}
+
+.part-used { background: var(--su-used); }
+.part-expired { background: var(--su-expired); }
+.part-left { background: var(--su-left); }
+.part-cleared { background: var(--su-cleared); }
+
+.oh-usage-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8rem;
+  color: var(--oh-text-muted);
+}
+
+.oh-usage-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.oh-usage-legend b {
+  color: var(--oh-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.oh-usage-legend .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+}
+
+/* ---------- Report ---------- */
+.oh-su {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: opacity 0.15s ease;
+}
+
+.oh-su.refreshing {
+  opacity: 0.6;
+}
+
+.oh-su .oh-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.oh-su-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.oh-su-head h2 {
+  font-family: var(--oh-font-display);
+  font-size: 1.35rem;
+  color: var(--oh-forest);
+}
+
+.oh-su-head p {
+  max-width: 640px;
+  margin: 4px 0 0;
+  font-size: 0.88rem;
+  color: var(--oh-text-muted);
+}
+
+.oh-su-head-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.oh-su-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 999px;
+  background: var(--oh-forest);
+  color: var(--oh-white);
+  font-size: 0.86rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.oh-su-btn:hover:not(:disabled) {
+  background: var(--oh-forest-light);
+}
+
+.oh-su-btn.ghost {
+  border: 1.5px solid var(--oh-border);
+  background: var(--oh-white);
+  color: var(--oh-forest);
+}
+
+.oh-su-btn.ghost:hover:not(:disabled) {
+  background: var(--oh-hover, #f7f2ea);
+}
+
+.oh-su-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* KPIs */
+.oh-su-kpis {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 1100px) {
+  .oh-su-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .oh-su-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.oh-su-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 1px solid var(--oh-border);
+  border-top: 3px solid var(--oh-forest);
+  border-radius: 14px;
+  background: var(--oh-white);
+}
+
+.oh-su-kpi.danger { border-top-color: var(--su-expired); }
+.oh-su-kpi.warning { border-top-color: var(--oh-orange-dark); }
+
+.oh-su-kpi-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--oh-text-muted);
+}
+
+.oh-su-kpi-value {
+  font-family: var(--oh-font-display);
+  font-size: 1.55rem;
+  line-height: 1.15;
+  color: var(--oh-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.oh-su-kpi.danger .oh-su-kpi-value { color: var(--su-expired); }
+
+.oh-su-kpi-foot {
+  font-size: 0.74rem;
+  color: var(--oh-text-muted);
+}
+
+/* Plan cards (also a filter) */
+.oh-su-plans {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 1100px) {
+  .oh-su-plans {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .oh-su-plans {
+    grid-template-columns: 1fr;
+  }
+}
+
+.oh-su-plan {
+  --plan: var(--su-payg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--oh-border);
+  border-left: 4px solid var(--plan);
+  border-radius: 14px;
+  background: var(--oh-white);
+  text-align: left;
+  color: var(--oh-text);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.oh-su-plan.plan-subscription { --plan: var(--su-sub); }
+.oh-su-plan.plan-fixed_variable { --plan: var(--su-fixed); }
+.oh-su-plan.plan-light { --plan: var(--su-light); }
+
+.oh-su-plan:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--oh-shadow-sm);
+}
+
+.oh-su-plan.active {
+  border-color: var(--plan);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--plan) 18%, transparent);
+}
+
+.oh-su-plan-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.oh-su-plan-name {
+  font-weight: 700;
+  color: var(--plan);
+}
+
+.oh-su-plan-expired {
+  font-size: 0.8rem;
+  color: var(--oh-text-muted);
+}
+
+.oh-su-plan-expired b {
+  font-family: var(--oh-font-display);
+  font-size: 1.05rem;
+  color: var(--su-expired);
+}
+
+.oh-su-plan-foot {
+  font-size: 0.76rem;
+  color: var(--oh-text-muted);
+}
+
+/* Toolbar */
+.oh-su-toolbar {
+  align-items: center;
+  margin: 0;
+}
+
+.oh-su-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  color: var(--oh-text);
+  cursor: pointer;
+}
+
+.oh-su-check input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--oh-forest);
+}
+
+/* Table */
+.oh-su-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--oh-border);
+  border-radius: 14px;
+  background: var(--oh-white);
+}
+
+.oh-su-table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.oh-su-table th,
+.oh-su-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid #f1ebe0;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.oh-su-table tbody tr:last-child > * {
+  border-bottom: none;
+}
+
+.oh-su-table tbody tr:hover {
+  background: var(--oh-hover, #f7f2ea);
+}
+
+.oh-su-table thead th {
+  position: sticky;
+  top: 0;
+  background: #faf6ef;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--oh-text-muted);
+  white-space: nowrap;
+}
+
+.oh-su-table thead button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+.oh-su-table thead th[aria-sort='ascending'],
+.oh-su-table thead th[aria-sort='descending'] {
+  color: var(--oh-forest);
+}
+
+.oh-su-sort {
+  display: inline-block;
+  width: 10px;
+  font-size: 0.6rem;
+}
+
+.oh-su-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.oh-su-table th.num button {
+  flex-direction: row-reverse;
+}
+
+.oh-su-table td.zero {
+  color: #b8b2a7;
+}
+
+.oh-su-table td.expired {
+  color: var(--su-expired);
+  font-weight: 700;
+}
+
+.oh-su-table td.expired small {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--oh-red-bg);
+  font-size: 0.7rem;
+}
+
+.oh-su-table td.soon {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.oh-su-table td.date {
+  color: var(--oh-text-muted);
+}
+
+.oh-su-user {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+}
+
+.oh-su-user-name {
+  font-weight: 600;
+  color: var(--oh-forest);
+}
+
+.oh-su-user:hover .oh-su-user-name {
+  text-decoration: underline;
+}
+
+.oh-su-user-meta {
+  font-size: 0.74rem;
+  font-weight: 400;
+  color: var(--oh-text-muted);
+}
+
+.oh-su-note {
+  margin: -6px 0 0;
+  font-size: 0.76rem;
+  color: var(--oh-text-muted);
+}
+
+/* ---------- One user's stickers (user page) ---------- */
+.oh-ua-stickers {
+  margin-bottom: 18px;
+  padding: 18px 20px;
+}
+
+.oh-ua-stickers .oh-ua-section-head {
+  margin-bottom: 14px;
+}
+
+.oh-ua-sticker-table {
+  width: 100%;
+  margin-top: 14px;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.oh-ua-sticker-table th,
+.oh-ua-sticker-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid #f1ebe0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.oh-ua-sticker-table th:first-child,
+.oh-ua-sticker-table td:first-child {
+  text-align: left;
+}
+
+.oh-ua-sticker-table thead th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--oh-text-muted);
+}
+
+.oh-ua-sticker-table tfoot td {
+  border-bottom: none;
+  font-weight: 700;
+}
+
+.oh-ua-sticker-table td.expired {
+  color: var(--su-expired);
+  font-weight: 700;
+}
+
+.oh-ua-sticker-scroll {
+  overflow-x: auto;
+}
+
+.oh-ua-expiries {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.oh-ua-expiries-title {
+  margin-top: 16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--oh-text-muted);
+}
+
+.oh-ua-expiries li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px dashed #efe7da;
+  font-size: 0.84rem;
+}
+
+.oh-ua-expiries li:last-child {
+  border-bottom: none;
+}
+
+.oh-ua-expiries b {
+  color: var(--su-expired);
+}
+
+.oh-ua-expiries time {
+  flex-shrink: 0;
+  font-size: 0.76rem;
+  color: var(--oh-text-muted);
+}
+
+/* ---------- Dashboard card ---------- */
+.oh-dash-stickers-figures {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+@media (max-width: 760px) {
+  .oh-dash-stickers-figures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.oh-dash-stickers-figures div {
+  display: flex;
+  flex-direction: column;
+}
+
+.oh-dash-stickers-figures dt {
+  font-size: 0.76rem;
+  color: var(--oh-text-muted);
+}
+
+.oh-dash-stickers-figures dd {
+  margin: 0;
+  font-family: var(--oh-font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--oh-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.oh-dash-stickers-figures .expired dd {
+  color: var(--su-expired);
+}
+
+.oh-dash-stickers-figures small {
+  font-size: 0.72rem;
+  color: var(--oh-text-muted);
+}
+
+.oh-dash-stickers-plans {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 760px) {
+  .oh-dash-stickers-plans {
+    grid-template-columns: 1fr;
+  }
+}
+
+.oh-dash-stickers-plans li {
+  padding: 10px 12px;
+  border-left: 3px solid var(--plan, var(--su-payg));
+  border-radius: 10px;
+  background: #faf6ef;
+  font-size: 0.8rem;
+  color: var(--oh-text-muted);
+}
+
+.oh-dash-stickers-plans li.plan-subscription { --plan: var(--su-sub); }
+.oh-dash-stickers-plans li.plan-fixed_variable { --plan: var(--su-fixed); }
+.oh-dash-stickers-plans li.plan-light { --plan: var(--su-light); }
+
+.oh-dash-stickers-plans strong {
+  display: block;
+  color: var(--oh-text);
+}
+
+.oh-dash-stickers-plans b {
+  color: var(--su-expired);
+}
+
+.oh-dash-stickers-figures small {
+  display: block;
+  font-family: var(--oh-font-body);
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--oh-text-muted);
+}
+
+/* The sticker card spans the whole dashboard row in every layout. */
+.oh-dash-grid .area-stickers {
+  grid-column: 1 / -1;
+}
+
+/* The user page's totals strip gains a "Stickers expired" tile: seven across on wide screens. */
+@media (min-width: 1101px) {
+  .oh-ua-stats:has(> :nth-child(7)) {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}

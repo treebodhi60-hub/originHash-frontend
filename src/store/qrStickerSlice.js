@@ -41,7 +41,7 @@ export const generateBatch = createAsyncThunk(
       const { data } = await api.post('/qr-stickers/batches', payload);
       return data;
     } catch (err) {
-      // 402 INSUFFICIENT_BALANCE also carries balancePaise / shortfallPaise (see walletSlice).
+      // 402 INSUFFICIENT_STICKERS also carries the up-to-date balances (see walletSlice).
       const body = err.response?.data || {};
       return rejectWithValue({ ...body, message: body.message || 'Could not generate QR stickers.' });
     }

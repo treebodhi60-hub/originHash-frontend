@@ -1,0 +1,415 @@
+/* ==========================================================================
+   Print layout (Generate form): paper size, labels-per-page slider and a live
+   preview of the printed page.
+   ========================================================================== */
+
+.oh-print {
+  --thumb: 22px;
+  --ink: var(--oh-forest);
+  --shrink: var(--oh-orange-dark);
+  --track: #ece3d4;
+  --track-shrink: #f8e2cc;
+  display: grid;
+  grid-template-columns: 184px minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+  padding: 16px 20px 16px 16px;
+  border: 1.5px solid var(--oh-border);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fffdf9 0%, var(--oh-cream) 100%);
+}
+
+@media (max-width: 640px) {
+  .oh-print {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding: 14px;
+  }
+}
+
+/* ---------- Page preview ---------- */
+.oh-print-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.oh-print-page {
+  display: block;
+  width: 184px;
+  height: 184px;
+  overflow: visible;
+  filter: drop-shadow(0 6px 14px rgba(22, 56, 50, 0.14));
+}
+
+.oh-print-page .paper {
+  fill: #fff;
+  stroke: var(--oh-border);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+.oh-print-page .page-head {
+  fill: #e3dccf;
+}
+
+.oh-print-page .card {
+  fill: #fff;
+  stroke: #e7ddcc;
+  stroke-width: 0.75px;
+  vector-effect: non-scaling-stroke;
+}
+
+.oh-print-page .band {
+  fill: var(--oh-forest);
+}
+
+.oh-print-page .photo {
+  fill: #e6d5b8;
+}
+
+.oh-print-page .qr {
+  fill: #2c4a43;
+}
+
+.oh-print-page .logo {
+  fill: var(--oh-gold);
+  stroke: #fff;
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+
+.oh-print-page .bar {
+  fill: var(--oh-orange-dark);
+}
+
+.oh-print-page .cuts line {
+  stroke: #9aa0a8;
+  stroke-width: 0.8px;
+  stroke-dasharray: 3 2.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Labels settle in when the layout changes (staggered, quick). */
+.oh-print-page .label {
+  animation: oh-print-pop 0.28s var(--oh-ease, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
+}
+
+@keyframes oh-print-pop {
+  from {
+    opacity: 0;
+  }
+}
+
+.oh-print-preview-caption {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--oh-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Controls ---------- */
+.oh-print-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.oh-print-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Plain spans/labels here, not the form's uppercase field labels. */
+.oh-print .oh-print-label {
+  display: inline;
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--oh-text-muted);
+}
+
+.oh-print-segment {
+  display: inline-flex;
+  padding: 3px;
+  border: 1.5px solid var(--oh-border);
+  border-radius: 999px;
+  background: var(--oh-white);
+}
+
+.oh-print-segment button {
+  min-width: 52px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: var(--oh-text-muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.oh-print-segment button:hover:not(.active) {
+  color: var(--oh-forest);
+}
+
+.oh-print-segment button.active {
+  background: var(--oh-forest);
+  color: var(--oh-white);
+}
+
+.oh-print-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.oh-print-value b {
+  display: inline-block;
+  min-width: 2ch;
+  font-family: var(--oh-font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1;
+  text-align: right;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  animation: oh-print-tick 0.22s var(--oh-ease, ease) both;
+}
+
+@keyframes oh-print-tick {
+  from {
+    transform: translateY(4px);
+    opacity: 0.4;
+  }
+}
+
+.oh-print-reset {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--oh-forest);
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------- Slider ---------- */
+.oh-print-slider {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
+  align-items: start;
+  gap: 12px;
+}
+
+.oh-print-step {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-top: -6px;
+  padding: 0;
+  border: 1.5px solid var(--oh-border);
+  border-radius: 50%;
+  background: var(--oh-white);
+  color: var(--oh-forest);
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1;
+  transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+}
+
+.oh-print-step:hover:not(:disabled) {
+  border-color: var(--oh-forest);
+  background: var(--oh-hover, #f7f2ea);
+}
+
+.oh-print-step:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.oh-print-step:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.oh-print-track {
+  position: relative;
+  padding-bottom: 30px;
+}
+
+/* Reset the browser's and the form's input styling for the range, wherever the panel sits. */
+.oh-print .oh-print-track input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: var(--thumb);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.oh-print-track input[type='range']:focus {
+  outline: none;
+}
+
+/* Track: filled up to the thumb (green while full size, orange once labels shrink), on a base
+   that tints the shrink zone so where the size changes is visible before you get there. */
+.oh-print-track input[type='range']::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 999px;
+  background:
+    linear-gradient(to right, var(--ink) 0 min(var(--fill), var(--full)), transparent 0),
+    linear-gradient(to right, var(--shrink) 0 var(--fill), transparent 0),
+    linear-gradient(to right, var(--track) 0 var(--full), var(--track-shrink) 0);
+}
+
+.oh-print-track input[type='range']::-moz-range-track {
+  height: 8px;
+  border-radius: 999px;
+  background:
+    linear-gradient(to right, var(--ink) 0 min(var(--fill), var(--full)), transparent 0),
+    linear-gradient(to right, var(--shrink) 0 var(--fill), transparent 0),
+    linear-gradient(to right, var(--track) 0 var(--full), var(--track-shrink) 0);
+}
+
+.oh-print-track input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: var(--thumb);
+  height: var(--thumb);
+  margin-top: calc((8px - var(--thumb)) / 2);
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--oh-white);
+  box-shadow: 0 2px 8px rgba(22, 56, 50, 0.25);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.oh-print-track input[type='range']::-moz-range-thumb {
+  width: var(--thumb);
+  height: var(--thumb);
+  box-sizing: border-box;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--oh-white);
+  box-shadow: 0 2px 8px rgba(22, 56, 50, 0.25);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.oh-print-track input[type='range']:hover::-webkit-slider-thumb {
+  transform: scale(1.08);
+}
+
+.oh-print-track input[type='range']:active::-webkit-slider-thumb {
+  transform: scale(1.18);
+}
+
+.oh-print-track input[type='range']:active::-moz-range-thumb {
+  transform: scale(1.18);
+}
+
+.oh-print-track input[type='range']:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(22, 56, 50, 0.18), 0 2px 8px rgba(22, 56, 50, 0.25);
+}
+
+.oh-print-track input[type='range']:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 4px rgba(22, 56, 50, 0.18);
+}
+
+/* Once labels shrink, the thumb and value turn orange. */
+.oh-print:has(.oh-print-summary.shrunk) input[type='range']::-webkit-slider-thumb {
+  border-color: var(--shrink);
+}
+
+.oh-print:has(.oh-print-summary.shrunk) input[type='range']::-moz-range-thumb {
+  border-color: var(--shrink);
+}
+
+.oh-print:has(.oh-print-summary.shrunk) .oh-print-value b {
+  color: var(--shrink);
+}
+
+/* Marks under the track: 1, the last full-size count, and the most a page takes. */
+.oh-print-scale {
+  position: absolute;
+  inset: calc(var(--thumb) + 4px) 0 0;
+  font-size: 0.72rem;
+  color: var(--oh-text-muted);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.oh-print-scale span {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.oh-print-scale span.full {
+  font-weight: 700;
+  color: var(--oh-forest);
+}
+
+.oh-print-scale span.full::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  width: 2px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--oh-forest);
+}
+
+.oh-print-scale small {
+  font-size: 0.64rem;
+  font-weight: 500;
+  color: var(--oh-text-muted);
+}
+
+/* ---------- Summary ---------- */
+.oh-print-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--oh-text-muted);
+}
+
+.oh-print-chip {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--oh-badge-farmer-bg);
+  color: var(--oh-badge-farmer-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.oh-print-summary.shrunk .oh-print-chip {
+  background: #fdebd7;
+  color: #b45309;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oh-print-page .label,
+  .oh-print-value b {
+    animation: none;
+  }
+}

@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUsers, toggleBlock, setSearch, setStatusFilter } from '../../store/usersSlice';
 import { fetchAdmins, promoteUser, demoteAdmin, setSearch as setAdminSearch } from '../../store/adminsSlice';
 import UserEditPanel from './UserEditPanel.jsx';
 import AdminEditPanel from './AdminEditPanel.jsx';
-import UserHistoryPanel from './UserHistoryPanel.jsx';
 import { LoadingState, RefreshingNote, Spinner } from '../../components/Loader.jsx';
+import { userCode } from '../../utils/format';
 import '../../styles/admin.css';
 
 const exportCsv = (users) => {
@@ -197,7 +198,6 @@ const NormalUsersTab = ({ showPromote }) => {
   const { list, total, active, blocked, search, statusFilter, status } = useSelector((state) => state.users);
   const [panel, setPanel] = useState(null); // { mode: 'add' | 'edit', user? }
   const [promoting, setPromoting] = useState(null); // user being promoted
-  const [historyUserId, setHistoryUserId] = useState(null);
   const [blocking, setBlocking] = useState({}); // user id → true while its block/unblock runs
 
   useEffect(() => {
@@ -239,7 +239,7 @@ const NormalUsersTab = ({ showPromote }) => {
       <div className="oh-toolbar">
         <input
           className="oh-search-input"
-          placeholder="Search name or number (past ones too)"
+          placeholder="Search name, number or ID like USR-00012 (past names too)"
           value={search}
           onChange={(e) => dispatch(setSearch(e.target.value))}
         />
@@ -268,12 +268,15 @@ const NormalUsersTab = ({ showPromote }) => {
           const { editCount = 0, previousNames = [] } = user.profileHistory || {};
           return (
             <div className="oh-user-row" key={user.id}>
+              <span className="oh-user-id" title="User ID">{userCode(user.id)}</span>
               <div className="oh-user-avatar">
                 {user.photoUrl ? <img src={user.photoUrl} alt={user.name} /> : initial}
               </div>
               <div className="oh-user-info">
                 <div className="oh-user-name-row">
-                  <span className="oh-user-name">{user.name || 'Unnamed user'}</span>
+                  <Link className="oh-user-name oh-user-name-link" to={`/admin/users/${user.id}`}>
+                    {user.name || 'Unnamed user'}
+                  </Link>
                   {user.userType && <span className={`oh-badge ${user.userType}`}>{user.userType}</span>}
                   {user.isBlocked && <span className="oh-badge blocked">Blocked</span>}
                   {editCount > 0 && (
@@ -295,9 +298,9 @@ const NormalUsersTab = ({ showPromote }) => {
                     Promote
                   </button>
                 )}
-                <button className="oh-btn-cancel" onClick={() => setHistoryUserId(user.id)}>
+                <Link className="oh-btn-cancel" to={`/admin/users/${user.id}`}>
                   History
-                </button>
+                </Link>
                 <button className="oh-btn-edit" onClick={() => setPanel({ mode: 'edit', user })}>
                   Edit
                 </button>
@@ -325,7 +328,6 @@ const NormalUsersTab = ({ showPromote }) => {
 
       {panel && <UserEditPanel mode={panel.mode} user={panel.user} onClose={() => setPanel(null)} />}
       {promoting && <PromoteModal user={promoting} onClose={() => setPromoting(null)} />}
-      {historyUserId && <UserHistoryPanel userId={historyUserId} onClose={() => setHistoryUserId(null)} />}
     </div>
   );
 };
@@ -373,7 +375,7 @@ const AdminsTab = () => {
       <div className="oh-toolbar">
         <input
           className="oh-search-input"
-          placeholder="Search name, username or email"
+          placeholder="Search name, username, email or ID"
           value={search}
           onChange={(e) => dispatch(setAdminSearch(e.target.value))}
         />
@@ -388,6 +390,7 @@ const AdminsTab = () => {
           const isSelf = admin.id === currentUser?.id;
           return (
             <div className="oh-user-row" key={admin.id}>
+              <span className="oh-user-id" title="User ID">{userCode(admin.id)}</span>
               <div className="oh-user-avatar">{initial}</div>
               <div className="oh-user-info">
                 <div className="oh-user-name-row">

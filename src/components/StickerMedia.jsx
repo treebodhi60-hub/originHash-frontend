@@ -1,5 +1,5 @@
-// The sticker behind a scan: its QR (everyone who can open the scan) and, for admins and the
-// batch's creator, the image printed beside it. The server leaves `imageUrl` out for anyone else.
+// The sticker behind a scan: its QR (everyone who can open the scan) and, for admins and
+// super-admins only, the image printed beside it. The server leaves `imageUrl` out for anyone else.
 // Both tiles are the same square, like on the printed sticker; tapping one opens it full size.
 const StickerMedia = ({ sticker }) => {
   if (!sticker?.qrDataUrl) return null;

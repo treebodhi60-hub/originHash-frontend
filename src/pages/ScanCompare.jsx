@@ -128,12 +128,12 @@ const ScanCompare = () => {
               </div>
               <div>
                 <dt>Verified on</dt>
-                <dd>{formatDateTime(scan.imageRevealedAt || scan.createdAt)}</dd>
+                <dd>{formatDateTime(scan.imageRevealedAt || scan.createdAt, { seconds: true })}</dd>
               </div>
               {firstVerifiedAt && (
                 <div>
                   <dt>First verified</dt>
-                  <dd>{formatDateTime(firstVerifiedAt)}</dd>
+                  <dd>{formatDateTime(firstVerifiedAt, { seconds: true })}</dd>
                 </div>
               )}
             </dl>

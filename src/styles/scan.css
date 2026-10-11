@@ -1046,11 +1046,6 @@
   cursor: progress;
 }
 
-.oh-result-icon.warning {
-  background: #fdecc8;
-  color: #b45309;
-}
-
 .oh-compare-answer.unmatched.active {
   box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.3);
 }

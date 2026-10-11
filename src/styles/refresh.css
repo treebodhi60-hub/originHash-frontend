@@ -441,6 +441,75 @@ body {
   box-shadow: 0 14px 30px rgba(22, 56, 50, 0.12);
 }
 
+/* A user's ID (USR-…) next to their name. */
+.oh-user-code {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 6px;
+  background: #f1ebe0;
+  color: var(--oh-text-muted);
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  vertical-align: 1px;
+}
+
+/* Users / Admins: the leading ID column. Fixed width so names line up; on phones it sits above. */
+.oh-user-id {
+  flex: 0 0 96px;
+  align-self: center;
+  padding: 4px 0;
+  border-radius: 8px;
+  background: #f1ebe0;
+  color: var(--oh-forest);
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .oh-user-id {
+    flex: 0 0 100%;
+    max-width: max-content;
+    padding: 3px 10px;
+  }
+}
+
+/* "now Sukumar": the scanner's current name, beside the name they had when they scanned. */
+.oh-now-called {
+  color: var(--oh-badge-changed-text);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.oh-user-name-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.oh-user-name-link:hover {
+  color: var(--oh-forest);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+a.oh-btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.oh-details-user-link {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--oh-forest);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-underline-offset: 2px;
+}
+
 /* ---------- Errors / empty states ---------- */
 .oh-error {
   border: 1px solid #f5c9c9;
@@ -463,7 +532,7 @@ body {
   animation: oh-fade-in 0.3s ease-out;
 }
 
-/* ---------- Wallet bar on phones: buttons wrap, Add balance gets its own full row ---------- */
+/* ---------- Sticker bar on phones: buttons wrap, Buy stickers gets its own full row ---------- */
 @media (max-width: 560px) {
   .oh-wallet-bar-actions {
     flex-wrap: wrap;

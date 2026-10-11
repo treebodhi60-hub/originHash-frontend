@@ -3,7 +3,7 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import ReportPhoto from '../components/ReportPhoto.jsx';
 import ScanReportForm from '../components/ScanReportForm.jsx';
-import { ArrowLeftIcon, CheckIcon, CrossIcon, FlagIcon, HomeIcon, WarningIcon } from '../components/ScanIcons.jsx';
+import { ArrowLeftIcon, CheckIcon, CrossIcon, DangerIcon, FlagIcon, HomeIcon, WarningIcon } from '../components/ScanIcons.jsx';
 import { formatDate, formatDateTime, formatScanTime } from '../utils/format';
 import { scanRoutes } from '../utils/scanRoutes';
 import '../styles/app-shell.css';
@@ -49,8 +49,8 @@ const RESULTS = {
   },
   ALREADY_VIEWED: {
     title: 'Verification result',
-    tone: 'warning',
-    icon: <WarningIcon size={28} />,
+    tone: 'danger',
+    icon: <DangerIcon size={28} />,
     heading: 'Already verified',
     body: ({ report }) =>
       report
@@ -127,7 +127,7 @@ const ScanResult = () => {
               {firstViewedAt ? (
                 <div>
                   <dt>First verified</dt>
-                  <dd>{formatDateTime(firstViewedAt)}</dd>
+                  <dd>{formatDateTime(firstViewedAt, { seconds: true })}</dd>
                 </div>
               ) : (
                 product.packedAt && (
@@ -139,7 +139,7 @@ const ScanResult = () => {
               )}
               <div>
                 <dt>{scan.action === 'record' ? 'Recorded' : 'Checked'}</dt>
-                <dd>{formatScanTime(scan.createdAt)}</dd>
+                <dd>{formatScanTime(scan.createdAt, { seconds: true })}</dd>
               </div>
             </dl>
           ) : (
@@ -153,7 +153,7 @@ const ScanResult = () => {
               <div className="oh-result-report-head">
                 <FlagIcon size={16} />
                 Your report
-                <span>{formatScanTime(report.createdAt)}</span>
+                <span>{formatScanTime(report.createdAt, { seconds: true })}</span>
               </div>
               {report.photoUrl && <ReportPhoto url={report.photoUrl} alt="The photo you sent with your report" />}
               {report.note && <p className="oh-result-report-note">{report.note}</p>}

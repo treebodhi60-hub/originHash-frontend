@@ -37,6 +37,51 @@
   color: var(--oh-white);
 }
 
+/* Phones and tablets: the filter chips are a swipeable row (Google-style). No scrollbar; the row
+   runs to the card's edges and fades out there, so the next chip "peeks" in and invites a swipe.
+   Chips snap into place and keep a comfortable tap size. Laptops show them in the page header. */
+@media (max-width: 1023.98px) {
+  .oh-history-body .oh-history-filters {
+    margin: 0 -18px 16px;
+    padding: 4px 18px 6px;
+    gap: 8px;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 18px;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 36px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 36px), transparent 100%);
+  }
+
+  .oh-history-body .oh-history-filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .oh-history-body .oh-history-chip {
+    scroll-snap-align: start;
+    min-height: 38px;
+    padding: 8px 16px;
+    font-size: 0.84rem;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .oh-history-body .oh-history-chip:active {
+    transform: scale(0.96);
+  }
+
+  .oh-history-body .oh-history-chip.active {
+    box-shadow: 0 4px 12px rgba(22, 56, 50, 0.22);
+  }
+
+  /* The last chip can scroll fully clear of the fade. */
+  .oh-history-body .oh-history-filters::after {
+    content: '';
+    flex: 0 0 18px;
+  }
+}
+
 .oh-history-empty {
   padding: 28px 12px;
   text-align: center;

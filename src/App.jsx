@@ -5,6 +5,14 @@ import { fetchMe } from "./store/authSlice";
 import Login from "./pages/Login.jsx";
 import OtpVerify from "./pages/OtpVerify.jsx";
 import Verify from "./pages/Verify.jsx";
+import BulkView from './pages/BulkView.jsx';
+import BulkQr from './pages/BulkQr.jsx';
+import BulkBatchDetails from './pages/BulkBatchDetails.jsx';
+import LightQr from './pages/LightQr.jsx';
+import LightBatchDetails from './pages/LightBatchDetails.jsx';
+import LightView from './pages/LightView.jsx';
+import LightUpdate from './pages/LightUpdate.jsx';
+import LightHistory from './pages/LightHistory.jsx';
 import Onboarding from "./pages/Onboarding.jsx";
 import Profile from "./pages/Profile.jsx";
 import UserHome from "./pages/UserHome.jsx";
@@ -18,6 +26,7 @@ import UserLayout from "./pages/UserLayout.jsx";
 import AdminLayout from "./pages/admin/AdminLayout.jsx";
 import Dashboard from "./pages/admin/Dashboard.jsx";
 import UsersList from "./pages/admin/UsersList.jsx";
+import UserActivity from "./pages/admin/UserActivity.jsx";
 import ImageStock from "./pages/admin/ImageStock.jsx";
 import QrStickers from "./pages/admin/QrStickers.jsx";
 import AdminProfile from "./pages/admin/AdminProfile.jsx";
@@ -46,6 +55,12 @@ function App() {
       />
       <Route path="/verify-otp" element={<OtpVerify />} />
       <Route path="/verify/:code" element={<Verify />} />
+      {/* Public: what a bulk (identical) QR label opens. */}
+      <Route path="/b/:code" element={<BulkView />} />
+      {/* Public: what a light QR label opens; the update and history pages sign people in themselves. */}
+      <Route path="/l/:token" element={<LightView />} />
+      <Route path="/l/:token/update" element={<LightUpdate />} />
+      <Route path="/l/:token/history" element={<LightHistory />} />
 
       <Route
         path="/onboarding"
@@ -75,6 +90,10 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/images" element={<ImageStock />} />
         <Route path="/qr-stickers" element={<QrStickers />} />
+        <Route path="/bulk-qr" element={<BulkQr />} />
+        <Route path="/bulk-qr/:id" element={<BulkBatchDetails />} />
+        <Route path="/light-qr" element={<LightQr />} />
+        <Route path="/light-qr/:id" element={<LightBatchDetails />} />
       </Route>
 
       <Route
@@ -87,9 +106,14 @@ function App() {
       >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="users" element={<UsersList />} />
+        <Route path="users/:id" element={<UserActivity />} />
         <Route path="admins" element={<Navigate to="/admin/users" replace />} />
         <Route path="images" element={<ImageStock />} />
         <Route path="qr-stickers" element={<QrStickers />} />
+        <Route path="bulk-qr" element={<BulkQr />} />
+        <Route path="bulk-qr/:id" element={<BulkBatchDetails />} />
+        <Route path="light-qr" element={<LightQr />} />
+        <Route path="light-qr/:id" element={<LightBatchDetails />} />
         <Route path="scan" element={<UserHome />} />
         <Route path="scan/camera" element={<Scan />} />
         <Route path="scan/compare" element={<ScanCompare />} />

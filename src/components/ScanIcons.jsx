@@ -151,6 +151,16 @@ export const MapIcon = ({ size }) => (
   </Svg>
 );
 
+// "Already verified": a stop-sign octagon with "!" — this code was used before, so the sticker
+// in hand may be a copy. Kept distinct from the mismatch triangle and the not-authentic cross.
+export const DangerIcon = ({ size }) => (
+  <Svg size={size}>
+    <path d="M8.1 2.5h7.8l5.6 5.6v7.8l-5.6 5.6H8.1l-5.6-5.6V8.1l5.6-5.6Z" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" />
+    <path d="M12 7.3v5.9" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+    <circle cx="12" cy="16.6" r="1.3" fill="currentColor" />
+  </Svg>
+);
+
 export const ChevronLeftIcon = ({ size }) => (
   <Svg size={size}>
     <path d="m14.5 6-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

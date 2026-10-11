@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import api from '../api/axios';
 import ReportPhoto from '../components/ReportPhoto.jsx';
@@ -10,6 +10,7 @@ import {
   ArrowLeftIcon,
   CheckIcon,
   CrossIcon,
+  DangerIcon,
   FlagIcon,
   ShareIcon,
   UndoIcon,
@@ -49,8 +50,8 @@ const VARIANTS = {
   },
   ALREADY_VIEWED: {
     title: 'Verification details',
-    tone: 'warning',
-    icon: <WarningIcon size={28} />,
+    tone: 'danger',
+    icon: <DangerIcon size={28} />,
     heading: 'Already verified',
     text: 'This product was verified earlier. It may have been scanned before.',
   },
@@ -162,7 +163,7 @@ const ScanDetails = () => {
     const { scan, product } = data;
     const what = variant.pill || variant.heading || 'Recorded scan';
     const code = product?.code || scan.code;
-    return `${what}: ${product ? productLine(product) : 'Unknown product'}${code ? ` (${code})` : ''}, ${formatDateTimeShort(scan.createdAt)}. OriginHash scan ID ${scan.uuid}.`;
+    return `${what}: ${product ? productLine(product) : 'Unknown product'}${code ? ` (${code})` : ''}, ${formatDateTimeShort(scan.createdAt, { seconds: true })}. OriginHash scan ID ${scan.uuid}.`;
   };
 
   const copyDetails = async () => {
@@ -307,6 +308,7 @@ const ScanDetails = () => {
 
 const VerifyDetails = ({ data, variant }) => {
   const { scan, product, report, firstViewedAt } = data;
+  const user = useSelector((state) => state.auth.user);
   return (
     <>
       <div className="oh-details-hero">
@@ -326,12 +328,21 @@ const VerifyDetails = ({ data, variant }) => {
         ) : (
           scan.code && <Row label="Code scanned">{scan.code}</Row>
         )}
-        {data.scannedBy && !data.scannedBy.isYou && (
-          <Row label="Scanned by">{data.scannedBy.name || 'Unnamed user'}</Row>
+        {data.scannedBy && (!data.scannedBy.isYou || data.scannedBy.userCode) && (
+          <Row label="Scanned by">
+            {data.scannedBy.isYou ? 'You' : data.scannedBy.name || 'Unnamed user'}
+            {data.scannedBy.userCode && <span className="oh-details-coords">{data.scannedBy.userCode}</span>}
+            {data.scannedBy.currentName && <span className="oh-details-coords">now {data.scannedBy.currentName}</span>}
+            {user?.isAdmin && data.scannedBy.userId && (
+              <Link className="oh-details-user-link" to={`/admin/users/${data.scannedBy.userId}`}>
+                View all their activity
+              </Link>
+            )}
+          </Row>
         )}
-        {firstViewedAt && <Row label="First verified">{formatDateTimeShort(firstViewedAt)}</Row>}
+        {firstViewedAt && <Row label="First verified">{formatDateTimeShort(firstViewedAt, { seconds: true })}</Row>}
         <Row label={['VERIFIED', 'MATCHED', 'AUTHENTIC'].includes(scan.result) ? 'Verified on' : 'Checked on'}>
-          {formatDateTimeShort(scan.createdAt)}
+          {formatDateTimeShort(scan.createdAt, { seconds: true })}
         </Row>
         <Row label="Location">
           {scan.location ? (
@@ -350,7 +361,7 @@ const VerifyDetails = ({ data, variant }) => {
           <div className="oh-result-report-head">
             <FlagIcon size={16} />
             {data.scannedBy?.isYou === false ? 'Report' : 'Your report'}
-            <span>{formatDateTimeShort(report.createdAt)}</span>
+            <span>{formatDateTimeShort(report.createdAt, { seconds: true })}</span>
           </div>
           {report.photoUrl && <ReportPhoto url={report.photoUrl} alt="The photo you sent with your report" />}
           {report.note && <p className="oh-result-report-note">{report.note}</p>}
