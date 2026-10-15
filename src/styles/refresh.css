@@ -4,14 +4,7 @@
    changes markup or behaviour. Same palette (tokens.css); tints are mixed from it.
    ========================================================================== */
 
-:root {
-  --oh-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --oh-shadow-sm: 0 1px 2px rgba(22, 56, 50, 0.05), 0 4px 12px rgba(22, 56, 50, 0.05);
-  --oh-shadow-lg: 0 18px 40px rgba(22, 56, 50, 0.14);
-  --oh-ring: 0 0 0 3px rgba(22, 56, 50, 0.12);
-  --oh-hover: #f7f2ea; /* cream, one step towards the border tone */
-  --oh-panel-radius: 18px;
-}
+/* Tokens (colours, type, space, motion) live in tokens.css. */
 
 body {
   text-rendering: optimizeLegibility;
@@ -32,29 +25,60 @@ body {
   margin-inline: auto;
 }
 
-/* ---------- Sidebar (laptop) ---------- */
+/* ---------- Sidebar (laptop) — components/SideNav.jsx ---------- */
 .oh-sidebar {
-  width: 76px;
-  background: linear-gradient(180deg, var(--oh-forest) 0%, #12302a 100%);
+  width: var(--oh-sidebar-width);
+  padding: 18px 0 16px;
+  gap: 0;
+  background: linear-gradient(180deg, var(--oh-forest) 0%, var(--oh-forest-deep) 100%);
   box-shadow: 4px 0 24px rgba(22, 56, 50, 0.12);
   position: sticky;
   top: 0;
   height: 100vh;
-  z-index: 40;
+  z-index: var(--oh-z-sidebar);
 }
 
 .oh-sidebar-logo {
-  transition: transform 0.3s var(--oh-ease), box-shadow 0.3s ease;
+  flex-shrink: 0;
+  margin-bottom: 10px;
+  box-shadow: 0 0 0 4px rgba(201, 164, 100, 0.08);
+  transition: transform var(--oh-dur-base) var(--oh-ease), box-shadow var(--oh-dur-base) ease;
 }
 
 .oh-sidebar-logo:hover {
-  transform: rotate(-8deg) scale(1.05);
-  box-shadow: 0 0 0 6px rgba(201, 164, 100, 0.12);
+  transform: rotate(-8deg);
+  box-shadow: 0 0 0 6px rgba(201, 164, 100, 0.14);
+}
+
+.oh-sidebar-nav,
+.oh-sidebar-group,
+.oh-sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.oh-sidebar-group {
+  gap: 4px;
+  padding: 10px 0;
+}
+
+/* A short hairline between groups (a background, so the items keep the aside as their offset parent). */
+.oh-sidebar-group + .oh-sidebar-group {
+  background: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)) center top / 22px 1px no-repeat;
+}
+
+.oh-sidebar-bottom {
+  gap: 4px;
 }
 
 .oh-sidebar-item {
   position: relative;
-  transition: background 0.18s ease, color 0.18s ease, transform 0.18s var(--oh-ease);
+  z-index: 1;
+  margin: 0;
+  color: #a9c4bc;
+  transition: background var(--oh-dur-quick) ease, color var(--oh-dur-quick) ease, transform var(--oh-dur-instant) var(--oh-ease);
 }
 
 .oh-sidebar-item:hover:not(.disabled):not(.active) {
@@ -63,20 +87,48 @@ body {
 }
 
 .oh-sidebar-item:active:not(.disabled) {
-  transform: scale(0.94);
+  transform: scale(0.92);
 }
 
+/* The current page: the sliding mark below draws the pill; the icon turns gold. */
 .oh-sidebar-item.active {
-  background: rgba(201, 164, 100, 0.16);
+  background: transparent;
   color: var(--oh-gold);
-  box-shadow: inset 0 0 0 1px rgba(201, 164, 100, 0.3);
 }
 
-/* Gold marker on the edge of the current page. */
-.oh-sidebar-item.active::before {
+.oh-sidebar-item:focus-visible {
+  outline: 2px solid var(--oh-gold);
+  outline-offset: 2px;
+}
+
+.oh-sidebar-mark {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  margin-left: -22px;
+  border-radius: 12px;
+  background: rgba(201, 164, 100, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(201, 164, 100, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--oh-dur-quick) ease;
+}
+
+.oh-sidebar-mark.shown {
+  opacity: 1;
+}
+
+.oh-sidebar-mark.animate {
+  transition: opacity var(--oh-dur-quick) ease, transform var(--oh-dur-base) var(--oh-ease-in-out);
+}
+
+/* Gold edge marker on the sidebar's edge, travelling with the pill. */
+.oh-sidebar-mark::before {
   content: '';
   position: absolute;
-  left: -16px;
+  left: calc(22px - var(--oh-sidebar-width) / 2);
   top: 10px;
   bottom: 10px;
   width: 4px;
@@ -84,11 +136,11 @@ body {
   background: var(--oh-gold);
 }
 
-/* Label on hover, straight away (from the item's existing title). */
-.oh-sidebar-item[title]::after {
-  content: attr(title);
+/* Label on hover or keyboard focus, straight away. */
+.oh-sidebar-item[data-tip]::after {
+  content: attr(data-tip);
   position: absolute;
-  left: calc(100% + 14px);
+  left: calc(100% + 16px);
   top: 50%;
   transform: translate(-4px, -50%);
   padding: 6px 10px;
@@ -98,17 +150,33 @@ body {
   font-size: 0.78rem;
   font-weight: 600;
   white-space: nowrap;
-  box-shadow: var(--oh-shadow-lg);
+  box-shadow: var(--oh-shadow-lg), inset 0 0 0 1px rgba(201, 164, 100, 0.25);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.15s ease, transform 0.15s var(--oh-ease);
-  z-index: 100;
+  transition: opacity var(--oh-dur-instant) ease, transform var(--oh-dur-quick) var(--oh-ease);
+  z-index: var(--oh-z-tooltip);
 }
 
-.oh-sidebar-item[title]:hover::after,
-.oh-sidebar-item[title]:focus-visible::after {
+.oh-sidebar-item[data-tip]:hover::after,
+.oh-sidebar-item[data-tip]:focus-visible::after {
   opacity: 1;
   transform: translate(0, -50%);
+}
+
+/* Short laptop screens: tighter rhythm so the foot item never collides. */
+@media (max-height: 700px) {
+  .oh-sidebar {
+    padding-top: 12px;
+  }
+
+  .oh-sidebar-group {
+    padding: 6px 0;
+    gap: 2px;
+  }
+
+  .oh-sidebar-logo {
+    margin-bottom: 4px;
+  }
 }
 
 /* ---------- Phone / tablet bars ---------- */
@@ -553,4 +621,333 @@ a.oh-btn-cancel {
     padding: 8px 11px;
     font-size: 0.82rem;
   }
+}
+
+/* ==========================================================================
+   Motion & craft layer — one language for entrances, panels, states and lists.
+   Durations and curves come from tokens.css; prefers-reduced-motion collapses them all.
+   ========================================================================== */
+
+/* ---------- Page titles: a short gold rule, the editorial mark used across the app ---------- */
+.oh-admin-title::before {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 3px;
+  margin-bottom: 10px;
+  border-radius: 3px;
+  background: var(--oh-gold);
+  transform-origin: left;
+  animation: oh-rule-draw var(--oh-dur-slow) var(--oh-ease-in-out) 80ms backwards;
+}
+
+@keyframes oh-rule-draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.oh-admin-subtitle {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Lists settle in, a few items at a time (opacity + small rise) ---------- */
+@keyframes oh-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.oh-users-panel > .oh-user-row,
+.oh-history-table tbody tr,
+.oh-history-list > li,
+.oh-folder-grid > *,
+.oh-image-grid > * {
+  animation: oh-item-in var(--oh-dur-base) var(--oh-ease-out) backwards;
+}
+
+.oh-users-panel > .oh-user-row:nth-child(2),
+.oh-history-table tbody tr:nth-child(2),
+.oh-history-list > li:nth-child(2),
+.oh-folder-grid > :nth-child(2),
+.oh-image-grid > :nth-child(2) { animation-delay: 30ms; }
+
+.oh-users-panel > .oh-user-row:nth-child(3),
+.oh-history-table tbody tr:nth-child(3),
+.oh-history-list > li:nth-child(3),
+.oh-folder-grid > :nth-child(3),
+.oh-image-grid > :nth-child(3) { animation-delay: 60ms; }
+
+.oh-users-panel > .oh-user-row:nth-child(4),
+.oh-history-table tbody tr:nth-child(4),
+.oh-history-list > li:nth-child(4),
+.oh-folder-grid > :nth-child(4),
+.oh-image-grid > :nth-child(4) { animation-delay: 90ms; }
+
+.oh-users-panel > .oh-user-row:nth-child(5),
+.oh-history-table tbody tr:nth-child(5),
+.oh-history-list > li:nth-child(5),
+.oh-folder-grid > :nth-child(5),
+.oh-image-grid > :nth-child(5) { animation-delay: 120ms; }
+
+.oh-users-panel > .oh-user-row:nth-child(n + 6),
+.oh-history-table tbody tr:nth-child(n + 6),
+.oh-history-list > li:nth-child(n + 6),
+.oh-folder-grid > :nth-child(n + 6),
+.oh-image-grid > :nth-child(n + 6) { animation-delay: 150ms; }
+
+/* ---------- People: role badges read as names, rows show where the pointer is ---------- */
+.oh-badge.farmer,
+.oh-badge.retailer,
+.oh-badge.distributor,
+.oh-badge.supplier,
+.oh-badge.consumer,
+.oh-badge.producer {
+  text-transform: capitalize;
+}
+
+.oh-user-row {
+  position: relative;
+}
+
+/* A gold edge on the row under the pointer or keyboard. */
+.oh-user-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--oh-gold);
+  transform: scaleY(0);
+  transition: transform var(--oh-dur-quick) var(--oh-ease);
+}
+
+.oh-user-row:hover::before,
+.oh-user-row:focus-within::before {
+  transform: scaleY(1);
+}
+
+.oh-user-avatar {
+  transition: box-shadow var(--oh-dur-quick) ease;
+}
+
+.oh-user-row:hover .oh-user-avatar {
+  box-shadow: 0 0 0 3px var(--oh-white), 0 0 0 4.5px var(--oh-gold);
+}
+
+/* ---------- Slide-over panels, lightbox: they arrive rather than appear ---------- */
+@keyframes oh-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes oh-panel-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+
+@keyframes oh-dialog-in {
+  from {
+    transform: translateY(10px) scale(0.98);
+    opacity: 0;
+  }
+}
+
+.oh-panel-backdrop {
+  z-index: var(--oh-z-overlay);
+  animation: oh-backdrop-in var(--oh-dur-quick) ease-out;
+}
+
+.oh-slide-panel {
+  border-radius: var(--oh-panel-radius) 0 0 var(--oh-panel-radius);
+  box-shadow: -18px 0 40px rgba(15, 30, 26, 0.18);
+  animation: oh-panel-in var(--oh-dur-base) var(--oh-ease-out);
+}
+
+.oh-panel-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  transition: background var(--oh-dur-quick) ease, color var(--oh-dur-quick) ease;
+}
+
+.oh-panel-close:hover {
+  background: var(--oh-hover);
+  color: var(--oh-text);
+}
+
+.oh-lightbox-content {
+  box-shadow: 0 30px 60px rgba(8, 20, 17, 0.35);
+  animation: oh-dialog-in var(--oh-dur-base) var(--oh-ease-out);
+}
+
+/* Product photos are evidence: shown whole, on a calm ground. */
+.oh-lightbox-content img {
+  background: var(--oh-paper);
+}
+
+.oh-image-thumb {
+  overflow: hidden;
+}
+
+.oh-image-thumb img.loaded {
+  animation: oh-photo-in var(--oh-dur-slow) var(--oh-ease-out);
+}
+
+@keyframes oh-photo-in {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+}
+
+.oh-image-card {
+  transition: transform var(--oh-dur-quick) var(--oh-ease), box-shadow var(--oh-dur-quick) ease;
+}
+
+.oh-image-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--oh-shadow-lg);
+}
+
+/* ---------- Empty states: a quiet mark above the words ---------- */
+.oh-empty-state:not(.oh-loading-row)::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--oh-border-strong);
+  background: radial-gradient(circle, var(--oh-gold) 0 3px, transparent 4px);
+}
+
+/* The identity page draws its own mark. */
+.oh-ua-empty.oh-empty-state::before {
+  content: none;
+}
+
+/* ---------- Phone bottom bar: a gold mark on the current page, like the sidebar's edge ---------- */
+.oh-nav-item {
+  position: relative;
+}
+
+.oh-nav-item::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 18px;
+  height: 3px;
+  margin-left: -9px;
+  border-radius: 0 0 3px 3px;
+  background: var(--oh-gold);
+  transform: scaleX(0);
+  transition: transform var(--oh-dur-base) var(--oh-ease-out);
+}
+
+.oh-nav-item.active::before {
+  transform: scaleX(1);
+}
+
+.oh-nav-item svg {
+  transition: transform var(--oh-dur-quick) var(--oh-ease);
+}
+
+.oh-nav-item.active svg {
+  transform: translateY(-1px);
+}
+
+/* ---------- Sticker preview: a physical label, cut line and all (screen only) ---------- */
+@media screen {
+  .oh-sticker-preview-label {
+    color: var(--oh-batch);
+    font-size: var(--oh-text-2xs);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .oh-sticker-preview-wrap {
+    padding: 14px 16px 22px;
+    border-radius: var(--oh-panel-radius);
+    background:
+      radial-gradient(circle, rgba(201, 164, 100, 0.28) 1px, transparent 1.5px) 0 0 / 14px 14px,
+      rgba(255, 255, 255, 0.4);
+    border: 1px solid var(--oh-border);
+  }
+
+  /* Dashed die-cut line around the label, and the soft shadow of paper lifted off a sheet.
+     Nothing is drawn over the QR itself, so the preview stays an honest picture of the print. */
+  .oh-sticker-card {
+    outline: 1px dashed rgba(201, 164, 100, 0.7);
+    outline-offset: 6px;
+    box-shadow: 0 1px 0 rgba(22, 56, 50, 0.05), 0 22px 34px -16px rgba(22, 56, 50, 0.35);
+    transition: box-shadow var(--oh-dur-base) var(--oh-ease);
+  }
+
+  .oh-sticker-card:hover {
+    box-shadow: 0 1px 0 rgba(22, 56, 50, 0.05), 0 28px 44px -16px rgba(22, 56, 50, 0.42);
+  }
+}
+
+/* ---------- Scan outcome: the result arrives in order — mark, verdict, explanation ---------- */
+.oh-result-icon {
+  position: relative;
+  animation: oh-result-pop 460ms var(--oh-ease-out) 60ms backwards;
+}
+
+/* One ring that spreads once from the mark. */
+.oh-result-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  opacity: 0;
+  animation: oh-result-ring 900ms var(--oh-ease-out) 260ms;
+}
+
+.oh-result-heading {
+  animation: oh-item-in var(--oh-dur-base) var(--oh-ease-out) 160ms backwards;
+}
+
+.oh-result-text,
+.oh-result-product {
+  animation: oh-item-in var(--oh-dur-base) var(--oh-ease-out) 240ms backwards;
+}
+
+@keyframes oh-result-pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+
+@keyframes oh-result-ring {
+  0% {
+    opacity: 0.35;
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  100% {
+    opacity: 0;
+    box-shadow: 0 0 0 14px currentColor;
+  }
+}
+
+/* ---------- Pressable things answer the press ---------- */
+.oh-history-table tbody tr {
+  transition: background var(--oh-dur-instant) ease;
+}
+
+.oh-tabs .oh-tab:active,
+.oh-history-view:active:not(:disabled),
+.oh-btn-cancel:active:not(:disabled),
+.oh-user-actions button:active:not(:disabled) {
+  transform: scale(0.97);
 }

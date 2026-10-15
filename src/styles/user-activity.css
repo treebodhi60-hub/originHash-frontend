@@ -1,10 +1,39 @@
-/* Admin: one user's page — profile, names over time, and every action under the name used then. */
+/* Admin: one user's page — profile, names over time, and every action under the name used then.
+   Signature pieces: the identity timeline (left), the drawn strike-through on former values,
+   the connector from a selected identity into its activity, and the audit timeline (right). */
 
 .oh-ua-page {
+  --oh-ua-gap: 28px;
   max-width: 1240px;
   margin: 0 auto;
   display: grid;
   gap: 18px;
+}
+
+/* Sections settle in one after another on arrival. */
+.oh-ua-page > * {
+  animation: oh-ua-rise var(--oh-dur-base) var(--oh-ease-out) backwards;
+}
+
+.oh-ua-page > :nth-child(2) { animation-delay: 40ms; }
+.oh-ua-page > :nth-child(3) { animation-delay: 90ms; }
+.oh-ua-page > :nth-child(4) { animation-delay: 140ms; }
+.oh-ua-page > :nth-child(5) { animation-delay: 190ms; }
+
+@keyframes oh-ua-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* ---------- Breadcrumb ---------- */
+.oh-ua-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  min-width: 0;
 }
 
 .oh-ua-back {
@@ -12,46 +41,72 @@
   align-items: center;
   gap: 6px;
   width: max-content;
+  padding: 4px 8px 4px 4px;
+  margin-left: -4px;
+  border-radius: 8px;
   color: var(--oh-text-muted);
-  font-size: 0.86rem;
   font-weight: 600;
   text-decoration: none;
+  transition: color var(--oh-dur-quick) ease, background var(--oh-dur-quick) ease;
+}
+
+.oh-ua-back svg {
+  transition: transform var(--oh-dur-quick) var(--oh-ease);
 }
 
 .oh-ua-back:hover {
   color: var(--oh-forest);
+  background: var(--oh-hover);
+}
+
+.oh-ua-back:hover svg {
+  transform: translateX(-2px);
+}
+
+.oh-ua-crumb-sep {
+  color: var(--oh-border-strong);
+}
+
+.oh-ua-crumb-current {
+  color: var(--oh-text);
+  font-family: var(--oh-font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .oh-ua-card {
   background: var(--oh-white);
   border: 1px solid var(--oh-border);
-  border-radius: var(--oh-panel-radius, 18px);
+  border-radius: var(--oh-panel-radius);
   box-shadow: var(--oh-shadow-sm);
 }
 
 /* ---------- Profile header ---------- */
 .oh-ua-profile {
   display: flex;
-  gap: 20px;
+  gap: 22px;
   align-items: center;
-  padding: 22px 24px;
+  padding: 24px 26px;
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(201, 164, 100, 0.1), transparent 45%),
+    var(--oh-white);
 }
 
 .oh-ua-avatar {
-  flex: 0 0 76px;
-  height: 76px;
+  flex: 0 0 80px;
+  height: 80px;
   border-radius: 50%;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #e3efe9;
+  background: var(--oh-sage);
   color: var(--oh-forest);
   font-family: var(--oh-font-display);
-  font-size: 1.8rem;
+  font-size: 1.85rem;
   font-weight: 700;
   border: 3px solid var(--oh-white);
-  box-shadow: 0 0 0 2px var(--oh-gold);
+  box-shadow: 0 0 0 1.5px var(--oh-gold), 0 10px 24px rgba(22, 56, 50, 0.12);
 }
 
 .oh-ua-avatar img {
@@ -75,22 +130,25 @@
 .oh-ua-name {
   margin: 0;
   font-family: var(--oh-font-display);
-  font-size: 1.55rem;
-  line-height: 1.2;
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
   color: var(--oh-forest);
   overflow-wrap: anywhere;
 }
 
 .oh-ua-name-row .oh-badge {
   margin: 0;
+  text-transform: capitalize;
 }
 
 .oh-ua-id {
   padding: 3px 10px;
   border-radius: 8px;
-  background: #f1ebe0;
+  background: var(--oh-paper);
   color: var(--oh-text);
-  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-family: var(--oh-font-mono);
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -100,127 +158,233 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px 0;
-  margin-top: 6px;
+  margin-top: 8px;
   color: var(--oh-text-muted);
   font-size: 0.88rem;
 }
 
 .oh-ua-contact span + span::before {
   content: '·';
-  margin: 0 8px;
+  margin: 0 9px;
+  color: var(--oh-border-strong);
 }
 
+/* "Known as": the account's names, oldest first. Former names are struck, the current one stands. */
 .oh-ua-trail {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
-  margin-top: 12px;
-  font-size: 0.84rem;
+  gap: 6px 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--oh-border);
+  font-size: 0.9rem;
 }
 
 .oh-ua-trail-label {
-  color: var(--oh-text-muted);
-  font-weight: 600;
-  margin-right: 2px;
+  margin-right: 4px;
+  color: var(--oh-batch);
+  font-size: var(--oh-text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
+/* Inline flow inside each item, so a long former name wraps and stays struck on every line. */
 .oh-ua-trail-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  display: block;
+  min-width: 0;
 }
 
 .oh-ua-trail-arrow {
+  display: inline-block;
+  margin-right: 8px;
   color: var(--oh-gold);
   font-weight: 700;
 }
 
 .oh-ua-trail-name {
-  padding: 3px 11px;
-  border-radius: 999px;
-  background: var(--oh-cream);
-  border: 1px solid var(--oh-border);
-  color: var(--oh-text);
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .oh-ua-trail-name.current {
+  padding: 3px 12px;
+  border-radius: var(--oh-radius-pill);
   background: var(--oh-forest);
-  border-color: var(--oh-forest);
   color: var(--oh-white);
+  box-shadow: 0 4px 12px rgba(22, 56, 50, 0.18);
 }
 
-/* ---------- Totals ---------- */
+.oh-ua-trail.in-view .oh-ua-trail-arrow {
+  animation: oh-ua-slide-in 360ms var(--oh-ease-out) calc(var(--d, 0ms) - 120ms) backwards;
+}
+
+.oh-ua-trail-name.current {
+  display: inline-block;
+}
+
+.oh-ua-trail.in-view .oh-ua-trail-name.current {
+  animation: oh-ua-arrive 420ms var(--oh-ease-out) calc(var(--d, 0ms) + 60ms) backwards;
+}
+
+/* ---------- The strike: a fine line drawn through a former value ----------
+   A background line (not text-decoration) so it can be drawn, and so it follows every line of
+   a wrapped value. The text stays at full legibility in the muted tone. */
+.oh-strike {
+  --oh-strike-color: rgba(194, 65, 12, 0.72); /* --oh-warning: the colour of former names everywhere */
+  color: var(--oh-text-muted);
+  text-decoration: none;
+  background-image: linear-gradient(var(--oh-strike-color), var(--oh-strike-color));
+  background-repeat: no-repeat;
+  background-position: 0 58%;
+  background-size: 100% 1.5px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.oh-reveal:not(.in-view) .oh-strike {
+  background-size: 0% 1.5px;
+}
+
+.oh-reveal.in-view .oh-strike {
+  animation: oh-strike-draw var(--oh-dur-slow) var(--oh-ease-in-out) calc(var(--d, 0ms) + 180ms) backwards;
+}
+
+/* Choosing an identity draws its lines again: the record re-asserts what changed. */
+.oh-ua-identity.selected .oh-strike {
+  animation-name: oh-strike-redraw;
+  animation-delay: 80ms;
+}
+
+@keyframes oh-strike-draw {
+  from {
+    background-size: 0% 1.5px;
+  }
+}
+
+@keyframes oh-strike-redraw {
+  from {
+    background-size: 0% 1.5px;
+  }
+}
+
+@keyframes oh-ua-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+}
+
+@keyframes oh-ua-arrive {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+}
+
+/* ---------- Totals: one quiet strip, hairlines between figures ---------- */
 .oh-ua-stats {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.oh-ua-stat {
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  overflow: hidden;
   background: var(--oh-white);
   border: 1px solid var(--oh-border);
-  border-radius: 14px;
-  padding: 14px 16px;
-  border-top: 3px solid var(--oh-forest);
+  border-radius: var(--oh-panel-radius);
+  box-shadow: var(--oh-shadow-sm);
 }
 
-.oh-ua-stat.success { border-top-color: var(--oh-badge-farmer-text); }
-.oh-ua-stat.warning { border-top-color: #c2410c; }
-.oh-ua-stat.danger { border-top-color: var(--oh-red); }
-.oh-ua-stat.batch { border-top-color: var(--oh-gold); }
-
-.oh-ua-stat-value {
-  font-family: var(--oh-font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--oh-text);
-  line-height: 1.1;
+/* Hairlines on the left and top of every cell; the strip's edge clips the outer ones. */
+.oh-ua-stat {
+  padding: 14px 18px 16px;
+  box-shadow: -1px 0 0 var(--oh-border), 0 -1px 0 var(--oh-border);
 }
 
 .oh-ua-stat-label {
-  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
   color: var(--oh-text-muted);
-  font-size: 0.8rem;
+  font-size: var(--oh-text-2xs);
+  font-weight: 700;
+  letter-spacing: var(--oh-tracking-label);
+  text-transform: uppercase;
+}
+
+.oh-ua-stat-label::before {
+  content: '';
+  flex: 0 0 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--oh-forest);
+}
+
+.oh-ua-stat.success .oh-ua-stat-label::before { background: var(--oh-success); }
+.oh-ua-stat.warning .oh-ua-stat-label::before { background: var(--oh-warning); }
+.oh-ua-stat.danger .oh-ua-stat-label::before { background: var(--oh-danger); }
+.oh-ua-stat.batch .oh-ua-stat-label::before { background: var(--oh-gold); }
+
+.oh-ua-stat-value {
+  margin-top: 6px;
+  font-family: var(--oh-font-display);
+  font-size: 1.6rem;
   font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--oh-text);
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Two columns: names over time | activity ---------- */
 .oh-ua-layout {
   display: grid;
-  grid-template-columns: 340px minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: var(--oh-ua-gap);
   align-items: start;
+}
+
+.oh-ua-eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--oh-batch);
+  font-size: var(--oh-text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .oh-ua-section-head h2 {
   margin: 0;
   font-family: var(--oh-font-display);
-  font-size: 1.05rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--oh-forest);
 }
 
 .oh-ua-section-head p {
-  margin: 4px 0 0;
+  margin: 6px 0 0;
+  max-width: 62ch;
   color: var(--oh-text-muted);
-  font-size: 0.82rem;
-  line-height: 1.45;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  text-wrap: pretty;
 }
 
 .oh-ua-identities {
-  position: sticky;
-  top: 16px;
   display: grid;
-  gap: 12px;
+  gap: 14px;
+  min-width: 0;
 }
 
 .oh-ua-identity-list {
   display: grid;
-  gap: 10px;
+  gap: 14px;
 }
 
+/* ---------- Identity cards ---------- */
 .oh-ua-identity {
+  position: relative;
   display: grid;
   gap: 4px;
   width: 100%;
@@ -228,131 +392,392 @@
   font: inherit;
   color: var(--oh-text);
   background: var(--oh-white);
-  border: 1.5px solid var(--oh-border);
-  border-radius: 14px;
-  padding: 12px 14px;
+  border: 1px solid var(--oh-border);
+  border-radius: 16px;
+  padding: 14px 16px 15px;
   cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  box-shadow: var(--oh-shadow-sm);
+  transition:
+    border-color var(--oh-dur-quick) ease,
+    box-shadow var(--oh-dur-quick) ease,
+    background var(--oh-dur-quick) ease,
+    transform var(--oh-dur-quick) var(--oh-ease);
 }
 
 .oh-ua-identity:hover {
-  border-color: var(--oh-gold);
+  border-color: var(--oh-border-strong);
+  box-shadow: 0 10px 26px rgba(22, 56, 50, 0.1);
+  transform: translateX(2px);
+}
+
+.oh-ua-identity:active {
+  transform: translateX(2px) scale(0.99);
 }
 
 .oh-ua-identity:focus-visible {
   outline: none;
-  box-shadow: var(--oh-ring);
+  box-shadow: var(--oh-ring-gold), var(--oh-shadow-sm);
 }
 
 .oh-ua-identity.selected {
   border-color: var(--oh-forest);
-  background: #f3f7f5;
-  box-shadow: 0 0 0 1px var(--oh-forest);
+  background: linear-gradient(180deg, #f5f9f7 0%, var(--oh-white) 100%);
+  box-shadow: 0 0 0 1px var(--oh-forest), 0 12px 28px rgba(22, 56, 50, 0.12);
+}
+
+/* Cards come into view one after another. */
+.oh-ua-identity.oh-reveal:not(.in-view) {
+  opacity: 0;
+}
+
+.oh-ua-identity.oh-reveal.in-view {
+  animation: oh-ua-rise var(--oh-dur-base) var(--oh-ease-out) var(--d, 0ms) backwards;
 }
 
 .oh-ua-identity-top {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 4px 8px;
 }
 
 .oh-ua-identity-name {
-  font-weight: 700;
-  font-size: 0.98rem;
+  font-family: var(--oh-font-display);
+  font-weight: 600;
+  font-size: 1.08rem;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
   color: var(--oh-forest);
   overflow-wrap: anywhere;
 }
 
+.oh-ua-node-item.past .oh-ua-identity-name {
+  color: var(--oh-text);
+}
+
 .oh-ua-identity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background: var(--oh-forest);
   color: var(--oh-white);
-  border-radius: 999px;
-  padding: 1px 8px;
-  font-size: 0.68rem;
-  font-weight: 600;
+  border-radius: var(--oh-radius-pill);
+  padding: 2px 9px 2px 7px;
+  font-size: var(--oh-text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* A small gold dot: the name in force today. */
+.oh-ua-identity-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--oh-gold);
+}
+
+.oh-ua-identity-count {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: var(--oh-radius-pill);
+  background: var(--oh-paper);
+  color: var(--oh-text-muted);
+  font-size: var(--oh-text-2xs);
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .oh-ua-identity-period {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: var(--oh-text);
   font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.oh-ua-period-arrow {
+  margin: 0 5px;
+  color: var(--oh-gold);
+  font-weight: 700;
 }
 
 .oh-ua-identity-source,
 .oh-ua-identity-details {
-  font-size: 0.76rem;
+  font-size: 0.77rem;
   color: var(--oh-text-muted);
   overflow-wrap: anywhere;
 }
 
-.oh-ua-identity-tally {
-  margin-top: 4px;
-  padding-top: 8px;
+.oh-ua-identity-summary {
+  display: grid;
+  gap: 7px;
+  margin-top: 6px;
+  padding-top: 10px;
   border-top: 1px dashed var(--oh-border);
-  font-size: 0.8rem;
+}
+
+.oh-ua-identity-tally {
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--oh-text);
+  font-variant-numeric: tabular-nums;
 }
 
 .oh-ua-identity-split {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 10px;
-  font-size: 0.74rem;
+  gap: 4px 12px;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
-.oh-ua-identity-split .success { color: var(--oh-badge-farmer-text); }
-.oh-ua-identity-split .warning { color: #c2410c; }
-.oh-ua-identity-split .danger { color: var(--oh-red); }
-.oh-ua-identity-split .info { color: var(--oh-badge-retailer-text); }
+.oh-ua-identity-split .success { color: var(--oh-success); }
+.oh-ua-identity-split .warning { color: var(--oh-warning); }
+.oh-ua-identity-split .danger { color: var(--oh-danger); }
+.oh-ua-identity-split .info { color: var(--oh-info); }
 
+/* Hairline bar: the share of each outcome under this identity. */
+.oh-ua-outcome-bar {
+  display: flex;
+  gap: 2px;
+  height: 4px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.oh-ua-outcome-bar > span {
+  flex-basis: 0;
+  min-width: 4px;
+  border-radius: 2px;
+  transform-origin: left;
+}
+
+.oh-ua-outcome-bar .success { background: var(--oh-success); }
+.oh-ua-outcome-bar .warning { background: var(--oh-warning); }
+.oh-ua-outcome-bar .danger { background: var(--oh-danger); }
+.oh-ua-outcome-bar .info { background: var(--oh-info); }
+
+.oh-reveal.in-view .oh-ua-outcome-bar > span {
+  animation: oh-ua-grow 520ms var(--oh-ease-out) calc(var(--d, 0ms) + 200ms) backwards;
+}
+
+@keyframes oh-ua-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* "All names": the overview at the head of the timeline. */
+.oh-ua-identity.all {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(201, 164, 100, 0.12), transparent 55%),
+    var(--oh-white);
+}
+
+.oh-ua-identity.all .oh-ua-identity-name {
+  color: var(--oh-forest);
+}
+
+.oh-ua-identity.all.selected {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(201, 164, 100, 0.16), transparent 55%),
+    #f5f9f7;
+}
+
+/* ---------- Field changes: label, former value (struck), → new value ---------- */
 .oh-ua-changes {
   list-style: none;
-  margin: 2px 0 0;
+  margin: 4px 0 0;
   padding: 0;
   display: grid;
-  gap: 2px;
-  font-size: 0.78rem;
+  gap: 4px;
+  font-size: 0.82rem;
 }
 
 .oh-ua-changes li {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
   align-items: baseline;
-  gap: 0 6px;
+  gap: 8px;
 }
 
 .oh-ua-change-field {
   color: var(--oh-text-muted);
-  min-width: 62px;
+  font-size: 0.76rem;
 }
 
-.oh-ua-change-old {
+/* Inline flow (not flex), so a wrapped former value is struck on each of its lines. */
+.oh-ua-change-values {
+  display: block;
+  min-width: 0;
+}
+
+.oh-ua-change-old,
+.oh-ua-change-new {
+  overflow-wrap: anywhere;
+}
+
+.oh-ua-change-arrow {
+  display: inline-block;
+  margin: 0 7px;
+  color: var(--oh-gold);
+  font-weight: 700;
+}
+
+.oh-ua-change-new {
+  color: var(--oh-forest);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.oh-reveal.in-view .oh-ua-change-arrow {
+  animation: oh-ua-slide-in 320ms var(--oh-ease-out) calc(var(--d, 0ms) + 420ms) backwards;
+}
+
+/* Opacity only: the new value is inline so it can wrap naturally. */
+.oh-reveal.in-view .oh-ua-change-new {
+  animation: oh-ua-fade 360ms var(--oh-ease-out) calc(var(--d, 0ms) + 500ms) backwards;
+}
+
+@keyframes oh-ua-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------- The timeline rail: numbered nodes, newest at the top ---------- */
+.oh-ua-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.oh-ua-node-item {
+  position: relative;
+  padding-left: 40px;
+  min-width: 0;
+}
+
+/* Rail: from this node down to the next one. */
+.oh-ua-node-item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 30px;
+  bottom: -32px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--oh-border);
+}
+
+.oh-ua-node-item.current:not(:last-child)::before {
+  background: linear-gradient(180deg, var(--oh-forest), var(--oh-border) 70%);
+}
+
+/* Tick from the node to its card. */
+.oh-ua-node-item::after {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 25px;
+  width: 16px;
+  height: 1.5px;
+  background: var(--oh-border-strong);
+  transition: background var(--oh-dur-quick) ease;
+}
+
+.oh-ua-node {
+  position: absolute;
+  left: 0;
+  top: 13px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--oh-white);
+  border: 1.5px solid var(--oh-border-strong);
   color: var(--oh-text-muted);
-  text-decoration: line-through;
+  font-family: var(--oh-font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  transition: background var(--oh-dur-quick) ease, color var(--oh-dur-quick) ease, border-color var(--oh-dur-quick) ease,
+    box-shadow var(--oh-dur-base) var(--oh-ease);
+}
+
+.oh-ua-node-item.current .oh-ua-node {
+  background: var(--oh-forest);
+  border-color: var(--oh-forest);
+  color: var(--oh-gold);
+  box-shadow: 0 0 0 4px rgba(201, 164, 100, 0.2);
+}
+
+.oh-ua-node-item.selected .oh-ua-node {
+  border-color: var(--oh-forest);
+  color: var(--oh-forest);
+  box-shadow: 0 0 0 5px var(--oh-sage);
+}
+
+.oh-ua-node-item.current.selected .oh-ua-node {
+  color: var(--oh-gold);
+}
+
+.oh-ua-node-item.selected::after {
+  background: var(--oh-forest);
 }
 
 /* ---------- Activity ---------- */
 .oh-ua-activity {
-  padding: 20px 22px 22px;
+  position: relative;
+  padding: 22px 24px 24px;
   min-width: 0;
+  transition: border-color var(--oh-dur-quick) ease, box-shadow var(--oh-dur-quick) ease;
+}
+
+/* While one identity is chosen, the activity panel takes its colour too. */
+.oh-ua-layout.scoped .oh-ua-activity {
+  border-color: var(--oh-forest);
+  box-shadow: 0 0 0 1px var(--oh-forest), var(--oh-shadow-sm);
+}
+
+.oh-ua-scope {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.oh-ua-scope .oh-ua-as {
+  max-width: 100%;
+  animation: oh-ua-arrive 320ms var(--oh-ease-out) backwards;
+}
+
+.oh-ua-scope-period {
+  font-variant-numeric: tabular-nums;
+}
+
+.oh-ua-scope .oh-link-btn {
+  margin-left: 4px;
 }
 
 .oh-ua-filters {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 16px 0 6px;
+  margin: 18px 0 4px;
 }
 
 .oh-ua-chip {
   display: inline-flex;
   align-items: center;
   gap: 7px;
+  min-height: 34px;
   padding: 6px 12px;
-  border-radius: 999px;
-  border: 1.5px solid #e2c992;
+  border-radius: var(--oh-radius-pill);
+  border: 1px solid #e2c992;
   background: #fdf1dc;
   color: var(--oh-text);
   font: inherit;
@@ -360,21 +785,34 @@
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  transition: background var(--oh-dur-quick) ease, border-color var(--oh-dur-quick) ease, color var(--oh-dur-quick) ease,
+    transform var(--oh-dur-instant) var(--oh-ease);
+}
+
+.oh-ua-chip:hover:not(.active) {
+  border-color: var(--oh-gold);
+  background: #fbe9c9;
+}
+
+.oh-ua-chip:active {
+  transform: scale(0.97);
 }
 
 .oh-ua-chip.active {
   background: var(--oh-forest);
   border-color: var(--oh-forest);
   color: var(--oh-white);
+  box-shadow: 0 4px 12px rgba(22, 56, 50, 0.18);
 }
 
 .oh-ua-chip-count {
   min-width: 20px;
   padding: 0 6px;
-  border-radius: 999px;
+  border-radius: var(--oh-radius-pill);
   background: rgba(22, 56, 50, 0.08);
   font-size: 0.72rem;
   text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
 .oh-ua-chip.active .oh-ua-chip-count {
@@ -382,29 +820,84 @@
 }
 
 .oh-ua-day {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
+/* Day headings stay in view while their day scrolls past. */
 .oh-ua-day-label {
-  margin: 0 0 6px;
-  font-size: 0.74rem;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 10px 0 8px;
+  background: var(--oh-white);
+  font-family: var(--oh-font-body);
+  font-size: var(--oh-text-2xs);
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--oh-tracking-label);
   text-transform: uppercase;
   color: var(--oh-text-muted);
 }
 
+.oh-ua-day-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--oh-border);
+}
+
+/* The day's events on one rail, icons sitting on it: each event draws the segment to the next. */
 .oh-ua-rows {
+  --oh-ua-rail-x: 33px; /* row padding + half the icon */
+  --oh-ua-rail-y: 31px;
+  position: relative;
   list-style: none;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--oh-border);
-  border-radius: 14px;
-  overflow: hidden;
 }
 
+.oh-ua-rows li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--oh-ua-rail-x) - 1px);
+  top: var(--oh-ua-rail-y);
+  bottom: calc(-1 * var(--oh-ua-rail-y));
+  width: 2px;
+  background: var(--oh-border);
+  pointer-events: none;
+}
+
+/* Hairline between events, starting after the rail. */
 .oh-ua-rows li + li {
-  border-top: 1px solid var(--oh-border);
+  background: linear-gradient(var(--oh-border), var(--oh-border)) 66px 0 / calc(100% - 66px) 1px no-repeat;
+}
+
+.oh-ua-event {
+  position: relative;
+  transition: opacity var(--oh-dur-quick) ease;
+}
+
+.oh-ua-feed .oh-ua-event {
+  animation: oh-ua-row-in 280ms var(--oh-ease-out) calc(var(--i, 0) * 22ms) backwards;
+}
+
+@keyframes oh-ua-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Hovering a name on the left: its actions stay bright, the rest step back. */
+.oh-ua-feed.previewing .oh-ua-event.dim {
+  opacity: 0.4;
+}
+
+.oh-ua-event.match .oh-ua-as {
+  box-shadow: 0 0 0 1.5px currentColor;
 }
 
 .oh-ua-row {
@@ -413,48 +906,70 @@
   grid-template-areas: 'icon main as time chev';
   align-items: center;
   gap: 12px;
-  padding: 11px 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
   color: var(--oh-text);
   text-decoration: none;
-  background: var(--oh-white);
+  transition: background var(--oh-dur-quick) ease;
 }
 
 a.oh-ua-row:hover {
-  background: var(--oh-hover, #f7f2ea);
+  background: var(--oh-hover);
+}
+
+a.oh-ua-row:hover > :nth-child(5) {
+  transform: translateX(2px);
+  color: var(--oh-forest);
 }
 
 a.oh-ua-row:focus-visible {
   outline: none;
   box-shadow: inset var(--oh-ring);
+  background: var(--oh-hover);
 }
 
+/* A change of details: a chapter marker on the rail. */
 .oh-ua-row.profile {
-  background: #fcfaf6;
+  background: linear-gradient(90deg, rgba(201, 164, 100, 0.12), rgba(201, 164, 100, 0) 75%);
+}
+
+.oh-ua-row.profile .oh-ua-what {
+  font-family: var(--oh-font-display);
+  font-weight: 600;
+  color: var(--oh-forest);
 }
 
 .oh-ua-row > :nth-child(1) { grid-area: icon; }
 .oh-ua-row > :nth-child(2) { grid-area: main; }
 .oh-ua-row > :nth-child(3) { grid-area: as; }
 .oh-ua-row > :nth-child(4) { grid-area: time; }
-.oh-ua-row > :nth-child(5) { grid-area: chev; color: var(--oh-text-muted); }
+
+.oh-ua-row > :nth-child(5) {
+  grid-area: chev;
+  color: var(--oh-text-muted);
+  transition: transform var(--oh-dur-quick) var(--oh-ease), color var(--oh-dur-quick) ease;
+}
 
 .oh-ua-icon {
+  position: relative;
+  z-index: 1;
   width: 38px;
   height: 38px;
-  border-radius: 10px;
+  border-radius: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
   align-self: start;
+  box-shadow: 0 0 0 4px var(--oh-white);
 }
 
-.oh-ua-icon.success { background: var(--oh-badge-farmer-bg); color: var(--oh-badge-farmer-text); }
-.oh-ua-icon.danger { background: var(--oh-red-bg); color: var(--oh-red); }
-.oh-ua-icon.warning { background: var(--oh-badge-changed-bg); color: #c2410c; }
-.oh-ua-icon.info { background: var(--oh-badge-retailer-bg); color: var(--oh-badge-retailer-text); }
+.oh-ua-icon.success { background: var(--oh-success-bg); color: var(--oh-success); }
+.oh-ua-icon.danger { background: var(--oh-danger-bg); color: var(--oh-danger); }
+.oh-ua-icon.warning { background: var(--oh-warning-bg); color: var(--oh-warning); }
+.oh-ua-icon.info { background: var(--oh-info-bg); color: var(--oh-info); }
 .oh-ua-icon.muted { background: var(--oh-badge-consumer-bg); color: var(--oh-text-muted); }
-.oh-ua-icon.batch { background: #f6ecd9; color: #8a6a2f; }
-.oh-ua-icon.profile { background: #e3efe9; color: var(--oh-forest); }
+.oh-ua-icon.batch { background: var(--oh-batch-bg); color: var(--oh-batch); }
+.oh-ua-icon.profile { background: var(--oh-sage); color: var(--oh-forest); }
 
 .oh-ua-main {
   display: grid;
@@ -474,22 +989,22 @@ a.oh-ua-row:focus-visible {
   font-size: 0.86rem;
 }
 
-.oh-ua-status.success { color: var(--oh-badge-farmer-text); }
-.oh-ua-status.danger { color: var(--oh-red); }
-.oh-ua-status.warning { color: #c2410c; }
-.oh-ua-status.info { color: var(--oh-badge-retailer-text); }
+.oh-ua-status.success { color: var(--oh-success); }
+.oh-ua-status.danger { color: var(--oh-danger); }
+.oh-ua-status.warning { color: var(--oh-warning); }
+.oh-ua-status.info { color: var(--oh-info); }
 .oh-ua-status.muted { color: var(--oh-text-muted); }
-.oh-ua-status.batch { color: #8a6a2f; }
+.oh-ua-status.batch { color: var(--oh-batch); }
 
 .oh-ua-what {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   overflow-wrap: anywhere;
 }
 
 .oh-ua-sub {
   color: var(--oh-text-muted);
-  font-size: 0.78rem;
+  font-size: 0.79rem;
   overflow-wrap: anywhere;
 }
 
@@ -497,16 +1012,17 @@ a.oh-ua-row:focus-visible {
   justify-self: end;
   max-width: 200px;
   padding: 3px 10px;
-  border-radius: 999px;
+  border-radius: var(--oh-radius-pill);
   font-size: 0.76rem;
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: box-shadow var(--oh-dur-quick) ease;
 }
 
 .oh-ua-as.current {
-  background: #e3efe9;
+  background: var(--oh-sage);
   color: var(--oh-forest);
 }
 
@@ -529,11 +1045,34 @@ a.oh-ua-row:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------- Empty, more, note ---------- */
+.oh-ua-empty {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 44px 20px;
+}
+
+.oh-ua-empty strong {
+  color: var(--oh-text);
+  font-family: var(--oh-font-display);
+  font-weight: 600;
+}
+
+.oh-ua-empty-mark {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--oh-border-strong);
+  background: radial-gradient(circle, var(--oh-gold) 0 3px, transparent 4px);
+}
+
 .oh-ua-more {
   display: block;
-  margin: 16px auto 0;
-  padding: 9px 20px;
-  border-radius: 999px;
+  margin: 18px auto 0;
+  padding: 10px 22px;
+  border-radius: var(--oh-radius-pill);
   border: 1.5px solid var(--oh-forest);
   background: var(--oh-white);
   color: var(--oh-forest);
@@ -541,11 +1080,16 @@ a.oh-ua-row:focus-visible {
   font-weight: 700;
   font-size: 0.85rem;
   cursor: pointer;
+  transition: background var(--oh-dur-quick) ease, color var(--oh-dur-quick) ease, transform var(--oh-dur-instant) var(--oh-ease);
 }
 
 .oh-ua-more:hover {
   background: var(--oh-forest);
   color: var(--oh-white);
+}
+
+.oh-ua-more:active {
+  transform: scale(0.97);
 }
 
 .oh-ua-note {
@@ -555,26 +1099,77 @@ a.oh-ua-row:focus-visible {
   font-size: 0.78rem;
 }
 
-/* ---------- Tablet: one column; the names become a swipeable row ---------- */
-@media (max-width: 1100px) {
-  .oh-ua-stats {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+/* ---------- Laptop: the timeline stays beside the activity, and the chosen identity plugs into it ---------- */
+@media (min-width: 1101px) {
+  /* Sticky, scrolling on its own when long. The padding reaches across the column gap
+     so the connector below is not clipped by the scroll box. */
+  .oh-ua-identities {
+    position: sticky;
+    top: 16px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    z-index: 1; /* the connector's end sits on the activity panel's edge */
+    margin: -6px calc(-1 * var(--oh-ua-gap) - 4px) -6px -6px;
+    padding: 6px calc(var(--oh-ua-gap) + 4px) 6px 6px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--oh-border-strong) transparent;
   }
 
+  .oh-ua-identity.selected::after {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 24px;
+    width: calc(var(--oh-ua-gap) + 1px);
+    height: 2px;
+    background: var(--oh-forest);
+    transform-origin: left;
+    animation: oh-ua-connect var(--oh-dur-base) var(--oh-ease-out) backwards;
+  }
+
+  .oh-ua-identity.selected::before {
+    content: '';
+    position: absolute;
+    left: calc(100% + var(--oh-ua-gap) - 4px);
+    top: 21px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--oh-forest);
+    box-shadow: 0 0 0 3px var(--oh-white);
+    z-index: 3;
+    animation: oh-ua-pop 260ms var(--oh-ease-out) 180ms backwards;
+  }
+}
+
+@keyframes oh-ua-connect {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes oh-ua-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+}
+
+/* ---------- Tablet: one column; the timeline becomes a swipeable row ---------- */
+@media (max-width: 1100px) {
   .oh-ua-layout {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .oh-ua-identities {
-    position: static;
-  }
-
   .oh-ua-identity-list {
     display: flex;
-    gap: 10px;
+    align-items: stretch;
+    gap: 12px;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    padding: 2px 2px 8px;
+    margin: 0 -4px;
+    padding: 4px 4px 10px;
     scrollbar-width: none;
   }
 
@@ -582,14 +1177,79 @@ a.oh-ua-row:focus-visible {
     display: none;
   }
 
-  .oh-ua-identity {
-    flex: 0 0 280px;
+  .oh-ua-identity.all {
+    flex: 0 0 200px;
+    align-self: flex-start;
+    align-content: start;
+    margin-top: 34px;
     scroll-snap-align: start;
+  }
+
+  .oh-ua-timeline {
+    display: flex;
+    gap: 12px;
+  }
+
+  /* Nodes on a horizontal rail above the cards. */
+  .oh-ua-node-item {
+    display: flex;
+    flex: 0 0 290px;
+    padding: 34px 0 0;
+    scroll-snap-align: start;
+  }
+
+  .oh-ua-node-item .oh-ua-identity {
     align-content: start;
   }
 
-  .oh-ua-identity.all {
-    flex-basis: 190px;
+  .oh-ua-node-item:not(:last-child)::before {
+    left: 40px;
+    right: -16px;
+    top: 11px;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+  }
+
+  .oh-ua-node-item.current:not(:last-child)::before {
+    background: linear-gradient(90deg, var(--oh-forest), var(--oh-border) 70%);
+  }
+
+  .oh-ua-node-item::after {
+    left: 27px;
+    top: 24px;
+    width: 1.5px;
+    height: 10px;
+  }
+
+  .oh-ua-node {
+    left: 16px;
+    top: 0;
+  }
+
+  .oh-ua-identity:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Inside the swipe row a lifted shadow would be cut off at the edges. */
+  .oh-ua-identity.selected,
+  .oh-ua-identity:hover {
+    box-shadow: 0 0 0 1px var(--oh-forest);
+  }
+
+  .oh-ua-identity:hover:not(.selected) {
+    box-shadow: var(--oh-shadow-sm);
+  }
+
+  .oh-ua-identity:active {
+    transform: translateY(-2px) scale(0.99);
+  }
+}
+
+/* Under the phone top bar, day headings stick below it. */
+@media (max-width: 1023.98px) {
+  .oh-ua-day-label {
+    top: 64px;
   }
 }
 
@@ -603,7 +1263,7 @@ a.oh-ua-row:focus-visible {
     flex-direction: column;
     align-items: flex-start;
     gap: 14px;
-    padding: 18px 16px;
+    padding: 20px 16px;
   }
 
   .oh-ua-avatar {
@@ -614,7 +1274,7 @@ a.oh-ua-row:focus-visible {
   }
 
   .oh-ua-name {
-    font-size: 1.3rem;
+    font-size: 1.35rem;
   }
 
   .oh-ua-contact {
@@ -626,27 +1286,49 @@ a.oh-ua-row:focus-visible {
   }
 
   .oh-ua-stats {
-    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .oh-ua-stat {
-    padding: 10px 12px;
+    padding: 12px 14px 13px;
   }
 
   .oh-ua-stat-value {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
   }
 
-  .oh-ua-stat-label {
-    font-size: 0.72rem;
+  /* Overview on its own row; the identities swipe beneath it, the next one peeking in. */
+  .oh-ua-identity-list {
+    display: grid;
+    gap: 6px;
+    overflow: visible;
+    margin: 0;
+    padding: 0;
   }
 
-  .oh-ua-identity {
-    flex-basis: 250px;
+  .oh-ua-identity.all {
+    margin-top: 0;
+  }
+
+  .oh-ua-timeline {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    margin: 0 -16px;
+    padding: 4px 16px 10px;
+    scroll-padding-left: 16px;
+    scrollbar-width: none;
+  }
+
+  .oh-ua-timeline::-webkit-scrollbar {
+    display: none;
+  }
+
+  .oh-ua-node-item {
+    flex-basis: 82%;
   }
 
   .oh-ua-activity {
-    padding: 16px 14px 18px;
+    padding: 18px 14px 18px;
   }
 
   /* Filter chips: one swipeable row. */
@@ -664,7 +1346,17 @@ a.oh-ua-row:focus-visible {
   }
 
   .oh-ua-chip {
-    min-height: 36px;
+    min-height: 38px;
+  }
+
+  .oh-ua-rows {
+    --oh-ua-rail-x: 27px;
+    --oh-ua-rail-y: 28px;
+  }
+
+  .oh-ua-rows li + li {
+    background-position: 54px 0;
+    background-size: calc(100% - 54px) 1px;
   }
 
   .oh-ua-row {
@@ -673,7 +1365,7 @@ a.oh-ua-row:focus-visible {
       'icon main time'
       'icon as as';
     gap: 4px 10px;
-    padding: 11px 12px;
+    padding: 11px 10px;
   }
 
   .oh-ua-row > :nth-child(5) {
@@ -683,6 +1375,7 @@ a.oh-ua-row:focus-visible {
   .oh-ua-icon {
     width: 34px;
     height: 34px;
+    border-radius: 10px;
   }
 
   .oh-ua-time {
@@ -696,5 +1389,9 @@ a.oh-ua-row:focus-visible {
 
   .oh-ua-row.profile > :nth-child(3) {
     display: none;
+  }
+
+  .oh-ua-changes li {
+    grid-template-columns: 56px minmax(0, 1fr);
   }
 }

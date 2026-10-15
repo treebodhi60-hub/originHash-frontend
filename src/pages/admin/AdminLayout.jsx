@@ -1,17 +1,30 @@
 import { useCallback, useEffect, useState } from 'react';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import AdminBottomNav, { adminMenuItems } from '../../components/AdminBottomNav.jsx';
 import { MenuButton, MenuDrawer } from '../../components/MobileMenu.jsx';
+import SideNav from '../../components/SideNav.jsx';
 import { logout } from '../../store/authSlice';
 import '../../styles/admin.css';
 import '../../styles/app-shell.css';
 
-const SidebarIcon = ({ children }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-    {children}
-  </svg>
-);
+// Laptop sidebar: overview, people, products and stickers, then what is still to come.
+const ADMIN_NAV = [
+  [
+    { to: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard' },
+    { to: '/admin/scan', label: 'Scan QR code', icon: 'scan' },
+    { to: '/admin/history', label: 'History', icon: 'history' },
+  ],
+  [{ to: '/admin/users', label: 'Users', icon: 'users' }],
+  [
+    { to: '/admin/images', label: 'Image stock', icon: 'images' },
+    { to: '/admin/qr-stickers', label: 'Generate QR stickers', icon: 'qr' },
+    { to: '/admin/bulk-qr', label: 'Generate bulk QR stickers', icon: 'bulk' },
+    { to: '/admin/light-qr', label: 'Generate light QR stickers', icon: 'light' },
+  ],
+  [{ label: 'Coming soon', icon: 'shield', disabled: true }],
+];
+const ADMIN_NAV_BOTTOM = [{ to: '/admin/profile', label: 'Settings / Profile', icon: 'settings' }];
 
 const AdminLayout = () => {
   const dispatch = useDispatch();
@@ -31,149 +44,7 @@ const AdminLayout = () => {
 
   return (
     <div className="oh-admin-shell">
-      <aside className="oh-sidebar">
-        <div className="oh-sidebar-logo">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 2c-2.2 0-4 1.8-4 4v1H7a1 1 0 0 0 0 2h1v2H7a1 1 0 0 0 0 2h1v1c0 2.2 1.8 4 4 4s4-1.8 4-4v-1h1a1 1 0 1 0 0-2h-1V9h1a1 1 0 1 0 0-2h-1V6c0-2.2-1.8-4-4-4Z"
-              fill="var(--oh-gold)"
-            />
-          </svg>
-        </div>
-
-        <NavLink
-          to="/admin/dashboard"
-          className={({ isActive }) => `oh-sidebar-item ${isActive ? 'active' : ''}`}
-          title="Dashboard"
-        >
-          <SidebarIcon>
-            <path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" stroke="currentColor" strokeWidth="1.6" />
-          </SidebarIcon>
-        </NavLink>
-
-        <NavLink
-          to="/admin/scan"
-          className={({ isActive }) => `oh-sidebar-item ${isActive ? 'active' : ''}`}
-          title="Scan QR code"
-        >
-          <SidebarIcon>
-            <path
-              d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-            />
-            <path d="M4 12h16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-          </SidebarIcon>
-        </NavLink>
-
-        <NavLink
-          to="/admin/history"
-          className={({ isActive }) => `oh-sidebar-item ${isActive ? 'active' : ''}`}
-          title="History"
-        >
-          <SidebarIcon>
-            <path d="M12 8v5l3 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" />
-          </SidebarIcon>
-        </NavLink>
-
-        <NavLink
-          to="/admin/users"
-          className={({ isActive }) => `oh-sidebar-item ${isActive ? 'active' : ''}`}
-          title="Users"
-        >
-          <SidebarIcon>
-            <circle cx="9" cy="8" r="3" stroke="currentColor" strokeWidth="1.6" />
-            <path d="M3 20c1-3.5 3.8-5.5 6-5.5s5 2 6 5.5" stroke="currentColor" strokeWidth="1.6" />
-            <circle cx="17" cy="8" r="2.4" stroke="currentColor" strokeWidth="1.4" />
-            <path d="M15.5 14.7c2 .3 3.7 1.8 4.5 5" stroke="currentColor" strokeWidth="1.4" />
-          </SidebarIcon>
-        </NavLink>
-
-        <NavLink
-          to="/admin/images"
-          className={({ isActive }) => `oh-sidebar-item ${isActive ? 'active' : ''}`}
-          title="Image stock"
-        >
-          <SidebarIcon>
-            <rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.6" />
-            <circle cx="9" cy="9.5" r="1.6" stroke="currentColor" strokeWidth="1.4" />
-            <path d="M5 16.5l4.5-4.5 3 3 2-2L20 17" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-          </SidebarIcon>
-        </NavLink>
-
-        <NavLink
-          to="/admin/qr-stickers"
-          className={({ isActive }) => `oh-sidebar-item ${isActive ? 'active' : ''}`}
-          title="Generate QR stickers"
-        >
-          <SidebarIcon>
-            <rect x="3.5" y="3.5" width="6" height="6" fill="currentColor" />
-            <rect x="14.5" y="3.5" width="6" height="6" fill="currentColor" />
-            <rect x="3.5" y="14.5" width="6" height="6" fill="currentColor" />
-            <rect x="15" y="15" width="2" height="2" fill="currentColor" />
-            <rect x="19" y="15" width="2" height="2" fill="currentColor" />
-            <rect x="15" y="19" width="2" height="2" fill="currentColor" />
-            <rect x="19" y="19" width="2" height="2" fill="currentColor" />
-          </SidebarIcon>
-        </NavLink>
-
-        <NavLink
-          to="/admin/bulk-qr"
-          className={({ isActive }) => `oh-sidebar-item ${isActive ? 'active' : ''}`}
-          title="Generate bulk QR stickers"
-        >
-          <SidebarIcon>
-            <rect x="8.5" y="2.5" width="13" height="13" rx="2.2" stroke="currentColor" strokeWidth="1.3" opacity="0.45" />
-            <rect x="5.5" y="5.5" width="13" height="13" rx="2.2" stroke="currentColor" strokeWidth="1.3" opacity="0.7" />
-            <rect x="2.5" y="8.5" width="13" height="13" rx="2.2" fill="var(--oh-forest, #163832)" stroke="currentColor" strokeWidth="1.6" />
-            <rect x="5" y="11" width="3" height="3" fill="currentColor" />
-            <rect x="10" y="11" width="3" height="3" fill="currentColor" />
-            <rect x="5" y="16" width="3" height="3" fill="currentColor" />
-            <rect x="10.5" y="16.5" width="2" height="2" fill="currentColor" />
-          </SidebarIcon>
-        </NavLink>
-
-        <NavLink
-          to="/admin/light-qr"
-          className={({ isActive }) => `oh-sidebar-item ${isActive ? 'active' : ''}`}
-          title="Generate light QR stickers"
-        >
-          <SidebarIcon>
-            <rect x="3" y="3" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.6" />
-            <rect x="15" y="3" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.6" />
-            <rect x="3" y="15" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.6" />
-            <rect x="5.2" y="5.2" width="1.6" height="1.6" fill="currentColor" />
-            <rect x="17.2" y="5.2" width="1.6" height="1.6" fill="currentColor" />
-            <rect x="5.2" y="17.2" width="1.6" height="1.6" fill="currentColor" />
-            <path d="M17.6 11.5 14 17h3l-1.2 4.5L20 15.6h-3.1l1.3-4.1h-.6Z" fill="currentColor" />
-          </SidebarIcon>
-        </NavLink>
-
-        <span className="oh-sidebar-item disabled" title="Coming soon">
-          <SidebarIcon>
-            <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z" stroke="currentColor" strokeWidth="1.6" />
-          </SidebarIcon>
-        </span>
-
-        <div className="oh-sidebar-bottom">
-          <NavLink
-            to="/admin/profile"
-            className={({ isActive }) => `oh-sidebar-item ${isActive ? 'active' : ''}`}
-            title="Settings / Profile"
-          >
-            <SidebarIcon>
-              <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
-              <path
-                d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.3.9a7 7 0 0 0-2.1-1.2L14 3h-4l-.5 2.5a7 7 0 0 0-2.1 1.2l-2.3-.9-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.3-.9a7 7 0 0 0 2.1 1.2L10 21h4l.5-2.5a7 7 0 0 0 2.1-1.2l2.3.9 2-3.4-2-1.6c.07-.4.1-.8.1-1.2Z"
-                stroke="currentColor"
-                strokeWidth="1.2"
-              />
-            </SidebarIcon>
-          </NavLink>
-        </div>
-      </aside>
+      <SideNav groups={ADMIN_NAV} bottom={ADMIN_NAV_BOTTOM} />
 
       <div className="oh-user-content-col">
         <header className="oh-mobile-topbar">

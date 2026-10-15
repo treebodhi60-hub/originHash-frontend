@@ -1,87 +1,24 @@
 import { NavLink } from 'react-router-dom';
+import NavIcon from './NavIcons.jsx';
 import '../styles/app-shell.css';
-
-const icons = {
-  light: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="3" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.8" />
-      <rect x="15" y="3" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.8" />
-      <rect x="3" y="15" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M17.6 11.5 14 17h3l-1.2 4.5L20 15.6h-3.1l1.3-4.1h-.6Z" fill="currentColor" />
-    </svg>
-  ),
-  bulk: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <rect x="8.5" y="2.5" width="13" height="13" rx="2.2" stroke="currentColor" strokeWidth="1.4" opacity="0.45" />
-      <rect x="5.5" y="5.5" width="13" height="13" rx="2.2" stroke="currentColor" strokeWidth="1.4" opacity="0.7" />
-      <rect x="2.5" y="8.5" width="13" height="13" rx="2.2" stroke="currentColor" strokeWidth="1.8" />
-      <rect x="5" y="11" width="3" height="3" fill="currentColor" />
-      <rect x="10" y="11" width="3" height="3" fill="currentColor" />
-      <rect x="5" y="16" width="3" height="3" fill="currentColor" />
-      <rect x="10.5" y="16.5" width="2" height="2" fill="currentColor" />
-    </svg>
-  ),
-  home: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <path d="M3 11 12 4l9 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-    </svg>
-  ),
-  scan: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M4 12h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  ),
-  history: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <path d="M12 8v5l3 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  ),
-  profile: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" />
-      <path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  ),
-  images: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="2" />
-      <circle cx="9" cy="9.5" r="1.6" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M5 16.5l4.5-4.5 3 3 2-2L20 17" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-    </svg>
-  ),
-  qr: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <rect x="3.5" y="3.5" width="6" height="6" fill="currentColor" />
-      <rect x="14.5" y="3.5" width="6" height="6" fill="currentColor" />
-      <rect x="3.5" y="14.5" width="6" height="6" fill="currentColor" />
-      <rect x="15" y="15" width="2" height="2" fill="currentColor" />
-      <rect x="19" y="15" width="2" height="2" fill="currentColor" />
-      <rect x="15" y="19" width="2" height="2" fill="currentColor" />
-      <rect x="19" y="19" width="2" height="2" fill="currentColor" />
-    </svg>
-  ),
-};
 
 // Phones show these four in the bottom bar; the other pages are in the ☰ menu (userMenuItems).
 const items = [
   { to: '/home', label: 'Home', icon: 'home' },
   { to: '/scan', label: 'Scan', icon: 'scan' },
   { to: '/history', label: 'History', icon: 'history' },
-  { to: '/profile', label: 'Profile', icon: 'profile' },
+  { to: '/profile', label: 'Profile', icon: 'person' },
 ];
 
 export const userMenuItems = [
-  { to: '/images', label: 'Image stock', icon: icons.images },
-  { to: '/qr-stickers', label: 'QR stickers', icon: icons.qr },
-  { to: '/bulk-qr', label: 'Bulk QR stickers', icon: icons.bulk },
-  { to: '/light-qr', label: 'Light QR stickers', icon: icons.light },
+  { to: '/images', label: 'Image stock', icon: <NavIcon name="images" /> },
+  { to: '/qr-stickers', label: 'QR stickers', icon: <NavIcon name="qr" /> },
+  { to: '/bulk-qr', label: 'Bulk QR stickers', icon: <NavIcon name="bulk" /> },
+  { to: '/light-qr', label: 'Light QR stickers', icon: <NavIcon name="light" /> },
 ];
 
 const BottomNav = () => (
-  <nav className="oh-bottom-nav">
+  <nav className="oh-bottom-nav" aria-label="Main">
     {items.map((item) => (
       <NavLink
         key={item.label}
@@ -89,7 +26,7 @@ const BottomNav = () => (
         onClick={(e) => item.disabled && e.preventDefault()}
         className={({ isActive }) => `oh-nav-item ${isActive && !item.disabled ? 'active' : ''} ${item.disabled ? 'disabled' : ''}`}
       >
-        {icons[item.icon]}
+        <NavIcon name={item.icon} />
         <span>{item.label}</span>
       </NavLink>
     ))}

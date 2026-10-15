@@ -2,6 +2,7 @@
   /* Core palette — sampled from the OriginHash reference screens */
   --oh-forest: #163832;       /* deep green: sidebar, primary buttons, header text */
   --oh-forest-light: #1f4a42;
+  --oh-forest-deep: #12302a;  /* bottom of the sidebar gradient */
   --oh-cream: #fbf3e7;        /* page background */
   --oh-white: #ffffff;
   --oh-gold: #c9a464;         /* logo accent, subtle borders */
@@ -29,14 +30,86 @@
   --oh-text-muted: #6b7280;
   --oh-border: #e7ddcc;
 
+  /* ---------- Neutral surfaces (tints already used across the screens) ---------- */
+  --oh-paper: #f1ebe0;        /* ID chips, quiet wells */
+  --oh-hover: #f7f2ea;        /* cream, one step towards the border tone */
+  --oh-row-hover: #fcf8f1;
+  --oh-sage: #e3efe9;         /* soft forest tint: avatars, current-name chips */
+  --oh-sage-strong: #cfe3dc;
+  --oh-border-strong: #dccbaf;
+
+  /* ---------- Status: one meaning, one colour, everywhere ---------- */
+  --oh-success: var(--oh-badge-farmer-text);
+  --oh-success-bg: var(--oh-badge-farmer-bg);
+  --oh-warning: #c2410c;
+  --oh-warning-bg: var(--oh-badge-changed-bg);
+  --oh-danger: var(--oh-red);
+  --oh-danger-bg: var(--oh-red-bg);
+  --oh-info: var(--oh-badge-retailer-text);
+  --oh-info-bg: var(--oh-badge-retailer-bg);
+  --oh-batch: #8a6a2f;        /* QR batches: the gold, darkened for text */
+  --oh-batch-bg: #f6ecd9;
+
+  /* ---------- Type ---------- */
   --oh-font-display: 'Poppins', 'Segoe UI', sans-serif;
   --oh-font-body: 'Inter', 'Segoe UI', sans-serif;
+  --oh-font-mono: ui-monospace, 'SFMono-Regular', Consolas, monospace;
 
+  --oh-text-2xs: 0.68rem;
+  --oh-text-xs: 0.74rem;
+  --oh-text-sm: 0.82rem;
+  --oh-text-md: 0.9rem;
+  --oh-text-lg: 1.05rem;
+  --oh-text-xl: 1.35rem;
+  --oh-text-2xl: 1.6rem;
+  --oh-tracking-label: 0.08em; /* small uppercase labels */
+
+  /* ---------- Space (4px grid) ---------- */
+  --oh-space-1: 4px;
+  --oh-space-2: 8px;
+  --oh-space-3: 12px;
+  --oh-space-4: 16px;
+  --oh-space-5: 20px;
+  --oh-space-6: 24px;
+  --oh-space-8: 32px;
+  --oh-space-10: 40px;
+
+  /* ---------- Shape ---------- */
+  --oh-radius-xs: 6px;
   --oh-radius-sm: 8px;
+  --oh-radius-control: 12px;
   --oh-radius-md: 14px;
+  --oh-panel-radius: 18px;
   --oh-radius-lg: 22px;
+  --oh-radius-pill: 999px;
 
+  /* ---------- Depth ---------- */
   --oh-shadow: 0 8px 24px rgba(22, 56, 50, 0.08);
+  --oh-shadow-sm: 0 1px 2px rgba(22, 56, 50, 0.05), 0 4px 12px rgba(22, 56, 50, 0.05);
+  --oh-shadow-lg: 0 18px 40px rgba(22, 56, 50, 0.14);
+  --oh-ring: 0 0 0 3px rgba(22, 56, 50, 0.12);
+  --oh-ring-gold: 0 0 0 3px rgba(201, 164, 100, 0.35);
+
+  /* ---------- Motion ---------- */
+  --oh-ease: cubic-bezier(0.2, 0.8, 0.2, 1);      /* default: quick out, soft landing */
+  --oh-ease-out: cubic-bezier(0.16, 1, 0.3, 1);    /* entrances and reveals */
+  --oh-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* things that travel (indicators, lines) */
+  --oh-dur-instant: 120ms;  /* press, hover */
+  --oh-dur-quick: 200ms;    /* state changes */
+  --oh-dur-base: 320ms;     /* panels, reveals */
+  --oh-dur-slow: 560ms;     /* signature moments: the name strike */
+
+  /* ---------- Layers ---------- */
+  --oh-z-sidebar: 40;
+  --oh-z-topbar: 45;
+  --oh-z-nav: 50;
+  --oh-z-overlay: 60;
+  --oh-z-tooltip: 100;
+
+  /* ---------- Layout ---------- */
+  --oh-sidebar-width: 76px;
+  --oh-page-max: 1360px;
+  --oh-control-height: 42px;
 }
 
 * {
@@ -80,9 +153,24 @@ a {
   outline-offset: 2px;
 }
 
+/* Visually hidden, still read by screen readers. */
+.oh-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
   }
 }
