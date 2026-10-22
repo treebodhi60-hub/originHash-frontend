@@ -1,0 +1,22 @@
+
+{$SITE_ADDRESS} {
+    encode zstd gzip
+
+    handle /api/* {
+        reverse_proxy backend:5000
+    }
+
+    handle /uploads/* {
+        reverse_proxy backend:5000
+    }
+
+    handle {
+        root * /srv
+        try_files {path} /index.html
+        file_server
+    }
+}
+
+http://200.234.32.124 {
+    redir https://origin.originhash.com{uri} permanent
+}
