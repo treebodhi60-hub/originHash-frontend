@@ -34,7 +34,7 @@ const AuthShell = ({ children, wide = false }) => (
           <QrGlyph id="mini" />
         </span>
         <span className="oh-si-mini-text">
-          <strong>One scan. The whole story.</strong>
+          <strong>From origin to assurance.</strong>
           <small>Origin · Journey · Authentic</small>
         </span>
       </div>
