@@ -1,5 +1,4 @@
-
-{$SITE_ADDRESS} {
+origin.originhash.com {
     encode zstd gzip
 
     handle /api/* {
@@ -14,6 +13,14 @@
         root * /srv
         try_files {path} /index.html
         file_server
+    }
+}
+
+originhash.com, www.originhash.com {
+    encode zstd gzip
+
+    handle {
+        reverse_proxy website:80
     }
 }
 
