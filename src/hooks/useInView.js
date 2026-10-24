@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
 // True once the element has come into view, and stays true (for one-time reveals).
-// Without IntersectionObserver it is true straight away, so nothing ever stays hidden.
-export default function useInView(rootMargin = '0px 0px -8% 0px') {
+// Content must never stay hidden waiting for this: it also turns true after `fallbackMs`
+// whatever happens (an element inside a sideways-scrolled row, an observer that never fires),
+// and straight away where IntersectionObserver is missing.
+export default function useInView(rootMargin = '0px 0px -8% 0px', fallbackMs = 1200) {
   const ref = useRef(null);
   const [inView, setInView] = useState(() => typeof IntersectionObserver === 'undefined');
 
@@ -18,8 +20,12 @@ export default function useInView(rootMargin = '0px 0px -8% 0px') {
       { rootMargin }
     );
     observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [inView, rootMargin]);
+    const fallback = setTimeout(() => setInView(true), fallbackMs);
+    return () => {
+      observer.disconnect();
+      clearTimeout(fallback);
+    };
+  }, [inView, rootMargin, fallbackMs]);
 
   return [ref, inView];
 }

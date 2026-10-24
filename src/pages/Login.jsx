@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import BrandPanel from '../components/BrandPanel.jsx';
+import { ArrowRight, CircleAlert } from 'lucide-react';
+import AuthShell from '../components/AuthShell.jsx';
+import BrandLogo from '../components/BrandLogo.jsx';
 import { Spinner } from '../components/Loader.jsx';
 import { sendOtp, adminLogin, clearError } from '../store/authSlice';
 import '../styles/auth.css';
@@ -56,111 +58,134 @@ const Login = () => {
   };
 
   return (
-    <div className="oh-auth-shell">
-      <BrandPanel />
-      <div className="oh-form-panel">
-        <div className="oh-auth-card">
-          <div className="oh-auth-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 2c-2.2 0-4 1.8-4 4v1H7a1 1 0 0 0 0 2h1v2H7a1 1 0 0 0 0 2h1v1c0 2.2 1.8 4 4 4s4-1.8 4-4v-1h1a1 1 0 1 0 0-2h-1V9h1a1 1 0 1 0 0-2h-1V6c0-2.2-1.8-4-4-4Z"
-                fill="var(--oh-gold)"
+    <AuthShell>
+      <div className="oh-si-hero">
+        <span className="oh-si-icon">
+          <BrandLogo size={64} />
+        </span>
+        <h1 className="oh-si-title">Sign in to OriginHash</h1>
+        <p className="oh-si-sub">Log in to continue verifying products.</p>
+      </div>
+
+      <div className="oh-si-seg" data-active={mode} role="group" aria-label="Sign in as">
+        <span className="oh-si-seg-thumb" aria-hidden="true" />
+        <button
+          type="button"
+          className={`oh-si-seg-btn ${mode === 'user' ? 'active' : ''}`}
+          aria-pressed={mode === 'user'}
+          onClick={() => switchMode('user')}
+        >
+          Customer
+        </button>
+        <button
+          type="button"
+          className={`oh-si-seg-btn ${mode === 'admin' ? 'active' : ''}`}
+          aria-pressed={mode === 'admin'}
+          onClick={() => switchMode('admin')}
+        >
+          Admin
+        </button>
+      </div>
+
+      {mode === 'user' ? (
+        <form className="oh-si-form" onSubmit={handleUserSubmit}>
+          <div className="oh-si-group">
+            <div className="oh-si-float with-prefix">
+              <input
+                id="mobile"
+                type="tel"
+                inputMode="numeric"
+                maxLength={10}
+                placeholder=" "
+                value={mobile}
+                onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                aria-describedby="oh-si-mobile-hint"
               />
-            </svg>
+              <label htmlFor="mobile">Mobile number</label>
+              <span className="oh-si-prefix" aria-hidden="true">
+                +91
+              </span>
+            </div>
           </div>
-          <h2 className="oh-auth-heading">Welcome back</h2>
-          <p className="oh-auth-sub">Log in to continue verifying products</p>
+          <p id="oh-si-mobile-hint" className="oh-si-hint">
+            10-digit number. We&rsquo;ll text you a one-time code.
+          </p>
 
-          <div className="oh-login-mode-tabs">
-            <button
-              type="button"
-              className={`oh-login-mode-tab ${mode === 'user' ? 'active' : ''}`}
-              onClick={() => switchMode('user')}
-            >
-              Customer
-            </button>
-            <button
-              type="button"
-              className={`oh-login-mode-tab ${mode === 'admin' ? 'active' : ''}`}
-              onClick={() => switchMode('admin')}
-            >
-              Admin
-            </button>
-          </div>
-
-          {(localError || error) && <div className="oh-error">{localError || error}</div>}
-
-          {mode === 'user' ? (
-            <form onSubmit={handleUserSubmit}>
-              <div className="oh-field">
-                <label htmlFor="mobile">Mobile number</label>
-                <div className="oh-mobile-input">
-                  <span className="oh-code">+91</span>
-                  <input
-                    id="mobile"
-                    type="tel"
-                    inputMode="numeric"
-                    maxLength={10}
-                    placeholder="10-digit number"
-                    value={mobile}
-                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  />
-                </div>
-              </div>
-
-              <button className="oh-btn-primary" type="submit" disabled={status === 'loading'}>
-                {status === 'loading' ? (
-                  <>
-                    <Spinner />
-                    Sending OTP…
-                  </>
-                ) : 'Send OTP'}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleAdminSubmit}>
-              <div className="oh-field">
-                <label htmlFor="username">Username</label>
-                <input
-                  id="username"
-                  type="text"
-                  placeholder="Username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  autoComplete="username"
-                />
-              </div>
-              <div className="oh-field">
-                <label htmlFor="password">Password</label>
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
-                />
-              </div>
-
-              <button className="oh-btn-primary" type="submit" disabled={status === 'loading'}>
-                {status === 'loading' ? (
-                  <>
-                    <Spinner />
-                    Logging in…
-                  </>
-                ) : 'Log in'}
-              </button>
-            </form>
-          )}
-
-          {mode === 'user' && (
-            <p className="oh-auth-footer">
-              Registration uses the same mobile + OTP flow — just enter your number above.
+          {(localError || error) && (
+            <p className="oh-si-error" role="alert">
+              <CircleAlert size={15} strokeWidth={2} aria-hidden="true" />
+              {localError || error}
             </p>
           )}
-        </div>
-      </div>
-    </div>
+
+          <button className="oh-si-button" type="submit" disabled={status === 'loading'}>
+            {status === 'loading' ? (
+              <>
+                <Spinner />
+                Sending OTP…
+              </>
+            ) : (
+              <>
+                Send OTP
+                <ArrowRight size={17} strokeWidth={2} aria-hidden="true" />
+              </>
+            )}
+          </button>
+        </form>
+      ) : (
+        <form className="oh-si-form" onSubmit={handleAdminSubmit}>
+          <div className="oh-si-group">
+            <div className="oh-si-float">
+              <input
+                id="username"
+                type="text"
+                placeholder=" "
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoComplete="username"
+              />
+              <label htmlFor="username">Username</label>
+            </div>
+            <div className="oh-si-float">
+              <input
+                id="password"
+                type="password"
+                placeholder=" "
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+              />
+              <label htmlFor="password">Password</label>
+            </div>
+          </div>
+
+          {(localError || error) && (
+            <p className="oh-si-error" role="alert">
+              <CircleAlert size={15} strokeWidth={2} aria-hidden="true" />
+              {localError || error}
+            </p>
+          )}
+
+          <button className="oh-si-button" type="submit" disabled={status === 'loading'}>
+            {status === 'loading' ? (
+              <>
+                <Spinner />
+                Logging in…
+              </>
+            ) : (
+              <>
+                Log in
+                <ArrowRight size={17} strokeWidth={2} aria-hidden="true" />
+              </>
+            )}
+          </button>
+        </form>
+      )}
+
+      {mode === 'user' && (
+        <p className="oh-si-note">Registration uses the same mobile + OTP flow — just enter your number above.</p>
+      )}
+    </AuthShell>
   );
 };
 

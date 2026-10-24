@@ -444,8 +444,8 @@ const Scan = () => {
         <span className="oh-scan-brand-logo">
           <BrandLogo size={20} />
         </span>
-        <span className="oh-scan-brand-name">
-          ORIGIN<span>HASH</span>
+        <span className="oh-scan-brand-name oh-wordmark on-paper">
+          Origin<span>Hash</span>
         </span>
       </header>
 

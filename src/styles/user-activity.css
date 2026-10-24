@@ -55,7 +55,7 @@
 }
 
 .oh-ua-back:hover {
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   background: var(--oh-hover);
 }
 
@@ -88,7 +88,6 @@
   align-items: center;
   padding: 24px 26px;
   background:
-    radial-gradient(120% 140% at 100% 0%, rgba(201, 164, 100, 0.1), transparent 45%),
     var(--oh-white);
 }
 
@@ -100,13 +99,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--oh-sage);
-  color: var(--oh-forest);
+  background: var(--oh-well);
+  color: var(--oh-ink);
   font-family: var(--oh-font-display);
-  font-size: 1.85rem;
-  font-weight: 700;
+  font-size: 1.8rem;
+  font-weight: 600;
   border: 3px solid var(--oh-white);
-  box-shadow: 0 0 0 1.5px var(--oh-gold), 0 10px 24px rgba(22, 56, 50, 0.12);
+  box-shadow: 0 0 0 1px var(--oh-border-strong), 0 10px 24px rgba(23, 36, 58, 0.1);
 }
 
 .oh-ua-avatar img {
@@ -130,11 +129,11 @@
 .oh-ua-name {
   margin: 0;
   font-family: var(--oh-font-display);
-  font-size: 1.65rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-  color: var(--oh-forest);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  color: var(--oh-navy);
   overflow-wrap: anywhere;
 }
 
@@ -146,7 +145,7 @@
 .oh-ua-id {
   padding: 3px 10px;
   border-radius: 8px;
-  background: var(--oh-paper);
+  background: var(--oh-well);
   color: var(--oh-text);
   font-family: var(--oh-font-mono);
   font-size: 0.8rem;
@@ -183,11 +182,12 @@
 
 .oh-ua-trail-label {
   margin-right: 4px;
-  color: var(--oh-batch);
+  color: var(--oh-text-muted);
+  font-family: var(--oh-font-body);
   font-size: var(--oh-text-2xs);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 /* Inline flow inside each item, so a long former name wraps and stays struck on every line. */
@@ -199,7 +199,7 @@
 .oh-ua-trail-arrow {
   display: inline-block;
   margin-right: 8px;
-  color: var(--oh-gold);
+  color: var(--oh-accent);
   font-weight: 700;
 }
 
@@ -208,12 +208,13 @@
   overflow-wrap: anywhere;
 }
 
+/* The name in force today, marked like a highlighter. */
 .oh-ua-trail-name.current {
-  padding: 3px 12px;
-  border-radius: var(--oh-radius-pill);
-  background: var(--oh-forest);
-  color: var(--oh-white);
-  box-shadow: 0 4px 12px rgba(22, 56, 50, 0.18);
+  padding: 2px 10px;
+  border-radius: 6px;
+  background: var(--oh-signal-soft);
+  color: var(--oh-signal-ink);
+  box-shadow: inset 0 0 0 1px var(--oh-signal-soft-2);
 }
 
 .oh-ua-trail.in-view .oh-ua-trail-arrow {
@@ -232,7 +233,7 @@
    A background line (not text-decoration) so it can be drawn, and so it follows every line of
    a wrapped value. The text stays at full legibility in the muted tone. */
 .oh-strike {
-  --oh-strike-color: rgba(194, 65, 12, 0.72); /* --oh-warning: the colour of former names everywhere */
+  --oh-strike-color: rgba(100, 112, 132, 0.8); /* slate: a subtle, deliberate line through what changed */
   color: var(--oh-text-muted);
   text-decoration: none;
   background-image: linear-gradient(var(--oh-strike-color), var(--oh-strike-color));
@@ -287,6 +288,16 @@
 .oh-ua-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+}
+
+/* Tablets: two even rows of three, never a lone figure. */
+@media (min-width: 641px) and (max-width: 1100px) {
+  .oh-ua-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.oh-ua-stats {
   overflow: hidden;
   background: var(--oh-white);
   border: 1px solid var(--oh-border);
@@ -305,10 +316,11 @@
   align-items: center;
   gap: 7px;
   color: var(--oh-text-muted);
-  font-size: var(--oh-text-2xs);
-  font-weight: 700;
-  letter-spacing: var(--oh-tracking-label);
-  text-transform: uppercase;
+  font-family: var(--oh-font-body);
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .oh-ua-stat-label::before {
@@ -316,18 +328,18 @@
   flex: 0 0 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--oh-forest);
+  background: var(--oh-ink);
 }
 
 .oh-ua-stat.success .oh-ua-stat-label::before { background: var(--oh-success); }
 .oh-ua-stat.warning .oh-ua-stat-label::before { background: var(--oh-warning); }
 .oh-ua-stat.danger .oh-ua-stat-label::before { background: var(--oh-danger); }
-.oh-ua-stat.batch .oh-ua-stat-label::before { background: var(--oh-gold); }
+.oh-ua-stat.batch .oh-ua-stat-label::before { background: var(--oh-accent); }
 
 .oh-ua-stat-value {
   margin-top: 6px;
   font-family: var(--oh-font-display);
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--oh-text);
@@ -346,20 +358,22 @@
 .oh-ua-eyebrow {
   display: block;
   margin-bottom: 4px;
-  color: var(--oh-batch);
+  color: var(--oh-text-muted);
+  font-family: var(--oh-font-body);
   font-size: var(--oh-text-2xs);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .oh-ua-section-head h2 {
   margin: 0;
   font-family: var(--oh-font-display);
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: var(--oh-forest);
+  line-height: 1.3;
+  color: var(--oh-ink);
 }
 
 .oh-ua-section-head p {
@@ -406,23 +420,23 @@
 
 .oh-ua-identity:hover {
   border-color: var(--oh-border-strong);
-  box-shadow: 0 10px 26px rgba(22, 56, 50, 0.1);
-  transform: translateX(2px);
+  box-shadow: var(--oh-shadow);
+  transform: none;
 }
 
 .oh-ua-identity:active {
-  transform: translateX(2px) scale(0.99);
+  transform: scale(0.995);
 }
 
 .oh-ua-identity:focus-visible {
   outline: none;
-  box-shadow: var(--oh-ring-gold), var(--oh-shadow-sm);
+  box-shadow: var(--oh-ring-signal), var(--oh-shadow-sm);
 }
 
 .oh-ua-identity.selected {
-  border-color: var(--oh-forest);
-  background: linear-gradient(180deg, #f5f9f7 0%, var(--oh-white) 100%);
-  box-shadow: 0 0 0 1px var(--oh-forest), 0 12px 28px rgba(22, 56, 50, 0.12);
+  border-color: var(--oh-blue);
+  background: var(--oh-white);
+  box-shadow: 0 0 0 1px var(--oh-blue), 0 0 0 4px rgba(82, 111, 229, 0.12);
 }
 
 /* Cards come into view one after another. */
@@ -444,10 +458,10 @@
 .oh-ua-identity-name {
   font-family: var(--oh-font-display);
   font-weight: 600;
-  font-size: 1.08rem;
+  font-size: 1.02rem;
   letter-spacing: -0.01em;
-  line-height: 1.25;
-  color: var(--oh-forest);
+  line-height: 1.3;
+  color: var(--oh-ink);
   overflow-wrap: anywhere;
 }
 
@@ -459,8 +473,9 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: var(--oh-forest);
-  color: var(--oh-white);
+  background: var(--oh-blue-soft);
+  color: var(--oh-blue-hover);
+  box-shadow: inset 0 0 0 1px rgba(82, 111, 229, 0.3);
   border-radius: var(--oh-radius-pill);
   padding: 2px 9px 2px 7px;
   font-size: var(--oh-text-2xs);
@@ -474,14 +489,14 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--oh-gold);
+  background: var(--oh-blue);
 }
 
 .oh-ua-identity-count {
   margin-left: auto;
   padding: 2px 8px;
   border-radius: var(--oh-radius-pill);
-  background: var(--oh-paper);
+  background: var(--oh-well);
   color: var(--oh-text-muted);
   font-size: var(--oh-text-2xs);
   font-weight: 700;
@@ -497,7 +512,7 @@
 
 .oh-ua-period-arrow {
   margin: 0 5px;
-  color: var(--oh-gold);
+  color: var(--oh-accent);
   font-weight: 700;
 }
 
@@ -570,18 +585,15 @@
 /* "All names": the overview at the head of the timeline. */
 .oh-ua-identity.all {
   background:
-    radial-gradient(circle at 100% 0%, rgba(201, 164, 100, 0.12), transparent 55%),
     var(--oh-white);
 }
 
 .oh-ua-identity.all .oh-ua-identity-name {
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-ua-identity.all.selected {
-  background:
-    radial-gradient(circle at 100% 0%, rgba(201, 164, 100, 0.16), transparent 55%),
-    #f5f9f7;
+  background: var(--oh-white);
 }
 
 /* ---------- Field changes: label, former value (struck), → new value ---------- */
@@ -620,12 +632,12 @@
 .oh-ua-change-arrow {
   display: inline-block;
   margin: 0 7px;
-  color: var(--oh-gold);
+  color: var(--oh-accent);
   font-weight: 700;
 }
 
 .oh-ua-change-new {
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   font-weight: 700;
   text-decoration: none;
 }
@@ -673,7 +685,7 @@
 }
 
 .oh-ua-node-item.current:not(:last-child)::before {
-  background: linear-gradient(180deg, var(--oh-forest), var(--oh-border) 70%);
+  background: linear-gradient(180deg, var(--oh-ink), var(--oh-border) 70%);
 }
 
 /* Tick from the node to its card. */
@@ -699,9 +711,9 @@
   height: 24px;
   border-radius: 50%;
   background: var(--oh-white);
-  border: 1.5px solid var(--oh-border-strong);
+  border: 1px solid var(--oh-border-strong);
   color: var(--oh-text-muted);
-  font-family: var(--oh-font-mono);
+  font-family: var(--oh-font-body);
   font-size: 0.66rem;
   font-weight: 700;
   transition: background var(--oh-dur-quick) ease, color var(--oh-dur-quick) ease, border-color var(--oh-dur-quick) ease,
@@ -709,24 +721,24 @@
 }
 
 .oh-ua-node-item.current .oh-ua-node {
-  background: var(--oh-forest);
-  border-color: var(--oh-forest);
-  color: var(--oh-gold);
-  box-shadow: 0 0 0 4px rgba(201, 164, 100, 0.2);
+  background: var(--oh-ink);
+  border-color: var(--oh-ink);
+  color: var(--oh-white);
+  box-shadow: 0 0 0 4px var(--oh-blue-soft);
 }
 
 .oh-ua-node-item.selected .oh-ua-node {
-  border-color: var(--oh-forest);
-  color: var(--oh-forest);
-  box-shadow: 0 0 0 5px var(--oh-sage);
+  border-color: var(--oh-blue);
+  color: var(--oh-blue-hover);
+  box-shadow: 0 0 0 4px var(--oh-blue-soft);
 }
 
 .oh-ua-node-item.current.selected .oh-ua-node {
-  color: var(--oh-gold);
+  color: var(--oh-white);
 }
 
 .oh-ua-node-item.selected::after {
-  background: var(--oh-forest);
+  background: var(--oh-blue);
 }
 
 /* ---------- Activity ---------- */
@@ -739,8 +751,8 @@
 
 /* While one identity is chosen, the activity panel takes its colour too. */
 .oh-ua-layout.scoped .oh-ua-activity {
-  border-color: var(--oh-forest);
-  box-shadow: 0 0 0 1px var(--oh-forest), var(--oh-shadow-sm);
+  border-color: var(--oh-blue);
+  box-shadow: 0 0 0 1px var(--oh-blue);
 }
 
 .oh-ua-scope {
@@ -777,8 +789,8 @@
   min-height: 34px;
   padding: 6px 12px;
   border-radius: var(--oh-radius-pill);
-  border: 1px solid #e2c992;
-  background: #fdf1dc;
+  border: 1px solid var(--oh-border-strong);
+  background: var(--oh-surface);
   color: var(--oh-text);
   font: inherit;
   font-size: 0.82rem;
@@ -790,8 +802,8 @@
 }
 
 .oh-ua-chip:hover:not(.active) {
-  border-color: var(--oh-gold);
-  background: #fbe9c9;
+  border-color: var(--oh-accent);
+  background: var(--oh-hover);
 }
 
 .oh-ua-chip:active {
@@ -799,24 +811,24 @@
 }
 
 .oh-ua-chip.active {
-  background: var(--oh-forest);
-  border-color: var(--oh-forest);
-  color: var(--oh-white);
-  box-shadow: 0 4px 12px rgba(22, 56, 50, 0.18);
+  background: var(--oh-blue-soft);
+  border-color: rgba(82, 111, 229, 0.45);
+  color: var(--oh-blue-hover);
+  box-shadow: none;
 }
 
 .oh-ua-chip-count {
   min-width: 20px;
   padding: 0 6px;
   border-radius: var(--oh-radius-pill);
-  background: rgba(22, 56, 50, 0.08);
+  background: rgba(23, 36, 58, 0.08);
   font-size: 0.72rem;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
 
 .oh-ua-chip.active .oh-ua-chip-count {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(82, 111, 229, 0.14);
 }
 
 .oh-ua-day {
@@ -835,10 +847,10 @@
   padding: 10px 0 8px;
   background: var(--oh-white);
   font-family: var(--oh-font-body);
-  font-size: var(--oh-text-2xs);
-  font-weight: 700;
-  letter-spacing: var(--oh-tracking-label);
-  text-transform: uppercase;
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--oh-text-muted);
 }
 
@@ -919,7 +931,7 @@ a.oh-ua-row:hover {
 
 a.oh-ua-row:hover > :nth-child(5) {
   transform: translateX(2px);
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 a.oh-ua-row:focus-visible {
@@ -930,13 +942,13 @@ a.oh-ua-row:focus-visible {
 
 /* A change of details: a chapter marker on the rail. */
 .oh-ua-row.profile {
-  background: linear-gradient(90deg, rgba(201, 164, 100, 0.12), rgba(201, 164, 100, 0) 75%);
+  background: linear-gradient(90deg, rgba(82, 111, 229, 0.07), rgba(82, 111, 229, 0) 75%);
 }
 
 .oh-ua-row.profile .oh-ua-what {
   font-family: var(--oh-font-display);
   font-weight: 600;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-ua-row > :nth-child(1) { grid-area: icon; }
@@ -969,7 +981,7 @@ a.oh-ua-row:focus-visible {
 .oh-ua-icon.info { background: var(--oh-info-bg); color: var(--oh-info); }
 .oh-ua-icon.muted { background: var(--oh-badge-consumer-bg); color: var(--oh-text-muted); }
 .oh-ua-icon.batch { background: var(--oh-batch-bg); color: var(--oh-batch); }
-.oh-ua-icon.profile { background: var(--oh-sage); color: var(--oh-forest); }
+.oh-ua-icon.profile { background: var(--oh-signal-soft); color: var(--oh-ink); }
 
 .oh-ua-main {
   display: grid;
@@ -1022,8 +1034,8 @@ a.oh-ua-row:focus-visible {
 }
 
 .oh-ua-as.current {
-  background: var(--oh-sage);
-  color: var(--oh-forest);
+  background: var(--oh-signal-soft);
+  color: var(--oh-signal-ink);
 }
 
 /* A name the account no longer uses: easy to spot in the list. */
@@ -1065,7 +1077,7 @@ a.oh-ua-row:focus-visible {
   margin-bottom: 6px;
   border-radius: 50%;
   border: 1.5px dashed var(--oh-border-strong);
-  background: radial-gradient(circle, var(--oh-gold) 0 3px, transparent 4px);
+  background: radial-gradient(circle, var(--oh-accent) 0 3px, transparent 4px);
 }
 
 .oh-ua-more {
@@ -1073,9 +1085,9 @@ a.oh-ua-row:focus-visible {
   margin: 18px auto 0;
   padding: 10px 22px;
   border-radius: var(--oh-radius-pill);
-  border: 1.5px solid var(--oh-forest);
+  border: 1.5px solid var(--oh-ink);
   background: var(--oh-white);
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   font: inherit;
   font-weight: 700;
   font-size: 0.85rem;
@@ -1084,7 +1096,7 @@ a.oh-ua-row:focus-visible {
 }
 
 .oh-ua-more:hover {
-  background: var(--oh-forest);
+  background: var(--oh-ink);
   color: var(--oh-white);
 }
 
@@ -1123,7 +1135,7 @@ a.oh-ua-row:focus-visible {
     top: 24px;
     width: calc(var(--oh-ua-gap) + 1px);
     height: 2px;
-    background: var(--oh-forest);
+    background: var(--oh-blue);
     transform-origin: left;
     animation: oh-ua-connect var(--oh-dur-base) var(--oh-ease-out) backwards;
   }
@@ -1136,7 +1148,7 @@ a.oh-ua-row:focus-visible {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--oh-forest);
+    background: var(--oh-blue);
     box-shadow: 0 0 0 3px var(--oh-white);
     z-index: 3;
     animation: oh-ua-pop 260ms var(--oh-ease-out) 180ms backwards;
@@ -1212,7 +1224,7 @@ a.oh-ua-row:focus-visible {
   }
 
   .oh-ua-node-item.current:not(:last-child)::before {
-    background: linear-gradient(90deg, var(--oh-forest), var(--oh-border) 70%);
+    background: linear-gradient(90deg, var(--oh-ink), var(--oh-border) 70%);
   }
 
   .oh-ua-node-item::after {
@@ -1234,7 +1246,7 @@ a.oh-ua-row:focus-visible {
   /* Inside the swipe row a lifted shadow would be cut off at the edges. */
   .oh-ua-identity.selected,
   .oh-ua-identity:hover {
-    box-shadow: 0 0 0 1px var(--oh-forest);
+    box-shadow: 0 0 0 1px var(--oh-ink);
   }
 
   .oh-ua-identity:hover:not(.selected) {
@@ -1249,7 +1261,7 @@ a.oh-ua-row:focus-visible {
 /* Under the phone top bar, day headings stick below it. */
 @media (max-width: 1023.98px) {
   .oh-ua-day-label {
-    top: 64px;
+    top: var(--oh-topbar-height);
   }
 }
 

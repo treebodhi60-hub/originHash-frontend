@@ -1,68 +1,130 @@
+/* ==========================================================================
+   OriginHash design tokens — "Porcelain × Ink × Electric Cobalt".
+   Porcelain carries the work, ink carries the words and the navigation, and one electric cobalt
+   marks what you can act on and where you are. Mist draws structure; ice is the quiet highlight
+   (and the accent on ink). Status colours (success, warning, error) are used only for what they
+   mean, always with an icon or a word. Inter for the interface and titles; Geist Mono only for
+   codes and IDs. Every colour in the app comes from here.
+   ========================================================================== */
+
 :root {
-  /* Core palette — sampled from the OriginHash reference screens */
-  --oh-forest: #163832;       /* deep green: sidebar, primary buttons, header text */
-  --oh-forest-light: #1f4a42;
-  --oh-forest-deep: #12302a;  /* bottom of the sidebar gradient */
-  --oh-cream: #fbf3e7;        /* page background */
-  --oh-white: #ffffff;
-  --oh-gold: #c9a464;         /* logo accent, subtle borders */
-  --oh-green: #1f8f5f;        /* active scan mode, success accents on dark */
-  --oh-orange: #f2a65a;       /* Edit button */
-  --oh-orange-dark: #e4924a;
-  --oh-purple: #5b3e85;       /* Add button */
-  --oh-red: #dc2626;          /* Block text / border, blocked badge */
-  --oh-red-bg: #fee2e2;
+  /* ---------- Brand palette (official) ---------- */
+  --oh-porcelain: #f7f8fa;      /* application canvas */
+  --oh-ink-900: #111827;        /* primary text, navigation */
+  --oh-cobalt: #315cf5;         /* primary actions, selection, links, focus */
+  --oh-mist: #dce3ef;           /* borders, separators, table structure */
+  --oh-ice: #b8d8f8;            /* subtle highlights, information panels, accent on ink */
 
-  --oh-badge-farmer-bg: #dcfce7;
-  --oh-badge-farmer-text: #15803d;
-  --oh-badge-retailer-bg: #dbeafe;
-  --oh-badge-retailer-text: #1d4ed8;
-  --oh-badge-producer-bg: #f3e8ff;
-  --oh-badge-producer-text: #7e22ce;
-  --oh-badge-distributor-bg: #fef3c7;
-  --oh-badge-distributor-text: #b45309;
-  --oh-badge-consumer-bg: #e5e7eb;
-  --oh-badge-consumer-text: #374151;
-  --oh-badge-changed-bg: #ffedd5;   /* "Profile edited / changed" — a user's details changed */
-  --oh-badge-changed-text: #9a3412;
+  /* ---------- Base roles (names kept from the previous system) ---------- */
+  --oh-bg: var(--oh-porcelain);
+  --oh-white: #ffffff;          /* surfaces: cards, forms, tables */
+  --oh-navy: var(--oh-ink-900); /* primary text */
+  --oh-slate: #545b69;          /* secondary text: ink at ~70% on porcelain (6.6:1) */
+  --oh-blue: var(--oh-cobalt);
+  --oh-blue-hover: #2347d6;     /* hover and pressed; cobalt as text on tints (6.9:1) */
+  --oh-line: var(--oh-mist);
+  --oh-blue-soft: #edf2ff;      /* selected rows and items */
 
-  --oh-text: #1f2937;
-  --oh-text-muted: #6b7280;
-  --oh-border: #e7ddcc;
+  /* ---------- Ink surfaces (sidebar, scanner, greeting, auth panel) ---------- */
+  --oh-ink: var(--oh-ink-900);
+  --oh-ink-2: #1a2232;
+  --oh-ink-3: #273145;
+  --oh-ink-deep: #0b111d;
+  --oh-on-ink: #f7f8fa;
+  --oh-on-ink-muted: #9aa4b5;   /* 6.9:1 on ink */
+  --oh-on-ink-line: rgba(220, 227, 239, 0.12);
+  --oh-on-ink-hover: rgba(247, 248, 250, 0.06);
+  --oh-on-ink-accent: var(--oh-ice);
 
-  /* ---------- Neutral surfaces (tints already used across the screens) ---------- */
-  --oh-paper: #f1ebe0;        /* ID chips, quiet wells */
-  --oh-hover: #f7f2ea;        /* cream, one step towards the border tone */
-  --oh-row-hover: #fcf8f1;
-  --oh-sage: #e3efe9;         /* soft forest tint: avatars, current-name chips */
-  --oh-sage-strong: #cfe3dc;
-  --oh-border-strong: #dccbaf;
+  /* ---------- Surfaces ---------- */
+  --oh-canvas: var(--oh-bg);
+  --oh-surface: var(--oh-white);
+  --oh-surface-2: #fafbfc;      /* table heads, quiet panels */
+  --oh-well: #f0f3f8;           /* inset wells, ID chips */
+  --oh-hover: #f2f5fa;
+  --oh-row-hover: #f6f8fc;
+  --oh-ice-wash: #eef5fd;       /* information panels (ice on white) */
+  --oh-border: var(--oh-line);
+  --oh-border-strong: #c4cddb;
+  --oh-nav-bg: var(--oh-ink-900); /* the sidebar */
 
-  /* ---------- Status: one meaning, one colour, everywhere ---------- */
-  --oh-success: var(--oh-badge-farmer-text);
-  --oh-success-bg: var(--oh-badge-farmer-bg);
-  --oh-warning: #c2410c;
-  --oh-warning-bg: var(--oh-badge-changed-bg);
-  --oh-danger: var(--oh-red);
-  --oh-danger-bg: var(--oh-red-bg);
-  --oh-info: var(--oh-badge-retailer-text);
-  --oh-info-bg: var(--oh-badge-retailer-bg);
-  --oh-batch: #8a6a2f;        /* QR batches: the gold, darkened for text */
-  --oh-batch-bg: #f6ecd9;
+  /* ---------- Text ---------- */
+  --oh-text: var(--oh-navy);
+  --oh-text-muted: var(--oh-slate);
+  --oh-text-faint: #8a93a3;     /* decoration and disabled only, never essential text */
+  --oh-icon: #6b7384;
 
-  /* ---------- Type ---------- */
-  --oh-font-display: 'Poppins', 'Segoe UI', sans-serif;
-  --oh-font-body: 'Inter', 'Segoe UI', sans-serif;
-  --oh-font-mono: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  /* ---------- Accent: electric cobalt ---------- */
+  --oh-signal: var(--oh-cobalt);
+  --oh-signal-hover: var(--oh-blue-hover);
+  --oh-signal-strong: var(--oh-cobalt);
+  --oh-signal-soft: var(--oh-blue-soft);
+  --oh-signal-soft-2: #d9e3fe;
+  --oh-signal-ink: var(--oh-blue-hover);
+  --oh-accent: var(--oh-cobalt);
+  --oh-chart-muted: #c7d2e6;    /* secondary data in charts */
 
-  --oh-text-2xs: 0.68rem;
-  --oh-text-xs: 0.74rem;
-  --oh-text-sm: 0.82rem;
-  --oh-text-md: 0.9rem;
-  --oh-text-lg: 1.05rem;
-  --oh-text-xl: 1.35rem;
-  --oh-text-2xl: 1.6rem;
-  --oh-tracking-label: 0.08em; /* small uppercase labels */
+  /* ---------- Status: only for what they mean ---------- */
+  --oh-success: #19764a;
+  --oh-success-bg: #ecf6f0;
+  --oh-success-line: #bfe0cd;
+  --oh-warning: #a3600f;
+  --oh-warning-bg: #fdf5e9;
+  --oh-warning-line: #f0d7ae;
+  --oh-danger: #c0303f;
+  --oh-danger-bg: #fdf0f1;
+  --oh-danger-line: #f3c6cb;
+  --oh-info: var(--oh-blue-hover);       /* "Scanned": recorded, not a verdict */
+  --oh-info-bg: var(--oh-blue-soft);
+  --oh-info-line: #c9d6fd;
+  --oh-batch: #3a4457;                   /* QR batches: ink family */
+  --oh-batch-bg: #eef1f6;
+  --oh-amber: #c98a2e;
+  --oh-amber-strong: var(--oh-warning);
+
+  /* ---------- Roles: quiet tints, text deepened for 5:1+ ---------- */
+  --oh-badge-farmer-bg: #ecf6f0;
+  --oh-badge-farmer-text: #19643f;
+  --oh-badge-retailer-bg: var(--oh-blue-soft);
+  --oh-badge-retailer-text: #2347d6;
+  --oh-badge-producer-bg: #e9edf4;       /* admin staff */
+  --oh-badge-producer-text: var(--oh-ink-900);
+  --oh-badge-distributor-bg: #fdf5e9;
+  --oh-badge-distributor-text: #85500e;
+  --oh-badge-supplier-bg: var(--oh-ice-wash);
+  --oh-badge-supplier-text: #1d4f86;
+  --oh-badge-consumer-bg: #eef1f6;
+  --oh-badge-consumer-text: #454d5c;
+  --oh-badge-changed-bg: #eef1f6;        /* a former identity: neutral; the strike carries the change */
+  --oh-badge-changed-text: #454d5c;
+
+  /* ---------- Printed labels: the colours the server prints with (stickerPdf, shareCard).
+     On-screen sticker previews use these so they stay a faithful picture of the print.
+     Do not change them with the app's palette. ---------- */
+  --oh-print-ink: #163832;
+  --oh-print-accent: #c9a464;
+  --oh-print-paper: #fbf3e7;
+  --oh-print-bar: #e4924a;
+  --oh-print-line: #e7ddcc;
+
+  /* ---------- Type ----------
+     Inter everywhere: interface, labels and titles (its optical-size axis switches to the
+     display cut at large sizes). Geist Mono only where the text is a code or an ID. */
+  --oh-font-body: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --oh-font-display: var(--oh-font-body);
+  --oh-font-label: var(--oh-font-body);  /* small capitals: eyebrows, table heads, stamps */
+  --oh-font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace; /* codes, IDs */
+
+  --oh-text-2xs: 0.6875rem;     /* 11px: stamps, mono labels */
+  --oh-text-xs: 0.75rem;
+  --oh-text-sm: 0.8125rem;
+  --oh-text-md: 0.875rem;
+  --oh-text-lg: 1rem;
+  --oh-text-xl: 1.25rem;
+  --oh-text-2xl: 1.625rem;
+  --oh-text-display: 1.75rem;   /* page titles */
+  --oh-tracking-label: 0.06em;  /* uppercase labels */
+  --oh-tracking-title: -0.022em;
 
   /* ---------- Space (4px grid) ---------- */
   --oh-space-1: 4px;
@@ -73,43 +135,58 @@
   --oh-space-6: 24px;
   --oh-space-8: 32px;
   --oh-space-10: 40px;
+  --oh-space-12: 48px;
 
-  /* ---------- Shape ---------- */
-  --oh-radius-xs: 6px;
-  --oh-radius-sm: 8px;
-  --oh-radius-control: 12px;
-  --oh-radius-md: 14px;
-  --oh-panel-radius: 18px;
-  --oh-radius-lg: 22px;
+  /* ---------- Shape: precise, modest radii ---------- */
+  --oh-radius-stamp: 3px;       /* stamps, ID chips */
+  --oh-radius-xs: 4px;
+  --oh-radius-sm: 6px;
+  --oh-radius-control: 8px;     /* buttons, inputs */
+  --oh-radius-md: 10px;
+  --oh-panel-radius: 12px;      /* cards, tables, panels */
+  --oh-radius-lg: 14px;
+  --oh-radius-passport: 18px;   /* product passport cards */
   --oh-radius-pill: 999px;
 
-  /* ---------- Depth ---------- */
-  --oh-shadow: 0 8px 24px rgba(22, 56, 50, 0.08);
-  --oh-shadow-sm: 0 1px 2px rgba(22, 56, 50, 0.05), 0 4px 12px rgba(22, 56, 50, 0.05);
-  --oh-shadow-lg: 0 18px 40px rgba(22, 56, 50, 0.14);
-  --oh-ring: 0 0 0 3px rgba(22, 56, 50, 0.12);
-  --oh-ring-gold: 0 0 0 3px rgba(201, 164, 100, 0.35);
+  /* ---------- Depth: borders first; shadows only where something floats ---------- */
+  --oh-shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.04);
+  --oh-shadow: 0 1px 2px rgba(17, 24, 39, 0.04), 0 4px 12px rgba(17, 24, 39, 0.05);
+  --oh-shadow-lg: 0 8px 24px rgba(17, 24, 39, 0.1), 0 24px 48px -12px rgba(17, 24, 39, 0.16);
+  --oh-shadow-passport: 0 40px 80px -48px rgba(49, 92, 245, 0.45);
+  --oh-ring: 0 0 0 3px rgba(17, 24, 39, 0.08);
+  --oh-ring-signal: 0 0 0 3px rgba(49, 92, 245, 0.2);
 
-  /* ---------- Motion ---------- */
-  --oh-ease: cubic-bezier(0.2, 0.8, 0.2, 1);      /* default: quick out, soft landing */
-  --oh-ease-out: cubic-bezier(0.16, 1, 0.3, 1);    /* entrances and reveals */
-  --oh-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* things that travel (indicators, lines) */
-  --oh-dur-instant: 120ms;  /* press, hover */
-  --oh-dur-quick: 200ms;    /* state changes */
-  --oh-dur-base: 320ms;     /* panels, reveals */
-  --oh-dur-slow: 560ms;     /* signature moments: the name strike */
+  /* ---------- Heights ---------- */
+  --oh-control-height: 38px;
+  --oh-control-height-sm: 32px;
+  --oh-control-height-lg: 44px;
+  --oh-row-height: 48px;        /* table rows */
+  --oh-topbar-height: 56px;
+
+  /* ---------- Breakpoints (for reference; media queries cannot read variables) ----------
+     phone ≤ 600 · tablet 601–1023 · laptop rail 1024–1279 · desktop ≥ 1280 */
+
+  /* ---------- Motion: precise and quick ---------- */
+  --oh-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --oh-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --oh-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --oh-dur-instant: 100ms;
+  --oh-dur-quick: 160ms;
+  --oh-dur-base: 240ms;
+  --oh-dur-slow: 420ms;
 
   /* ---------- Layers ---------- */
   --oh-z-sidebar: 40;
   --oh-z-topbar: 45;
   --oh-z-nav: 50;
   --oh-z-overlay: 60;
+  --oh-z-toast: 80;
   --oh-z-tooltip: 100;
 
   /* ---------- Layout ---------- */
-  --oh-sidebar-width: 76px;
-  --oh-page-max: 1360px;
-  --oh-control-height: 42px;
+  --oh-sidebar-width: 248px;
+  --oh-sidebar-rail: 68px;
+  --oh-page-max: 1320px;
 }
 
 * {
@@ -125,13 +202,22 @@ body,
 body {
   margin: 0;
   font-family: var(--oh-font-body);
-  background: var(--oh-cream);
+  font-size: 14px;
+  line-height: 1.5;
+  font-optical-sizing: auto;
+  /* Inter: open digits, a straight-legged l (distinct from 1 and I), round quotes. */
+  font-feature-settings: 'cv05', 'cv08', 'ss03';
+  background: var(--oh-canvas);
   color: var(--oh-text);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 h1, h2, h3, h4 {
   font-family: var(--oh-font-display);
+  font-weight: 600;
+  letter-spacing: -0.015em;
   margin: 0;
 }
 
@@ -148,8 +234,19 @@ a {
   color: inherit;
 }
 
+code,
+kbd,
+samp {
+  font-family: var(--oh-font-mono);
+}
+
+::selection {
+  background: var(--oh-ice);
+  color: var(--oh-ink-900);
+}
+
 :focus-visible {
-  outline: 2px solid var(--oh-forest);
+  outline: 2px solid var(--oh-cobalt);
   outline-offset: 2px;
 }
 

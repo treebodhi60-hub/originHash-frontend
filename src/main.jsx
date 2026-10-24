@@ -7,6 +7,9 @@ import './styles/tokens.css';
 import App from './App.jsx';
 // Loaded after every page's own styles: the shared look (see the file's header).
 import './styles/refresh.css';
+// The OriginHash design system, last of all so it governs every page (see its header).
+import './styles/system.css';
+import './styles/screens.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

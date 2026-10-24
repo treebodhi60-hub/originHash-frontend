@@ -1,3 +1,4 @@
+import { Check, Download, Images, QrCode, TriangleAlert } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -66,7 +67,7 @@ const formatDate = (iso) => {
   return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-const DownloadPdfButton = ({ batchId, productName, className = 'oh-btn-export', label = '⬇ Download PDF' }) => {
+const DownloadPdfButton = ({ batchId, productName, className = 'oh-btn-export', label = 'Download PDF' }) => {
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState('');
 
@@ -85,6 +86,7 @@ const DownloadPdfButton = ({ batchId, productName, className = 'oh-btn-export', 
   return (
     <span className="oh-download-btn-wrap">
       <button type="button" className={className} onClick={handleClick} disabled={downloading}>
+        {!downloading && <Download size={16} strokeWidth={1.75} aria-hidden="true" />}
         {downloading ? (
           <>
             <span className="oh-spinner" /> Preparing PDF…
@@ -158,22 +160,22 @@ const StickerPreview = ({ form }) => {
         <div className={`oh-sticker-body ${isHorizontal ? 'horizontal' : 'vertical'}`}>
           <div className="oh-sticker-image-box">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="4" width="18" height="16" rx="2" stroke="#c9a464" strokeWidth="1.5" />
-              <circle cx="9" cy="10" r="1.6" stroke="#c9a464" strokeWidth="1.3" />
-              <path d="M5 17l4.5-4.5 3 3 2-2L19 17" stroke="#c9a464" strokeWidth="1.5" />
+              <rect x="3" y="4" width="18" height="16" rx="2" stroke="var(--oh-print-accent)" strokeWidth="1.5" />
+              <circle cx="9" cy="10" r="1.6" stroke="var(--oh-print-accent)" strokeWidth="1.3" />
+              <path d="M5 17l4.5-4.5 3 3 2-2L19 17" stroke="var(--oh-print-accent)" strokeWidth="1.5" />
             </svg>
           </div>
           <div className="oh-sticker-qr-box">
             <svg width="100%" height="100%" viewBox="0 0 24 24">
-              <rect x="2" y="2" width="8" height="8" fill="#163832" />
-              <rect x="14" y="2" width="8" height="8" fill="#163832" />
-              <rect x="2" y="14" width="8" height="8" fill="#163832" />
-              <rect x="15" y="15" width="2" height="2" fill="#163832" />
-              <rect x="19" y="15" width="2" height="2" fill="#163832" />
-              <rect x="15" y="19" width="2" height="2" fill="#163832" />
-              <rect x="19" y="19" width="2" height="2" fill="#163832" />
-              <rect x="15" y="17" width="2" height="2" fill="#163832" />
-              <rect x="17" y="19" width="2" height="2" fill="#163832" />
+              <rect x="2" y="2" width="8" height="8" fill="var(--oh-print-ink)" />
+              <rect x="14" y="2" width="8" height="8" fill="var(--oh-print-ink)" />
+              <rect x="2" y="14" width="8" height="8" fill="var(--oh-print-ink)" />
+              <rect x="15" y="15" width="2" height="2" fill="var(--oh-print-ink)" />
+              <rect x="19" y="15" width="2" height="2" fill="var(--oh-print-ink)" />
+              <rect x="15" y="19" width="2" height="2" fill="var(--oh-print-ink)" />
+              <rect x="19" y="19" width="2" height="2" fill="var(--oh-print-ink)" />
+              <rect x="15" y="17" width="2" height="2" fill="var(--oh-print-ink)" />
+              <rect x="17" y="19" width="2" height="2" fill="var(--oh-print-ink)" />
             </svg>
           </div>
         </div>
@@ -308,7 +310,9 @@ const GenerateTab = ({ source, onSource, onBuy, onActivity }) => {
   if (lastResult) {
     return (
       <div className="oh-qr-success">
-        <div className="oh-qr-success-icon">✓</div>
+        <div className="oh-qr-success-icon">
+          <Check size={26} strokeWidth={2.25} aria-hidden="true" />
+        </div>
         <h2 className="oh-admin-title">{lastResult.codes.length} stickers generated</h2>
         <p className="oh-admin-subtitle">
           {lastResult.batch.producer} · {lastResult.batch.productName} · Batch {lastResult.batch.batchNo}
@@ -379,7 +383,7 @@ const GenerateTab = ({ source, onSource, onBuy, onActivity }) => {
               />
               {batchNoError && (
                 <div id="qr-batch-no-error" className="oh-field-alert" role="alert">
-                  ⚠ {batchNoError}
+                  <TriangleAlert size={14} strokeWidth={2} aria-hidden="true" /> {batchNoError}
                 </div>
               )}
             </div>
@@ -426,7 +430,7 @@ const GenerateTab = ({ source, onSource, onBuy, onActivity }) => {
                 ))}
               </select>
               <div className="oh-qr-folder-hint">
-                🖼 {selectedFolder ? selectedFolder.availableImagesCount ?? 0 : 0} global images available · this
+                <Images size={14} strokeWidth={1.75} aria-hidden="true" /> {selectedFolder ? selectedFolder.availableImagesCount ?? 0 : 0} global images available · this
                 batch will use {form.numberOfQrs || 0}
               </div>
             </div>
@@ -479,7 +483,10 @@ const GenerateTab = ({ source, onSource, onBuy, onActivity }) => {
                 Checking batch no…
               </>
             ) : (
-              `⊞ Generate ${form.numberOfQrs || 0} stickers${sourceTab ? ` from ${sourceTab.name}` : ''}`
+              <>
+                <QrCode size={17} strokeWidth={1.75} aria-hidden="true" />
+                {`Generate ${form.numberOfQrs || 0} stickers${sourceTab ? ` from ${sourceTab.name}` : ''}`}
+              </>
             )}
           </button>
         </form>

@@ -1,0 +1,1576 @@
+/* ==========================================================================
+   OriginHash screens — page-level compositions on top of system.css.
+   One section per screen family, in sidebar order. Presentation only: every class here is one
+   the page already renders.
+   ========================================================================== */
+
+/* =============================== DASHBOARD =============================== */
+
+/* Greeting on porcelain: eyebrow, display title, date + refresh; quick actions to the right. */
+.oh-dash-hero {
+  gap: 20px;
+  padding: 0 0 4px;
+  margin-bottom: 24px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--oh-ink-900);
+}
+
+.oh-dash-hero::before {
+  content: none;
+}
+
+.oh-dash-eyebrow {
+  gap: 7px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--oh-text-muted);
+  font-family: var(--oh-font-label);
+  font-size: var(--oh-text-2xs);
+  font-weight: 600;
+  letter-spacing: var(--oh-tracking-label);
+  text-transform: uppercase;
+}
+
+.oh-dash-eyebrow svg {
+  color: var(--oh-cobalt);
+}
+
+.oh-dash-hero-title {
+  margin-top: 10px;
+  color: var(--oh-ink-900);
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.oh-dash-hero-sub {
+  margin-top: 10px;
+  color: var(--oh-text-muted);
+}
+
+.oh-dash-refresh {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-pill);
+  background: var(--oh-white);
+  color: var(--oh-ink-900);
+  font-weight: 600;
+}
+
+.oh-dash-refresh:hover:not(:disabled) {
+  border-color: var(--oh-border-strong);
+  background: var(--oh-surface-2);
+}
+
+.oh-dash-actions {
+  gap: 8px;
+}
+
+.oh-dash-action {
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-md);
+  background: var(--oh-white);
+  color: var(--oh-ink-900);
+  font-weight: 600;
+  box-shadow: var(--oh-shadow-sm);
+}
+
+.oh-dash-action:hover {
+  border-color: var(--oh-cobalt);
+  background: var(--oh-white);
+  transform: none;
+}
+
+.oh-dash-action-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--oh-blue-soft);
+  color: var(--oh-cobalt);
+}
+
+@media (min-width: 900px) {
+  .oh-dash-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 460px);
+    padding: 0 0 4px;
+  }
+
+  .oh-dash-hero-title {
+    font-size: 2.25rem;
+  }
+}
+
+/* KPIs: one ledger strip with hairline dividers, not six floating cards. */
+.oh-kpi-row {
+  gap: 0;
+  overflow: hidden;
+  margin-bottom: 20px;
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-panel-radius);
+  background: var(--oh-white);
+  box-shadow: var(--oh-shadow-sm);
+}
+
+.oh-kpi {
+  min-height: 0;
+  gap: 2px;
+  padding: 18px 20px 18px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: 1px 0 0 var(--oh-border), 0 1px 0 var(--oh-border);
+}
+
+.oh-kpi:hover {
+  transform: none;
+  box-shadow: 1px 0 0 var(--oh-border), 0 1px 0 var(--oh-border);
+  background: var(--oh-row-hover);
+}
+
+.oh-kpi-top {
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.oh-kpi-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+}
+
+.oh-kpi-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.oh-kpi-label {
+  font-family: var(--oh-font-label);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.oh-kpi-value {
+  font-size: 2rem;
+  font-weight: 560;
+  letter-spacing: -0.03em;
+  color: var(--oh-ink-900);
+}
+
+.oh-kpi-foot {
+  margin-top: 2px;
+  font-size: 0.8rem;
+}
+
+.oh-dash-delta {
+  padding: 2px 7px;
+  border-radius: var(--oh-radius-stamp);
+  font-family: var(--oh-font-label);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Cards: mist hairline, small square icon, no lift. */
+.oh-dash-card {
+  border-radius: var(--oh-panel-radius);
+  box-shadow: var(--oh-shadow-sm);
+}
+
+.oh-dash-card-icon {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--oh-border);
+  border-radius: 8px;
+  background: var(--oh-surface-2);
+  color: var(--oh-ink-900);
+}
+
+.oh-dash-card-titles h2 {
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.oh-dash-card-link {
+  color: var(--oh-cobalt);
+  font-weight: 600;
+}
+
+.oh-chart-figure {
+  font-family: var(--oh-font-display);
+  font-weight: 560;
+  letter-spacing: -0.03em;
+  color: var(--oh-ink-900);
+}
+
+.oh-chart-caption,
+.oh-chart-gridline span,
+.oh-chart-axis span {
+  font-family: var(--oh-font-label);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+}
+
+.oh-chart-bar {
+  border-radius: 3px 3px 0 0;
+  background: var(--oh-ice);
+}
+
+.oh-chart-bar.today,
+.oh-chart-slot.active .oh-chart-bar:not(.empty):not(.today) {
+  background: var(--oh-cobalt);
+}
+
+.oh-chart-tooltip {
+  border-radius: var(--oh-radius-sm);
+  background: var(--oh-ink-900);
+}
+
+.oh-dash-error {
+  border: 1px solid var(--oh-danger-line);
+  border-radius: var(--oh-panel-radius);
+  background: var(--oh-danger-bg);
+}
+
+/* ============================ HOME / SCAN HUB ============================ */
+
+.oh-home-hero {
+  border: 1px solid var(--oh-ink-900);
+  border-radius: var(--oh-panel-radius);
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(49, 92, 245, 0.28) 0%, transparent 55%),
+    var(--oh-ink-900);
+  box-shadow: none;
+}
+
+.oh-home-hero-greeting {
+  font-family: var(--oh-font-label);
+  font-size: var(--oh-text-2xs);
+  letter-spacing: var(--oh-tracking-label);
+  text-transform: uppercase;
+  color: var(--oh-on-ink-muted);
+}
+
+.oh-home-hero-name {
+  color: var(--oh-on-ink);
+}
+
+.oh-home-hero-sub {
+  color: #c7cfdb;
+}
+
+.oh-home-hero-logo {
+  width: 40px;
+  height: 40px;
+}
+
+.oh-home-verify-btn {
+  border: 1px solid var(--oh-cobalt);
+  border-radius: var(--oh-radius-control);
+  background: var(--oh-cobalt);
+  color: #ffffff;
+  box-shadow: 0 8px 24px -10px rgba(49, 92, 245, 0.8);
+}
+
+.oh-home-verify-btn:hover {
+  border-color: var(--oh-blue-hover);
+  background: var(--oh-blue-hover);
+}
+
+/* Totals: one strip. */
+.oh-home-stats {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-panel-radius);
+  background: var(--oh-white);
+}
+
+.oh-home-stat,
+.oh-home-stat.success,
+.oh-home-stat.danger {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: 1px 0 0 var(--oh-border), 0 1px 0 var(--oh-border);
+}
+
+.oh-home-stat:hover {
+  transform: none;
+  box-shadow: 1px 0 0 var(--oh-border), 0 1px 0 var(--oh-border);
+}
+
+.oh-home-stat-label {
+  font-family: var(--oh-font-label);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--oh-text-muted);
+}
+
+.oh-home-stat-value {
+  font-weight: 560;
+  letter-spacing: -0.03em;
+  color: var(--oh-ink-900);
+}
+
+.oh-home-stat.success .oh-home-stat-label::before,
+.oh-home-stat.danger .oh-home-stat-label::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: 1px;
+  background: var(--oh-success);
+}
+
+.oh-home-stat.danger .oh-home-stat-label::before {
+  background: var(--oh-danger);
+}
+
+.oh-home-scan-card {
+  border-radius: var(--oh-panel-radius);
+}
+
+.oh-home-scan-card:hover {
+  border-color: var(--oh-cobalt);
+}
+
+.oh-home-scan-icon {
+  border-radius: 10px;
+  background: var(--oh-blue-soft);
+  color: var(--oh-cobalt);
+}
+
+.oh-home-scan-cta {
+  border-radius: var(--oh-radius-control);
+  background: var(--oh-ink-900);
+}
+
+.oh-home-recent {
+  border-radius: var(--oh-panel-radius);
+}
+
+.oh-home-recent-title {
+  font-family: var(--oh-font-display);
+  letter-spacing: -0.015em;
+}
+
+.oh-home-recent-all {
+  color: var(--oh-cobalt);
+  font-weight: 600;
+}
+
+/* ===================== RESULT SHELL: a product passport ===================== */
+/* Scan details, product journey, result, compare and the phone history header share one
+   document frame: porcelain paper, a mist edge, an ice glow underneath. */
+
+.oh-result-shell {
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-passport);
+  background: var(--oh-white);
+  box-shadow: var(--oh-shadow-passport), var(--oh-shadow-sm);
+}
+
+.oh-result-head {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--oh-border);
+  background: var(--oh-white);
+  color: var(--oh-ink-900);
+}
+
+.oh-result-title {
+  font-family: var(--oh-font-display);
+  font-size: 1.05rem;
+  letter-spacing: -0.015em;
+  color: var(--oh-ink-900);
+}
+
+.oh-result-head .oh-scan-icon-btn {
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-control);
+  background: var(--oh-white);
+  color: var(--oh-ink-900);
+}
+
+.oh-result-head .oh-scan-icon-btn:hover {
+  background: var(--oh-surface-2);
+}
+
+.oh-result-body {
+  margin-top: 0;
+  border-radius: 0;
+  background: var(--oh-white);
+}
+
+.oh-result-heading {
+  font-family: var(--oh-font-display);
+  letter-spacing: var(--oh-tracking-title);
+  color: var(--oh-ink-900);
+}
+
+.oh-details-list,
+.oh-details-ids-card,
+.oh-details-product,
+.oh-result-product,
+.oh-compare-card {
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-panel-radius);
+  background: var(--oh-surface-2);
+  box-shadow: none;
+}
+
+.oh-details-ids dt,
+.oh-details-product-label,
+.oh-compare-facts dt {
+  font-family: var(--oh-font-label);
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--oh-text-muted);
+}
+
+.oh-details-ids dd {
+  color: var(--oh-ink-900);
+  font-size: 0.82rem;
+}
+
+.oh-journey-title {
+  font-family: var(--oh-font-display);
+  letter-spacing: -0.015em;
+}
+
+.oh-journey-dot {
+  border: 2px solid var(--oh-cobalt);
+  box-shadow: 0 0 0 3px var(--oh-white);
+  background: var(--oh-white);
+  color: var(--oh-cobalt);
+  font-family: var(--oh-font-label);
+}
+
+.oh-journey-step.end.done .oh-journey-dot {
+  border-color: var(--oh-success);
+  background: var(--oh-success);
+  color: #ffffff;
+}
+
+.oh-journey-card {
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-md);
+  background: var(--oh-white);
+}
+
+.oh-journey-map {
+  border-radius: var(--oh-radius-control);
+  color: var(--oh-cobalt);
+}
+
+.oh-share-menu {
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-md);
+  box-shadow: var(--oh-shadow-lg);
+}
+
+/* ================================ SCANNER ================================ */
+
+/* Inside the app shell the sidebar or top bar already names the product. */
+.oh-admin-main .oh-scan-brand {
+  display: none;
+}
+
+.oh-scan-panel {
+  border: 1px solid var(--oh-ink-900);
+  border-radius: var(--oh-radius-passport);
+  background:
+    radial-gradient(90% 60% at 50% 0%, rgba(49, 92, 245, 0.16) 0%, transparent 70%),
+    var(--oh-ink-900);
+  box-shadow: none;
+}
+
+.oh-scan-title {
+  font-family: var(--oh-font-display);
+  letter-spacing: -0.015em;
+}
+
+.oh-scan-hint {
+  color: var(--oh-on-ink-muted);
+}
+
+.oh-scan-hint.captured {
+  color: var(--oh-ice);
+}
+
+.oh-scan-viewport {
+  border-radius: var(--oh-radius-lg);
+  box-shadow: inset 0 0 0 1px rgba(184, 216, 248, 0.12);
+}
+
+/* Ice corner brackets, as on the brand site. */
+.oh-scan-frame > span:not(.oh-scan-line) {
+  border-color: var(--oh-ice);
+}
+
+.oh-scan-line {
+  background: linear-gradient(90deg, transparent, var(--oh-ice), transparent);
+  box-shadow: 0 0 14px 1px rgba(49, 92, 245, 0.75);
+}
+
+.oh-scan-action {
+  min-height: 50px;
+  border-radius: var(--oh-radius-md);
+  font-weight: 600;
+}
+
+.oh-scan-actions.ready .oh-scan-action.record {
+  box-shadow: 0 0 0 3px rgba(184, 216, 248, 0.35), 0 8px 24px -8px rgba(49, 92, 245, 0.8);
+}
+
+.oh-scan-alt-label {
+  font-family: var(--oh-font-label);
+  font-size: var(--oh-text-2xs);
+  letter-spacing: var(--oh-tracking-label);
+  text-transform: uppercase;
+  color: var(--oh-on-ink-muted);
+}
+
+.oh-scan-alt-btn {
+  border-radius: var(--oh-radius-md);
+}
+
+.oh-scan-captured {
+  border-radius: var(--oh-radius-md);
+}
+
+.oh-scan-card {
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-panel-radius);
+  box-shadow: var(--oh-shadow-sm);
+}
+
+.oh-scan-card-label {
+  font-family: var(--oh-font-label);
+  font-size: var(--oh-text-2xs);
+  letter-spacing: var(--oh-tracking-label);
+  text-transform: uppercase;
+  color: var(--oh-cobalt);
+}
+
+.oh-scan-card-title {
+  font-family: var(--oh-font-display);
+  letter-spacing: -0.015em;
+}
+
+.oh-scan-steps li::marker {
+  color: var(--oh-cobalt);
+  font-family: var(--oh-font-label);
+}
+
+/* "Ready to see the image?" sheet and the compare answers. */
+.oh-verify-sheet {
+  border-radius: var(--oh-radius-passport) var(--oh-radius-passport) 0 0;
+}
+
+.oh-verify-title,
+.oh-compare-question {
+  font-family: var(--oh-font-display);
+  letter-spacing: -0.015em;
+}
+
+.oh-verify-show {
+  border-radius: var(--oh-radius-control);
+  background: var(--oh-cobalt);
+}
+
+.oh-compare-answer {
+  border-radius: var(--oh-radius-md);
+}
+
+/* ============================ SIGN IN / ONBOARDING ============================ */
+
+.oh-brand-panel {
+  position: relative;
+  overflow: hidden;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 32px;
+  text-align: left;
+  background:
+    radial-gradient(70% 55% at 85% 10%, rgba(49, 92, 245, 0.32) 0%, transparent 70%),
+    radial-gradient(60% 50% at 0% 100%, rgba(184, 216, 248, 0.1) 0%, transparent 70%),
+    var(--oh-ink-900);
+  color: var(--oh-on-ink);
+}
+
+/* A faint hash grid: the brand's name, drawn as a ledger. */
+.oh-brand-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(184, 216, 248, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(184, 216, 248, 0.07) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(80% 70% at 60% 40%, #000 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.oh-brand-head,
+.oh-brand-body,
+.oh-brand-foot {
+  position: relative;
+}
+
+.oh-brand-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.oh-brand-title.oh-wordmark {
+  font-size: 1.35rem;
+}
+
+.oh-brand-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--oh-font-label);
+  font-size: var(--oh-text-2xs);
+  letter-spacing: var(--oh-tracking-label);
+  text-transform: uppercase;
+  color: var(--oh-ice);
+}
+
+.oh-brand-eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--oh-cobalt);
+  box-shadow: 0 0 10px 1px rgba(49, 92, 245, 0.9);
+}
+
+.oh-brand-tagline {
+  margin: 16px 0 28px;
+  color: var(--oh-on-ink);
+  font-family: var(--oh-font-display);
+  font-size: clamp(2.4rem, 1.6rem + 2.2vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.oh-brand-points {
+  display: grid;
+  gap: 4px;
+  max-width: 440px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.oh-brand-points li {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--oh-on-ink-line);
+  color: var(--oh-on-ink-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.oh-brand-points svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--oh-ice);
+}
+
+.oh-brand-points strong {
+  display: block;
+  color: var(--oh-on-ink);
+  font-weight: 600;
+}
+
+.oh-brand-motto {
+  margin: 0;
+  font-family: var(--oh-font-label);
+  font-size: var(--oh-text-2xs);
+  letter-spacing: var(--oh-tracking-label);
+  text-transform: uppercase;
+  color: var(--oh-ice);
+}
+
+.oh-brand-footnote {
+  position: static;
+  margin-top: 6px;
+  color: var(--oh-on-ink-muted);
+  font-size: 0.74rem;
+}
+
+@media (min-width: 900px) {
+  .oh-brand-panel {
+    flex: 0 0 min(46%, 640px);
+    min-height: 100vh;
+    padding: 40px clamp(32px, 5vw, 72px);
+  }
+
+  .oh-brand-footnote {
+    position: static;
+  }
+}
+
+@media (max-width: 899px) {
+  .oh-brand-panel {
+    align-items: center;
+    padding: 18px 20px;
+    gap: 0;
+  }
+
+  .oh-brand-body,
+  .oh-brand-foot {
+    display: none;
+  }
+
+  .oh-brand-head .oh-brand-mark {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.oh-auth-card {
+  max-width: 400px;
+  padding: 32px 28px;
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-passport);
+  background: var(--oh-white);
+  box-shadow: var(--oh-shadow-passport), var(--oh-shadow-sm);
+}
+
+.oh-auth-icon {
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--oh-border);
+  background: var(--oh-surface-2);
+  color: var(--oh-cobalt);
+}
+
+.oh-auth-icon.brand {
+  border: none;
+  background: transparent;
+}
+
+.oh-auth-heading {
+  font-family: var(--oh-font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: var(--oh-tracking-title);
+  color: var(--oh-ink-900);
+}
+
+.oh-login-mode-tabs {
+  padding: 3px;
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-control);
+  background: var(--oh-surface-2);
+}
+
+.oh-login-mode-tab {
+  border-radius: 6px;
+}
+
+.oh-login-mode-tab.active {
+  background: var(--oh-ink-900);
+  color: var(--oh-on-ink);
+  box-shadow: none;
+}
+
+.oh-btn-primary {
+  min-height: var(--oh-control-height-lg);
+}
+
+.oh-otp-input input {
+  font-family: var(--oh-font-label);
+  letter-spacing: 0.5em;
+  text-align: center;
+}
+
+.oh-field-hint {
+  margin-top: 6px;
+  color: var(--oh-text-muted);
+  font-size: 0.8rem;
+}
+
+.oh-auth-footer {
+  color: var(--oh-text-muted);
+}
+
+.oh-user-type-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-control);
+  background: var(--oh-white);
+  color: var(--oh-ink-900);
+  font-weight: 600;
+}
+
+.oh-user-type-option svg {
+  color: var(--oh-icon);
+}
+
+.oh-user-type-option.active {
+  border-color: var(--oh-cobalt);
+  background: var(--oh-blue-soft);
+  color: var(--oh-cobalt);
+  box-shadow: inset 0 0 0 1px var(--oh-cobalt);
+}
+
+.oh-user-type-option.active svg {
+  color: var(--oh-cobalt);
+}
+
+/* ================================ ACCOUNT ================================ */
+/* My profile and Admin profile: an identity card beside a list of details. */
+
+.oh-account {
+  max-width: 1040px;
+}
+
+.oh-account .oh-eyebrow {
+  margin-bottom: 8px;
+}
+
+.oh-account-grid {
+  display: grid;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .oh-account-grid {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+}
+
+.oh-account-card {
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-panel-radius);
+  background: var(--oh-white);
+  box-shadow: var(--oh-shadow-sm);
+}
+
+.oh-account-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 28px 22px 20px;
+  text-align: center;
+}
+
+.oh-account-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  background: var(--oh-ink-900);
+  color: var(--oh-on-ink);
+  font-family: var(--oh-font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  box-shadow: 0 0 0 4px var(--oh-white), 0 0 0 5px var(--oh-border);
+}
+
+.oh-account-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.oh-account-photo-btn {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--oh-white);
+  border-radius: 50%;
+  background: var(--oh-cobalt);
+  color: #ffffff;
+  box-shadow: var(--oh-shadow);
+}
+
+.oh-account-photo-btn:hover:not(:disabled) {
+  background: var(--oh-blue-hover);
+}
+
+.oh-account-name {
+  font-family: var(--oh-font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--oh-ink-900);
+}
+
+.oh-account-sub {
+  color: var(--oh-text-muted);
+  font-family: var(--oh-font-label);
+  font-size: 0.8rem;
+}
+
+.oh-account-stamps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.oh-account-stamps .oh-user-code {
+  margin: 0;
+}
+
+.oh-account-identity .oh-error {
+  width: 100%;
+  margin-top: 12px;
+  text-align: left;
+}
+
+.oh-account-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: var(--oh-control-height);
+  margin-top: 22px;
+  padding-top: 0;
+  border: 1px solid var(--oh-danger-line);
+  border-radius: var(--oh-radius-control);
+  background: var(--oh-white);
+  color: var(--oh-danger);
+  font-weight: 600;
+  transition: background var(--oh-dur-quick) ease, border-color var(--oh-dur-quick) ease;
+}
+
+.oh-account-logout:hover {
+  border-color: var(--oh-danger);
+  background: var(--oh-danger-bg);
+}
+
+.oh-account-card-head {
+  padding: 20px 22px 14px;
+  border-bottom: 1px solid var(--oh-border);
+}
+
+.oh-account-card-head h2 {
+  font-size: 1.05rem;
+  letter-spacing: -0.015em;
+  color: var(--oh-ink-900);
+}
+
+.oh-account-card-head p {
+  margin: 4px 0 0;
+  color: var(--oh-text-muted);
+  font-size: 0.84rem;
+}
+
+.oh-account-list {
+  margin: 0;
+}
+
+.oh-account-row {
+  display: grid;
+  gap: 6px 18px;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--oh-border);
+}
+
+.oh-account-row:last-child {
+  border-bottom: none;
+}
+
+@media (min-width: 640px) {
+  .oh-account-row {
+    grid-template-columns: 200px minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .oh-account-row.editing {
+    align-items: start;
+  }
+
+  .oh-account-row.editing dt {
+    padding-top: 9px;
+  }
+}
+
+.oh-account-row.editing {
+  background: var(--oh-surface-2);
+}
+
+.oh-account-row dt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--oh-text-muted);
+  font-size: 0.84rem;
+  font-weight: 500;
+}
+
+.oh-account-row dt svg {
+  color: var(--oh-icon);
+}
+
+.oh-account-row dd {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+}
+
+.oh-account-row dd.oh-edit-inline {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.oh-account-row dd.oh-edit-inline input,
+.oh-account-row dd.oh-edit-inline select {
+  width: 100%;
+  padding: 0 12px;
+}
+
+.oh-account-row .oh-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.oh-account-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--oh-ink-900);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.oh-account-value.empty {
+  color: var(--oh-text-faint);
+  font-weight: 500;
+}
+
+.oh-account-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--oh-control-height-sm);
+  padding: 0 12px;
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-control);
+  background: var(--oh-white);
+  color: var(--oh-cobalt);
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background var(--oh-dur-quick) ease, border-color var(--oh-dur-quick) ease;
+}
+
+.oh-account-edit:hover {
+  border-color: var(--oh-info-line);
+  background: var(--oh-blue-soft);
+}
+
+.oh-account-locked {
+  padding: 2px 7px;
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-stamp);
+  background: var(--oh-surface-2);
+  color: var(--oh-text-muted);
+  font-family: var(--oh-font-label);
+  font-size: 0.64rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Compare and report: a focused document, not a full-width page. */
+.oh-admin-main > .oh-compare-page,
+.oh-admin-main > .oh-result-page {
+  max-width: 880px;
+}
+
+.oh-compare-earlier {
+  border: 1px solid var(--oh-warning-line);
+  border-radius: var(--oh-radius-control);
+  background: var(--oh-warning-bg);
+  color: var(--oh-warning);
+}
+
+.oh-report-pick {
+  border: 1.5px dashed var(--oh-border-strong);
+  border-radius: var(--oh-radius-md);
+  background: var(--oh-white);
+  color: var(--oh-ink-900);
+  transition: border-color var(--oh-dur-quick) ease, background var(--oh-dur-quick) ease;
+}
+
+.oh-report-pick:hover:not(:disabled),
+.oh-report-picks.dragging .oh-report-pick {
+  border-color: var(--oh-cobalt);
+  background: var(--oh-blue-soft);
+}
+
+.oh-report-pick-icon {
+  border: 1px solid var(--oh-border);
+  border-radius: 8px;
+  background: var(--oh-surface-2);
+  color: var(--oh-cobalt);
+}
+
+.oh-report-label {
+  color: var(--oh-ink-900);
+}
+
+.oh-report-form textarea {
+  border: 1px solid var(--oh-border-strong);
+  border-radius: var(--oh-radius-control);
+}
+
+.oh-report-form textarea:focus {
+  outline: none;
+  border-color: var(--oh-cobalt);
+  box-shadow: var(--oh-ring-signal);
+}
+
+.oh-report-submit,
+.oh-result-report-btn {
+  border-radius: var(--oh-radius-control);
+}
+
+.oh-result-home {
+  border-radius: var(--oh-radius-control);
+  background: var(--oh-cobalt);
+}
+
+.oh-result-again {
+  border-radius: var(--oh-radius-control);
+}
+
+/* History (phone cards): producer in the quiet tone, not amber. */
+.oh-history-producer {
+  color: var(--oh-text-muted);
+}
+
+.oh-history-card {
+  border-radius: var(--oh-radius-md);
+}
+
+/* ============================ PLANS & PRICING ============================ */
+/* Three plans in the brand family: ink, electric cobalt and a deep ice-blue. */
+
+.oh-plans {
+  --payg: var(--oh-ink-900);
+  --payg-soft: var(--oh-surface-2);
+  --payg-tint: #f2f4f8;
+  --sub: var(--oh-cobalt);
+  --sub-soft: var(--oh-blue-soft);
+  --sub-tint: #f3f6ff;
+  --fixed: #1d4f86;
+  --fixed-soft: var(--oh-ice-wash);
+  --fixed-tint: #f2f8fe;
+}
+
+.oh-plans-head h2 {
+  font-family: var(--oh-font-display);
+  font-weight: 600;
+  letter-spacing: var(--oh-tracking-title);
+  color: var(--oh-ink-900);
+}
+
+.oh-plans-save {
+  border: 1px solid var(--oh-success-line);
+  border-radius: var(--oh-radius-stamp);
+  font-family: var(--oh-font-label);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.oh-plan-card {
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-passport);
+  background: var(--oh-white);
+  box-shadow: var(--oh-shadow-sm);
+}
+
+.oh-plan-card:hover {
+  transform: none;
+  box-shadow: var(--oh-shadow);
+}
+
+.oh-plan-card.current {
+  border: 1px solid var(--tone);
+  box-shadow: 0 0 0 1px var(--tone), var(--oh-shadow-sm);
+}
+
+.oh-plan-card h3 {
+  font-family: var(--oh-font-display);
+  letter-spacing: -0.02em;
+}
+
+.oh-plan-ribbon {
+  border: none;
+  background: var(--tone);
+  color: #ffffff;
+}
+
+.oh-plan-icon {
+  border-radius: 10px;
+}
+
+.oh-plan-cta {
+  min-height: var(--oh-control-height-lg);
+}
+
+.oh-plans-compare {
+  border-radius: var(--oh-panel-radius);
+  box-shadow: var(--oh-shadow-sm);
+}
+
+.oh-plans-compare thead th {
+  font-family: var(--oh-font-display);
+}
+
+.oh-plans-steps {
+  border-radius: var(--oh-panel-radius);
+  box-shadow: var(--oh-shadow-sm);
+}
+
+.oh-plans-step-no {
+  font-family: var(--oh-font-label);
+}
+
+/* ============================ STICKER BALANCE ============================ */
+
+.oh-wallet-bar {
+  border-radius: var(--oh-panel-radius);
+  background:
+    radial-gradient(80% 140% at 100% 0%, rgba(49, 92, 245, 0.22) 0%, transparent 60%),
+    var(--oh-ink-900);
+}
+
+.oh-wallet-bar-label {
+  font-family: var(--oh-font-label);
+  font-size: var(--oh-text-2xs);
+  letter-spacing: var(--oh-tracking-label);
+  text-transform: uppercase;
+  color: var(--oh-on-ink-muted);
+}
+
+.oh-wallet-bar-balance {
+  font-family: var(--oh-font-display);
+  font-weight: 560;
+  letter-spacing: -0.03em;
+}
+
+.oh-wallet-bar-icon {
+  border-radius: 10px;
+  background: rgba(184, 216, 248, 0.1);
+  color: var(--oh-ice);
+}
+
+.oh-wallet-bar .oh-wallet-ghost {
+  border-color: rgba(220, 227, 239, 0.18);
+  background: rgba(247, 248, 250, 0.06);
+  color: var(--oh-on-ink);
+  box-shadow: none;
+}
+
+.oh-wallet-bar .oh-wallet-ghost:hover:not(:disabled) {
+  border-color: rgba(220, 227, 239, 0.32);
+  background: rgba(247, 248, 250, 0.12);
+  color: #ffffff;
+}
+
+.oh-sticker-tabs-label {
+  font-family: var(--oh-font-label);
+  font-size: var(--oh-text-2xs);
+  letter-spacing: var(--oh-tracking-label);
+  text-transform: uppercase;
+}
+
+.oh-sticker-tab {
+  border-radius: var(--oh-radius-pill);
+}
+
+.oh-sticker-tab.active {
+  border-color: var(--oh-cobalt);
+  background: var(--oh-cobalt);
+  color: #ffffff;
+}
+
+.oh-wallet-ledger-icon {
+  border-radius: 8px;
+}
+
+.oh-plan-confirm .total dd,
+.oh-wallet-success strong {
+  font-family: var(--oh-font-display);
+  letter-spacing: -0.02em;
+}
+
+/* ============================ JOURNEY ROUTE ============================ */
+/* The journey at a glance: stops on one cobalt line, the final buyer at the end. */
+
+.oh-route {
+  margin: 4px 0 18px;
+  padding: 18px 18px 14px;
+  overflow-x: auto;
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-panel-radius);
+  background:
+    radial-gradient(circle, rgba(49, 92, 245, 0.07) 1px, transparent 1.5px) 0 0 / 14px 14px,
+    var(--oh-surface-2);
+  scrollbar-width: thin;
+}
+
+.oh-route-track {
+  display: flex;
+  min-width: max-content;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.oh-route-stop {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  width: 148px;
+  padding-right: 16px;
+  text-align: left;
+}
+
+/* The line to the next stop. */
+.oh-route-stop:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 13px;
+  left: 30px;
+  right: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--oh-cobalt);
+  opacity: 0.55;
+}
+
+.oh-route-stop:nth-last-child(2)::after {
+  background: repeating-linear-gradient(90deg, var(--oh-cobalt) 0 6px, transparent 6px 11px);
+}
+
+.oh-route-node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 8px;
+  border: 2px solid var(--oh-cobalt);
+  border-radius: 50%;
+  background: var(--oh-white);
+  color: var(--oh-cobalt);
+  font-family: var(--oh-font-label);
+  font-size: 0.74rem;
+  font-weight: 600;
+  box-shadow: 0 0 0 4px var(--oh-surface-2);
+}
+
+.oh-route-stop.end .oh-route-node {
+  border-color: var(--oh-border-strong);
+  color: var(--oh-text-muted);
+}
+
+.oh-route-stop.end.done .oh-route-node {
+  border-color: var(--oh-success);
+  background: var(--oh-success);
+  color: #ffffff;
+}
+
+.oh-route-role {
+  color: var(--oh-ink-900);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.oh-route-place {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--oh-text-muted);
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.oh-route-date {
+  color: var(--oh-text-faint);
+  font-family: var(--oh-font-label);
+  font-size: 0.68rem;
+}
+
+.oh-route-stop.end.done .oh-route-place {
+  color: var(--oh-success);
+  font-weight: 600;
+}
+
+/* ============================ PUBLIC QR PAGES ============================ */
+/* What a printed label opens (/b, /l, /verify): one product passport on porcelain. */
+
+.obv-page,
+.olq-page,
+.ov-page {
+  background:
+    radial-gradient(60% 40% at 50% 0%, rgba(184, 216, 248, 0.45) 0%, transparent 70%),
+    var(--oh-porcelain);
+}
+
+.obv-card,
+.olq-card,
+.ov-card {
+  overflow: hidden;
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-passport);
+  background: var(--oh-white);
+  box-shadow: var(--oh-shadow-passport), var(--oh-shadow-sm);
+}
+
+.obv-head {
+  border-bottom: 1px solid var(--oh-border);
+  background: var(--oh-white);
+}
+
+.obv-head .oh-wordmark {
+  color: var(--oh-ink-900);
+}
+
+.obv-head .oh-wordmark > span {
+  color: var(--oh-cobalt);
+}
+
+.obv-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-control);
+  background: var(--oh-white);
+  color: var(--oh-ink-900);
+}
+
+.obv-eyebrow,
+.olq-brand span,
+.ov-producer {
+  font-family: var(--oh-font-label);
+  font-size: var(--oh-text-2xs);
+  font-weight: 600;
+  letter-spacing: var(--oh-tracking-label);
+  text-transform: uppercase;
+  color: var(--oh-cobalt);
+}
+
+.olq-brand span {
+  color: var(--oh-text-muted);
+}
+
+.obv-hero h1,
+.olq-product h2,
+.ov-title {
+  font-family: var(--oh-font-display);
+  font-weight: 600;
+  letter-spacing: var(--oh-tracking-title);
+  color: var(--oh-ink-900);
+}
+
+.obv-expiry {
+  border: 1px solid var(--oh-success-line);
+  border-radius: var(--oh-radius-stamp);
+  font-family: var(--oh-font-label);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.obv-expiry.expired {
+  border-color: var(--oh-danger-line);
+}
+
+.obv-foot code,
+.ov-code {
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-stamp);
+  background: var(--oh-surface-2);
+  font-family: var(--oh-font-mono);
+}
+
+.ov-footer {
+  background: var(--oh-ink-900);
+  color: var(--oh-ice);
+  font-family: var(--oh-font-label);
+  font-size: 0.68rem;
+  letter-spacing: var(--oh-tracking-label);
+  text-transform: uppercase;
+}
+
+.olq-qrid strong {
+  font-family: var(--oh-font-mono);
+  letter-spacing: 0.02em;
+}
+
+.olq-qrid span {
+  font-family: var(--oh-font-label);
+  font-size: var(--oh-text-2xs);
+  letter-spacing: var(--oh-tracking-label);
+  text-transform: uppercase;
+}
+
+.olq-product-tile {
+  border-radius: 14px;
+  background:
+    radial-gradient(90% 90% at 100% 0%, rgba(49, 92, 245, 0.45) 0%, transparent 70%),
+    var(--oh-ink-900);
+  color: var(--oh-ice);
+}
+
+.olq-btn {
+  min-height: var(--oh-control-height-lg);
+}
+
+.olq-tabs button.active {
+  background: var(--oh-ink-900);
+  color: var(--oh-on-ink);
+}

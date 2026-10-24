@@ -52,7 +52,7 @@ const BulkLabelPreview = ({ values, code, bar }) => {
           <Finder x={0} y={QR_N - 7} />
           <circle cx="12.5" cy="12.5" r="3.4" fill="#fff" />
           <circle cx="12.5" cy="12.5" r="2.8" className="ink" />
-          <circle cx="12.5" cy="12.5" r="1.1" fill="var(--oh-gold)" />
+          <circle cx="12.5" cy="12.5" r="1.1" fill="var(--oh-print-accent)" />
         </svg>
         <span className="oh-bulk-label-brand">OriginHash</span>
       </div>

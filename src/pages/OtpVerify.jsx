@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import BrandPanel from '../components/BrandPanel.jsx';
+import { CircleAlert, ShieldCheck } from 'lucide-react';
+import AuthShell from '../components/AuthShell.jsx';
 import { Spinner } from '../components/Loader.jsx';
 import { sendOtp, verifyOtp, clearError } from '../store/authSlice';
 import '../styles/auth.css';
@@ -89,68 +90,74 @@ const OtpVerify = () => {
   };
 
   return (
-    <div className="oh-auth-shell">
-      <BrandPanel />
-      <div className="oh-form-panel">
-        <div className="oh-auth-card">
-          <div className="oh-auth-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2 2 7v6c0 5.2 3.8 9.9 10 11 6.2-1.1 10-5.8 10-11V7l-10-5Z" fill="var(--oh-gold)" />
-            </svg>
-          </div>
-          <h2 className="oh-auth-heading">Welcome back</h2>
-          <p className="oh-auth-sub">Log in to continue verifying products</p>
-
-        
-
-          {error && <div className="oh-error">{error}</div>}
-
-          <form onSubmit={handleVerify}>
-            <div className="oh-field">
-              <label htmlFor="otp">Enter OTP</label>
-              <div className="oh-otp-input">
-                <input
-                  id="otp"
-                  type="tel"
-                  inputMode="numeric"
-                  maxLength={6}
-                  placeholder="••••"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                />
-              </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--oh-text-muted)', marginTop: 6 }}>
-                OTP sent to +91 {mobile} &middot; check your SMS
-              </p>
-            </div>
-
-            <button className="oh-btn-primary" type="submit" disabled={status === 'loading' || !otp}>
-              {status === 'loading' && !resending ? (
-                <>
-                  <Spinner />
-                  Verifying…
-                </>
-              ) : 'Verify and log in'}
-            </button>
-          </form>
-
-          <div className="oh-resend-row">
-            {resendIn > 0 ? (
-              <span>Resend in {resendIn}s</span>
-            ) : (
-              <button className="oh-link" type="button" onClick={handleResend} disabled={resending}>
-                {resending ? (
-                  <>
-                    <Spinner />
-                    Sending OTP…
-                  </>
-                ) : 'Resend OTP'}
-              </button>
-            )}
-          </div>
-        </div>
+    <AuthShell>
+      <div className="oh-si-hero">
+        <span className="oh-si-icon glyph">
+          <ShieldCheck size={30} strokeWidth={1.6} aria-hidden="true" />
+        </span>
+        <h1 className="oh-si-title">Check your phone</h1>
+        <p className="oh-si-sub">
+          Enter the code we sent to <strong>+91 {mobile}</strong>
+        </p>
       </div>
-    </div>
+
+      <form className="oh-si-form" onSubmit={handleVerify}>
+        <label htmlFor="otp" className="oh-sr-only">
+          Enter OTP
+        </label>
+        <input
+          id="otp"
+          className="oh-si-code"
+          type="tel"
+          inputMode="numeric"
+          maxLength={6}
+          placeholder="••••"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+          aria-describedby="oh-si-otp-hint"
+        />
+        <p id="oh-si-otp-hint" className="oh-si-hint center">
+          OTP sent to +91 {mobile} &middot; check your SMS
+        </p>
+
+        {error && (
+          <p className="oh-si-error" role="alert">
+            <CircleAlert size={15} strokeWidth={2} aria-hidden="true" />
+            {error}
+          </p>
+        )}
+
+        <button className="oh-si-button" type="submit" disabled={status === 'loading' || !otp}>
+          {status === 'loading' && !resending ? (
+            <>
+              <Spinner />
+              Verifying…
+            </>
+          ) : (
+            'Verify and log in'
+          )}
+        </button>
+      </form>
+
+      <div className="oh-si-resend">
+        {resendIn > 0 ? (
+          <span>
+            Resend in <b>{resendIn}s</b>
+          </span>
+        ) : (
+          <button className="oh-si-link" type="button" onClick={handleResend} disabled={resending}>
+            {resending ? (
+              <>
+                <Spinner />
+                Sending OTP…
+              </>
+            ) : (
+              'Resend OTP'
+            )}
+          </button>
+        )}
+      </div>
+    </AuthShell>
   );
 };
 

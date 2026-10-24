@@ -65,6 +65,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   pointer-events: none;
 }

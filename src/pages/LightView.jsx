@@ -1,3 +1,4 @@
+import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../api/axios';
@@ -103,7 +104,9 @@ const LightView = () => {
 
       {status === 'missing' && (
         <div className="olq-missing">
-          <span aria-hidden="true">✕</span>
+          <span aria-hidden="true">
+            <X size={22} strokeWidth={2} />
+          </span>
           <h2>QR code not found</h2>
           <p>This code isn&apos;t in OriginHash records. It may not be a genuine OriginHash label.</p>
         </div>

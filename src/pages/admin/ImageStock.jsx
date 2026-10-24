@@ -1,3 +1,4 @@
+import { ArrowLeft, Plus, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -11,6 +12,7 @@ import {
   clearRejected,
 } from '../../store/imageStockSlice';
 import { LoadingState, RefreshingNote, Spinner } from '../../components/Loader.jsx';
+import { useConfirm } from '../../components/ConfirmDialog.jsx';
 import '../../styles/admin.css';
 
 const formatBytes = (bytes) => {
@@ -24,13 +26,15 @@ const formatDate = (iso) => {
   return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-// Asked before deleting a sample folder, from its card or from inside it.
-const confirmFolderDelete = (folder) => {
+// What to ask before deleting a sample folder, from its card or from inside it.
+const folderDeleteQuestion = (folder) => {
   const count = folder.imagesCount ?? 0;
-  return window.confirm(
-    `Delete ${folder.name} and its ${count} image${count === 1 ? '' : 's'}? ` +
-      "QR stickers already generated from it keep working. This can't be undone."
-  );
+  return {
+    title: `Delete ${folder.name}?`,
+    message: `Its ${count} image${count === 1 ? '' : 's'} will be deleted. QR stickers already generated from it keep working. This can't be undone.`,
+    confirmLabel: 'Delete folder',
+    danger: true,
+  };
 };
 
 const NewFolderCard = ({ onCreate }) => {
@@ -93,11 +97,11 @@ const NewFolderCard = ({ onCreate }) => {
 };
 
 // `onDelete` is only passed for sample folders an admin can remove.
-const FolderCard = ({ folder, onOpen, onDelete }) => {
+const FolderCard = ({ folder, onOpen, onDelete, confirm }) => {
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirmFolderDelete(folder)) return;
+    if (!(await confirm(folderDeleteQuestion(folder)))) return;
     setDeleting(true);
     const result = await onDelete(folder);
     // On success the card leaves the list; otherwise it's usable again.
@@ -115,7 +119,7 @@ const FolderCard = ({ folder, onOpen, onDelete }) => {
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
           <path
             d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.4l1.6 2h9A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5v-11Z"
-            stroke="var(--oh-forest)"
+            stroke="var(--oh-ink)"
             strokeWidth="1.5"
           />
         </svg>
@@ -132,7 +136,7 @@ const FolderCard = ({ folder, onOpen, onDelete }) => {
           title="Delete this sample folder"
           aria-label={deleting ? `Deleting ${folder.name}` : `Delete ${folder.name}`}
         >
-          {deleting ? <Spinner className="solo" /> : '✕'}
+          {deleting ? <Spinner className="solo" /> : <X size={14} strokeWidth={2} aria-hidden="true" />}
         </button>
       )}
     </div>
@@ -229,7 +233,7 @@ const ImageViewModal = ({ image, onClose }) => {
     <div className="oh-panel-backdrop oh-lightbox-backdrop" onClick={onClose}>
       <div className="oh-lightbox-content" onClick={(e) => e.stopPropagation()}>
         <button type="button" className="oh-panel-close oh-lightbox-close" onClick={onClose} aria-label="Close">
-          ✕
+          <X size={18} strokeWidth={1.75} aria-hidden="true" />
         </button>
         <LightboxImage key={image.url} image={image} />
         <div className="oh-lightbox-meta">
@@ -331,7 +335,7 @@ const UploadDropzone = ({ folderId, onUploaded }) => {
   );
 };
 
-const FolderDetail = ({ folder, onBack, onDelete }) => {
+const FolderDetail = ({ folder, onBack, onDelete, confirm }) => {
   const dispatch = useDispatch();
   const { images, imagesStatus } = useSelector((s) => s.imageStock);
   const canModerate = useSelector((s) => Boolean(s.auth.user?.isAdmin));
@@ -341,7 +345,7 @@ const FolderDetail = ({ folder, onBack, onDelete }) => {
   const [deleteError, setDeleteError] = useState('');
 
   const handleDelete = async () => {
-    if (!confirmFolderDelete(folder)) return;
+    if (!(await confirm(folderDeleteQuestion(folder)))) return;
     setDeleting(true);
     setDeleteError('');
     const result = await onDelete(folder);
@@ -371,7 +375,7 @@ const FolderDetail = ({ folder, onBack, onDelete }) => {
       <div className="oh-admin-header">
         <div>
           <button type="button" className="oh-back-link" onClick={onBack}>
-            ← All folders
+            <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" /> All folders
           </button>
           <h1 className="oh-admin-title">
             {folder.name} {folder.isSample && <span className="oh-badge sample">Sample</span>}
@@ -430,6 +434,7 @@ const FolderDetail = ({ folder, onBack, onDelete }) => {
 };
 
 const ImageStock = () => {
+  const [confirm, confirmDialog] = useConfirm();
   const dispatch = useDispatch();
   const { folders, foldersStatus, images, imagesStatus } = useSelector((s) => s.imageStock);
   const canModerate = useSelector((s) => Boolean(s.auth.user?.isAdmin));
@@ -493,7 +498,10 @@ const ImageStock = () => {
 
   if (selectedFolder) {
     return (
-      <FolderDetail folder={selectedFolder} onBack={() => setSelectedFolder(null)} onDelete={handleDeleteFolder} />
+      <>
+        <FolderDetail folder={selectedFolder} onBack={() => setSelectedFolder(null)} onDelete={handleDeleteFolder} confirm={confirm} />
+        {confirmDialog}
+      </>
     );
   }
 
@@ -514,7 +522,12 @@ const ImageStock = () => {
                   <span className="oh-spinner" /> Fetching 10 photos…
                 </>
               ) : (
-                '+ Generate sample folder'
+                (
+                <>
+                  <Plus size={16} strokeWidth={2} aria-hidden="true" />
+                  Generate sample folder
+                </>
+              )
               )}
             </button>
           </div>
@@ -561,6 +574,7 @@ const ImageStock = () => {
                 folder={folder}
                 onOpen={setSelectedFolder}
                 onDelete={canModerate && folder.isSample ? handleDeleteFolder : undefined}
+                confirm={confirm}
               />
             ))}
           </div>
@@ -590,6 +604,7 @@ const ImageStock = () => {
       )}
 
       <ImageViewModal image={viewingImage} onClose={() => setViewingImage(null)} />
+      {confirmDialog}
     </div>
   );
 };

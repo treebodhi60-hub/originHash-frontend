@@ -1,3 +1,4 @@
+import { Download, Plus, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -6,6 +7,7 @@ import { fetchAdmins, promoteUser, demoteAdmin, setSearch as setAdminSearch } fr
 import UserEditPanel from './UserEditPanel.jsx';
 import AdminEditPanel from './AdminEditPanel.jsx';
 import { LoadingState, RefreshingNote, Spinner } from '../../components/Loader.jsx';
+import { useConfirm } from '../../components/ConfirmDialog.jsx';
 import { userCode } from '../../utils/format';
 import '../../styles/admin.css';
 
@@ -64,9 +66,9 @@ const PromoteModal = ({ user, onClose }) => {
 
   return (
     <div className="oh-panel-backdrop" onClick={onClose}>
-      <div className="oh-slide-panel" onClick={(e) => e.stopPropagation()}>
+      <div className="oh-slide-panel" role="dialog" aria-modal="true" aria-label="Promote to admin" onClick={(e) => e.stopPropagation()}>
         <button className="oh-panel-close" onClick={onClose} type="button" aria-label="Close">
-          ✕
+          <X size={18} strokeWidth={1.75} aria-hidden="true" />
         </button>
         <div className="oh-panel-header">
           <div className="oh-panel-avatar">{(user.name || '?').charAt(0).toUpperCase()}</div>
@@ -141,9 +143,9 @@ const DemoteMobileModal = ({ admin, onClose }) => {
 
   return (
     <div className="oh-panel-backdrop" onClick={onClose}>
-      <div className="oh-slide-panel" onClick={(e) => e.stopPropagation()}>
+      <div className="oh-slide-panel" role="dialog" aria-modal="true" aria-label="Demote to normal user" onClick={(e) => e.stopPropagation()}>
         <button className="oh-panel-close" onClick={onClose} type="button" aria-label="Close">
-          ✕
+          <X size={18} strokeWidth={1.75} aria-hidden="true" />
         </button>
         <div className="oh-panel-header">
           <div className="oh-panel-avatar">{(admin.name || '?').charAt(0).toUpperCase()}</div>
@@ -228,10 +230,12 @@ const NormalUsersTab = ({ showPromote }) => {
         </div>
         <div className="oh-header-actions">
           <button className="oh-btn-add" onClick={() => setPanel({ mode: 'add' })}>
-            + Add
+            <Plus size={16} strokeWidth={2} aria-hidden="true" />
+            Add user
           </button>
           <button className="oh-btn-export" onClick={() => exportCsv(list)}>
-            ⬇ Export
+            <Download size={16} strokeWidth={1.75} aria-hidden="true" />
+            Export CSV
           </button>
         </div>
       </div>
@@ -333,6 +337,7 @@ const NormalUsersTab = ({ showPromote }) => {
 };
 
 const AdminsTab = () => {
+  const [confirm, confirmDialog] = useConfirm();
   const dispatch = useDispatch();
   const { list, search, status } = useSelector((state) => state.admins);
   const currentUser = useSelector((state) => state.auth.user);
@@ -352,7 +357,13 @@ const AdminsTab = () => {
       setDemoteTarget(admin);
       return;
     }
-    if (!window.confirm(`Demote ${admin.name || admin.username} to a normal user?`)) return;
+    const ok = await confirm({
+      title: `Demote ${admin.name || admin.username}?`,
+      message: 'They lose admin access and sign in as a normal user with their mobile number and OTP.',
+      confirmLabel: 'Demote to normal user',
+      danger: true,
+    });
+    if (!ok) return;
     setDemotingId(admin.id);
     await dispatch(demoteAdmin({ id: admin.id }));
     setDemotingId(null);
@@ -367,7 +378,8 @@ const AdminsTab = () => {
         </div>
         <div className="oh-header-actions">
           <button className="oh-btn-add" onClick={() => setPanel({ mode: 'add' })}>
-            + Add admin
+            <Plus size={16} strokeWidth={2} aria-hidden="true" />
+            Add admin
           </button>
         </div>
       </div>
@@ -431,6 +443,7 @@ const AdminsTab = () => {
 
       {panel && <AdminEditPanel mode={panel.mode} admin={panel.admin} onClose={() => setPanel(null)} />}
       {demoteTarget && <DemoteMobileModal admin={demoteTarget} onClose={() => setDemoteTarget(null)} />}
+      {confirmDialog}
     </div>
   );
 };

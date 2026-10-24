@@ -10,8 +10,7 @@
   align-items: flex-start;
   padding: clamp(0px, 4vh, 40px) 0 32px;
   background:
-    radial-gradient(circle at 100% 0%, rgba(201, 164, 100, 0.18), transparent 40%),
-    var(--oh-cream);
+    var(--oh-canvas);
 }
 
 .olq-card {
@@ -26,7 +25,7 @@
 @media (min-width: 480px) {
   .olq-card {
     border-radius: 28px;
-    box-shadow: 0 24px 60px rgba(22, 56, 50, 0.16);
+    box-shadow: 0 24px 60px rgba(23, 36, 58, 0.16);
   }
 }
 
@@ -44,7 +43,7 @@
   justify-content: center;
   gap: 12px;
   padding: 22px 20px 18px;
-  border-bottom: 1px solid #f1ebe0;
+  border-bottom: 1px solid var(--oh-well);
 }
 
 .olq-brand-logo {
@@ -52,19 +51,18 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 50%;
-  background: var(--oh-forest);
+  border-radius: 12px;
+  background: var(--oh-ink);
+  box-shadow: inset 0 0 0 1px rgba(82, 111, 229, 0.3);
 }
 
 .olq-brand strong {
   display: block;
-  font-family: var(--oh-font-display);
-  font-size: 1.35rem;
+  font-size: 1.6rem;
   line-height: 1.1;
-  color: var(--oh-forest);
 }
 
-.olq-brand span {
+.olq-brand > div > span {
   font-size: 0.78rem;
   color: var(--oh-text-muted);
 }
@@ -74,7 +72,7 @@
   grid-template-columns: 40px 1fr 40px;
   align-items: center;
   padding: 14px 14px 12px;
-  border-bottom: 1px solid #f1ebe0;
+  border-bottom: 1px solid var(--oh-well);
 }
 
 .olq-back {
@@ -86,11 +84,11 @@
   border: none;
   border-radius: 50%;
   background: none;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .olq-back:hover {
-  background: var(--oh-hover, #f7f2ea);
+  background: var(--oh-hover, var(--oh-hover));
 }
 
 .olq-bar-title {
@@ -99,7 +97,7 @@
 
 .olq-bar-title h1 {
   font-size: 1.05rem;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .olq-bar-title span {
@@ -131,14 +129,14 @@
   height: 56px;
   margin-bottom: 12px;
   border-radius: 50%;
-  background: var(--oh-red-bg);
-  color: var(--oh-red);
+  background: var(--oh-danger-bg);
+  color: var(--oh-danger);
   font-weight: 700;
 }
 
 .olq-missing h2 {
   font-size: 1.2rem;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .olq-missing p {
@@ -154,7 +152,7 @@
   align-items: center;
   padding: 14px;
   border-radius: 18px;
-  background: linear-gradient(135deg, #fdf8ef 0%, var(--oh-cream) 100%);
+  background: linear-gradient(135deg, var(--oh-surface-2) 0%, var(--oh-canvas) 100%);
 }
 
 .olq-product-tile {
@@ -164,9 +162,9 @@
   width: 96px;
   height: 96px;
   border-radius: 16px;
-  background: var(--oh-forest);
-  color: var(--oh-gold);
-  box-shadow: 0 8px 20px rgba(22, 56, 50, 0.18);
+  background: var(--oh-ink);
+  color: var(--oh-accent);
+  box-shadow: 0 8px 20px rgba(23, 36, 58, 0.18);
 }
 
 .olq-product.compact .olq-product-tile {
@@ -183,7 +181,7 @@
   font-family: var(--oh-font-display);
   font-size: 1.25rem;
   line-height: 1.2;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .olq-product.compact h2 {
@@ -222,16 +220,16 @@
   flex-direction: column;
   align-items: center;
   padding: 14px;
-  border: 1px solid #f1ebe0;
+  border: 1px solid var(--oh-well);
   border-radius: 16px;
-  background: #faf6ef;
+  background: var(--oh-surface-2);
 }
 
 .olq-qrid span {
   font-size: 0.74rem;
   font-weight: 600;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--oh-text-muted);
 }
 
@@ -239,7 +237,7 @@
   font-family: var(--oh-font-display);
   font-size: 1.9rem;
   letter-spacing: 0.5px;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 /* Verified / scan recorded rows */
@@ -252,9 +250,9 @@
 
 .olq-row.recorded {
   padding: 14px;
-  border: 1px solid #cfe9d9;
+  border: 1px solid var(--oh-success-bg);
   border-radius: 16px;
-  background: #effaf3;
+  background: var(--oh-success-bg);
 }
 
 .olq-tick {
@@ -264,7 +262,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: var(--oh-green);
+  background: var(--oh-success);
   color: var(--oh-white);
 }
 
@@ -279,7 +277,7 @@
 
 .olq-row strong {
   font-size: 0.98rem;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .olq-place {
@@ -299,7 +297,7 @@
   font-size: 0.7rem;
   line-height: 1.45;
   text-align: center;
-  color: #9a948a;
+  color: var(--oh-text-faint);
 }
 
 /* Buttons */
@@ -319,23 +317,23 @@
 
 .olq-btn.primary {
   border: none;
-  background: var(--oh-forest);
+  background: var(--oh-ink);
   color: var(--oh-white);
-  box-shadow: 0 10px 22px rgba(22, 56, 50, 0.18);
+  box-shadow: 0 10px 22px rgba(23, 36, 58, 0.18);
 }
 
 .olq-btn.primary:hover:not(:disabled) {
-  background: var(--oh-forest-light);
+  background: var(--oh-ink-2);
 }
 
 .olq-btn.ghost {
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   background: var(--oh-white);
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .olq-btn.ghost:hover:not(:disabled) {
-  background: var(--oh-hover, #f7f2ea);
+  background: var(--oh-hover, var(--oh-hover));
 }
 
 .olq-btn:active:not(:disabled) {
@@ -359,9 +357,9 @@
   display: flex;
   gap: 12px;
   padding: 12px;
-  border: 1px solid #ecdcbc;
+  border: 1px solid var(--oh-border-strong);
   border-radius: 16px;
-  background: #fbf2e1;
+  background: var(--oh-surface-2);
 }
 
 .olq-mine img {
@@ -383,7 +381,7 @@
 
 .olq-mine strong {
   font-size: 0.92rem;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .olq-mine p {
@@ -408,7 +406,7 @@
 
 .olq-label em {
   font-style: normal;
-  color: var(--oh-red);
+  color: var(--oh-danger);
 }
 
 .olq-photo {
@@ -436,7 +434,7 @@
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: rgba(15, 30, 26, 0.75);
+  background: rgba(17, 27, 45, 0.75);
   color: #fff;
   font-size: 0.9rem;
 }
@@ -448,10 +446,10 @@
   justify-content: center;
   gap: 8px;
   height: 180px;
-  border: 1.5px dashed #d8c9aa;
+  border: 1.5px dashed var(--oh-border-strong);
   border-radius: 16px;
-  background: #faf6ef;
-  color: #8a6d35;
+  background: var(--oh-surface-2);
+  color: var(--oh-signal-ink);
   font-size: 0.86rem;
   font-weight: 600;
 }
@@ -465,9 +463,9 @@
 .olq-field textarea {
   width: 100%;
   padding: 12px 14px;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: 14px;
-  background: var(--oh-cream);
+  background: var(--oh-white);
   font: inherit;
   font-size: 0.95rem;
   color: var(--oh-text);
@@ -476,9 +474,9 @@
 
 .olq-field textarea:focus {
   outline: none;
-  border-color: var(--oh-forest);
+  border-color: var(--oh-ink);
   background: var(--oh-white);
-  box-shadow: 0 0 0 3px rgba(22, 56, 50, 0.1);
+  box-shadow: 0 0 0 3px rgba(23, 36, 58, 0.1);
 }
 
 .olq-count {
@@ -505,7 +503,7 @@
   padding: 4px;
   border: 1px solid var(--oh-border);
   border-radius: 12px;
-  background: #faf6ef;
+  background: var(--oh-surface-2);
 }
 
 .olq-tabs button {
@@ -519,8 +517,10 @@
 }
 
 .olq-tabs button.active {
-  background: var(--oh-forest);
-  color: var(--oh-white);
+  background: var(--oh-blue-soft);
+  color: var(--oh-blue-hover);
+  border-color: rgba(82, 111, 229, 0.45);
+  box-shadow: none;
 }
 
 .olq-timeline {
@@ -545,7 +545,7 @@
   top: 40px;
   bottom: 0;
   left: 19px;
-  border-left: 2px dashed #e3d9c6;
+  border-left: 2px dashed var(--oh-border);
 }
 
 .olq-dot {
@@ -560,12 +560,12 @@
 
 .type-scan .olq-dot {
   background: var(--oh-badge-farmer-bg);
-  color: var(--oh-green);
+  color: var(--oh-success);
 }
 
 .type-update .olq-dot {
-  background: #fdebd7;
-  color: #b45309;
+  background: var(--oh-warning-bg);
+  color: var(--oh-badge-distributor-text);
 }
 
 .olq-event {
@@ -608,7 +608,7 @@
   margin: 4px 0 0;
   padding: 8px 10px;
   border-radius: 10px;
-  background: #faf6ef;
+  background: var(--oh-surface-2);
   font-size: 0.86rem;
   color: var(--oh-text);
   overflow-wrap: anywhere;
@@ -623,7 +623,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 11px 0;
-  border-bottom: 1px solid #f1ebe0;
+  border-bottom: 1px solid var(--oh-well);
   font-size: 0.88rem;
 }
 

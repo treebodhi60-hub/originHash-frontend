@@ -5,14 +5,14 @@
 
 /* Plan colours match the plan cards: orange, the retailer blue, green. */
 :root {
-  --su-payg: var(--oh-orange-dark);
+  --su-payg: var(--oh-amber-strong);
   --su-sub: var(--oh-badge-retailer-text);
-  --su-fixed: var(--oh-green);
-  --su-light: var(--oh-purple);
-  --su-used: var(--oh-forest);
-  --su-expired: var(--oh-red);
-  --su-left: var(--oh-gold);
-  --su-cleared: #c7c2b8;
+  --su-fixed: var(--oh-success);
+  --su-light: var(--oh-ink);
+  --su-used: var(--oh-ink);
+  --su-expired: var(--oh-danger);
+  --su-left: var(--oh-accent);
+  --su-cleared: var(--oh-border-strong);
 }
 
 /* ---------- Usage bar ---------- */
@@ -22,7 +22,7 @@
   height: 10px;
   border-radius: 999px;
   overflow: hidden;
-  background: #efe7da;
+  background: var(--oh-border);
 }
 
 .oh-usage-bar span {
@@ -32,7 +32,7 @@
 
 .oh-usage-bar .empty {
   flex: 1;
-  background: #efe7da;
+  background: var(--oh-border);
 }
 
 .part-used { background: var(--su-used); }
@@ -100,7 +100,7 @@
 .oh-su-head h2 {
   font-family: var(--oh-font-display);
   font-size: 1.35rem;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-su-head p {
@@ -122,7 +122,7 @@
   padding: 10px 16px;
   border: none;
   border-radius: 999px;
-  background: var(--oh-forest);
+  background: var(--oh-blue);
   color: var(--oh-white);
   font-size: 0.86rem;
   font-weight: 600;
@@ -130,17 +130,17 @@
 }
 
 .oh-su-btn:hover:not(:disabled) {
-  background: var(--oh-forest-light);
+  background: var(--oh-ink-2);
 }
 
 .oh-su-btn.ghost {
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   background: var(--oh-white);
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-su-btn.ghost:hover:not(:disabled) {
-  background: var(--oh-hover, #f7f2ea);
+  background: var(--oh-hover, var(--oh-hover));
 }
 
 .oh-su-btn:disabled {
@@ -173,13 +173,13 @@
   gap: 2px;
   padding: 14px 16px;
   border: 1px solid var(--oh-border);
-  border-top: 3px solid var(--oh-forest);
+  border-top: 3px solid var(--oh-ink);
   border-radius: 14px;
   background: var(--oh-white);
 }
 
 .oh-su-kpi.danger { border-top-color: var(--su-expired); }
-.oh-su-kpi.warning { border-top-color: var(--oh-orange-dark); }
+.oh-su-kpi.warning { border-top-color: var(--oh-amber-strong); }
 
 .oh-su-kpi-label {
   font-size: 0.78rem;
@@ -227,7 +227,7 @@
   flex-direction: column;
   gap: 10px;
   padding: 14px 16px;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-left: 4px solid var(--plan);
   border-radius: 14px;
   background: var(--oh-white);
@@ -296,7 +296,7 @@
 .oh-su-check input {
   width: 16px;
   height: 16px;
-  accent-color: var(--oh-forest);
+  accent-color: var(--oh-ink);
 }
 
 /* Table */
@@ -317,7 +317,7 @@
 .oh-su-table th,
 .oh-su-table td {
   padding: 11px 14px;
-  border-bottom: 1px solid #f1ebe0;
+  border-bottom: 1px solid var(--oh-well);
   text-align: left;
   vertical-align: middle;
 }
@@ -327,17 +327,17 @@
 }
 
 .oh-su-table tbody tr:hover {
-  background: var(--oh-hover, #f7f2ea);
+  background: var(--oh-hover, var(--oh-hover));
 }
 
 .oh-su-table thead th {
   position: sticky;
   top: 0;
-  background: #faf6ef;
+  background: var(--oh-surface-2);
   font-size: 0.74rem;
   font-weight: 700;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--oh-text-muted);
   white-space: nowrap;
 }
@@ -357,7 +357,7 @@
 
 .oh-su-table thead th[aria-sort='ascending'],
 .oh-su-table thead th[aria-sort='descending'] {
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-su-sort {
@@ -377,7 +377,7 @@
 }
 
 .oh-su-table td.zero {
-  color: #b8b2a7;
+  color: var(--oh-text-faint);
 }
 
 .oh-su-table td.expired {
@@ -389,12 +389,12 @@
   margin-left: 6px;
   padding: 1px 6px;
   border-radius: 999px;
-  background: var(--oh-red-bg);
+  background: var(--oh-danger-bg);
   font-size: 0.7rem;
 }
 
 .oh-su-table td.soon {
-  color: #b45309;
+  color: var(--oh-badge-distributor-text);
   font-weight: 600;
 }
 
@@ -410,7 +410,7 @@
 
 .oh-su-user-name {
   font-weight: 600;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-su-user:hover .oh-su-user-name {
@@ -449,7 +449,7 @@
 .oh-ua-sticker-table th,
 .oh-ua-sticker-table td {
   padding: 9px 10px;
-  border-bottom: 1px solid #f1ebe0;
+  border-bottom: 1px solid var(--oh-well);
   text-align: right;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -463,8 +463,8 @@
 .oh-ua-sticker-table thead th {
   font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--oh-text-muted);
 }
 
@@ -492,8 +492,8 @@
   margin-top: 16px;
   font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--oh-text-muted);
 }
 
@@ -503,7 +503,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 8px 0;
-  border-bottom: 1px dashed #efe7da;
+  border-bottom: 1px dashed var(--oh-border);
   font-size: 0.84rem;
 }
 
@@ -582,7 +582,7 @@
   padding: 10px 12px;
   border-left: 3px solid var(--plan, var(--su-payg));
   border-radius: 10px;
-  background: #faf6ef;
+  background: var(--oh-surface-2);
   font-size: 0.8rem;
   color: var(--oh-text-muted);
 }

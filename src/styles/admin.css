@@ -1,56 +1,14 @@
 .oh-admin-shell {
   display: flex;
   min-height: 100vh;
-  background: var(--oh-cream);
+  background: var(--oh-canvas);
 }
 
-/* ---------- Sidebar ---------- */
+/* ---------- Sidebar: structure only; its look lives in refresh.css (SideNav.jsx) ---------- */
 .oh-sidebar {
-  width: 72px;
-  background: var(--oh-forest);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 18px 0;
-  gap: 6px;
   flex-shrink: 0;
-}
-
-.oh-sidebar-logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1.5px solid var(--oh-gold);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 18px;
-}
-
-.oh-sidebar-item {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #a9c4bc;
-  text-decoration: none;
-  margin-bottom: 4px;
-}
-
-.oh-sidebar-item.active {
-  background: #ffffff22;
-  color: var(--oh-white);
-}
-
-.oh-sidebar-item.disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.oh-sidebar-bottom {
-  margin-top: auto;
 }
 
 /* ---------- Main area ---------- */
@@ -76,7 +34,7 @@
 }
 
 .oh-admin-title {
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   font-size: 1.4rem;
 }
 
@@ -92,7 +50,7 @@
 }
 
 .oh-btn-add {
-  background: var(--oh-purple);
+  background: var(--oh-ink);
   color: var(--oh-white);
   border: none;
   border-radius: var(--oh-radius-sm);
@@ -102,7 +60,7 @@
 }
 
 .oh-btn-export {
-  background: var(--oh-forest);
+  background: var(--oh-ink);
   color: var(--oh-white);
   border: none;
   border-radius: var(--oh-radius-sm);
@@ -125,7 +83,7 @@
   flex: 1;
   min-width: 220px;
   background: var(--oh-white);
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: var(--oh-radius-sm);
   padding: 11px 14px;
   font-size: 0.9rem;
@@ -133,7 +91,7 @@
 
 .oh-status-select {
   background: var(--oh-white);
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: var(--oh-radius-sm);
   padding: 11px 14px;
   font-size: 0.9rem;
@@ -166,8 +124,8 @@
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: #cfe3dc;
-  color: var(--oh-forest);
+  background: var(--oh-well);
+  color: var(--oh-ink);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -212,7 +170,7 @@
 }
 
 .oh-btn-edit {
-  background: var(--oh-orange);
+  background: var(--oh-amber);
   color: var(--oh-white);
   border: none;
   border-radius: var(--oh-radius-sm);
@@ -222,13 +180,13 @@
 }
 
 .oh-btn-edit:hover {
-  background: var(--oh-orange-dark);
+  background: var(--oh-amber-strong);
 }
 
 .oh-btn-block {
   background: var(--oh-white);
-  color: var(--oh-red);
-  border: 1.5px solid var(--oh-red);
+  color: var(--oh-danger);
+  border: 1.5px solid var(--oh-danger);
   border-radius: var(--oh-radius-sm);
   padding: 9px 18px;
   font-weight: 700;
@@ -237,8 +195,8 @@
 
 .oh-btn-unblock {
   background: var(--oh-white);
-  color: var(--oh-forest);
-  border: 1.5px solid var(--oh-forest);
+  color: var(--oh-ink);
+  border: 1.5px solid var(--oh-ink);
   border-radius: var(--oh-radius-sm);
   padding: 9px 16px;
   font-weight: 700;
@@ -255,7 +213,7 @@
 .oh-panel-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 30, 26, 0.35);
+  background: rgba(17, 27, 45, 0.35);
   z-index: 40;
   display: flex;
   justify-content: flex-end;
@@ -288,8 +246,8 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: #cfe3dc;
-  color: var(--oh-forest);
+  background: var(--oh-well);
+  color: var(--oh-ink);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -309,8 +267,8 @@
 }
 
 .oh-error {
-  background: var(--oh-red-bg);
-  color: var(--oh-red);
+  background: var(--oh-danger-bg);
+  color: var(--oh-danger);
   border-radius: var(--oh-radius-sm);
   padding: 10px 12px;
   font-size: 0.85rem;
@@ -325,34 +283,34 @@
   display: block;
   font-size: 0.78rem;
   font-weight: 600;
-  letter-spacing: 0.4px;
+  letter-spacing: 0;
   color: var(--oh-text-muted);
   margin-bottom: 6px;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .oh-field input,
 .oh-field select {
   width: 100%;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: var(--oh-radius-sm);
-  background: var(--oh-cream);
+  background: var(--oh-white);
   padding: 11px 12px;
   font-size: 0.9rem;
 }
 
 .oh-mobile-input {
   display: flex;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: var(--oh-radius-sm);
   overflow: hidden;
-  background: var(--oh-cream);
+  background: var(--oh-white);
 }
 
 .oh-mobile-input .oh-code {
   padding: 11px 12px;
   font-weight: 600;
-  border-right: 1.5px solid var(--oh-border);
+  border-right: 1px solid var(--oh-border);
   background: var(--oh-white);
 }
 
@@ -383,7 +341,7 @@
 .oh-btn-cancel {
   flex: 1;
   background: var(--oh-white);
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: var(--oh-radius-sm);
   padding: 11px;
   font-weight: 600;
@@ -392,7 +350,7 @@
 
 .oh-btn-save {
   flex: 1;
-  background: var(--oh-forest);
+  background: var(--oh-ink);
   color: var(--oh-white);
   border: none;
   border-radius: var(--oh-radius-sm);
@@ -416,7 +374,7 @@
   display: flex;
   gap: 6px;
   margin-bottom: 18px;
-  border-bottom: 1.5px solid var(--oh-border);
+  border-bottom: 1px solid var(--oh-border);
 }
 
 .oh-tab {
@@ -431,8 +389,8 @@
 }
 
 .oh-tab.active {
-  color: var(--oh-forest);
-  border-bottom-color: var(--oh-forest);
+  color: var(--oh-ink);
+  border-bottom-color: var(--oh-ink);
 }
 
 .oh-folder-grid {
@@ -443,7 +401,7 @@
 
 .oh-folder-card {
   background: var(--oh-white);
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: var(--oh-radius-md);
   box-shadow: var(--oh-shadow);
   padding: 20px 14px;
@@ -469,7 +427,7 @@
 
 .oh-folder-card-new {
   justify-content: center;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   border-style: dashed;
   border-width: 2px;
   box-shadow: none;
@@ -488,7 +446,7 @@
 
 .oh-folder-card-form input {
   width: 100%;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: var(--oh-radius-sm);
   padding: 8px 10px;
   font-size: 0.85rem;
@@ -508,7 +466,7 @@
 }
 
 .oh-folder-error {
-  color: var(--oh-red);
+  color: var(--oh-danger);
   font-size: 0.72rem;
 }
 
@@ -521,8 +479,8 @@
 }
 
 .oh-dropzone.active {
-  border-color: var(--oh-forest);
-  background: #f1f7f4;
+  border-color: var(--oh-ink);
+  background: var(--oh-success-bg);
 }
 
 .oh-dropzone-icon {
@@ -556,7 +514,7 @@
 
 .oh-dropzone-notices {
   margin-top: 12px;
-  color: var(--oh-red);
+  color: var(--oh-danger);
   font-size: 0.8rem;
   text-align: left;
 }
@@ -580,7 +538,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
-  background: var(--oh-cream);
+  background: var(--oh-canvas);
   border: none;
   padding: 0;
   display: block;
@@ -611,7 +569,7 @@
   width: 22px;
   height: 22px;
   border: 2.5px solid var(--oh-border);
-  border-top-color: var(--oh-forest);
+  border-top-color: var(--oh-ink);
   border-radius: 50%;
   animation: oh-spin 0.7s linear infinite;
 }
@@ -639,7 +597,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: rgba(15, 30, 26, 0.55);
+  background: rgba(17, 27, 45, 0.55);
   color: var(--oh-white);
   display: flex;
   align-items: center;
@@ -702,7 +660,7 @@
   max-height: 70vh;
   object-fit: contain;
   display: block;
-  background: var(--oh-cream);
+  background: var(--oh-canvas);
 }
 
 .oh-lightbox-meta {
@@ -714,7 +672,7 @@
   top: 10px;
   right: 14px;
   z-index: 1;
-  background: rgba(15, 30, 26, 0.55);
+  background: rgba(17, 27, 45, 0.55);
   color: var(--oh-white);
   border-radius: 50%;
   width: 30px;
@@ -763,7 +721,7 @@
 .oh-btn-generate {
   width: 100%;
   margin-top: 22px;
-  background: var(--oh-forest);
+  background: var(--oh-ink);
   color: var(--oh-white);
   border: none;
   border-radius: var(--oh-radius-sm);
@@ -798,7 +756,7 @@
 }
 
 .oh-sticker-header {
-  background: var(--oh-forest);
+  background: var(--oh-print-ink);
   color: var(--oh-white);
   padding: 10px 14px;
 }
@@ -810,7 +768,7 @@
 }
 
 .oh-sticker-batchline {
-  color: var(--oh-gold);
+  color: var(--oh-print-accent);
   font-size: 0.68rem;
   margin-top: 2px;
 }
@@ -818,7 +776,7 @@
 .oh-sticker-product {
   text-align: center;
   font-weight: 700;
-  color: var(--oh-forest);
+  color: var(--oh-print-ink);
   font-size: 0.88rem;
   margin-top: 10px;
 }
@@ -844,7 +802,7 @@
 .oh-sticker-qr-box {
   flex: 1;
   aspect-ratio: 1 / 1;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -852,7 +810,7 @@
 }
 
 .oh-sticker-image-box {
-  background: var(--oh-cream);
+  background: var(--oh-print-paper);
 }
 
 .oh-sticker-qr-box {
@@ -1024,7 +982,7 @@
 }
 
 .oh-download-error {
-  color: var(--oh-red);
+  color: var(--oh-danger);
   font-size: 0.72rem;
 }
 
@@ -1050,12 +1008,12 @@
 
 .oh-qr-code-chip.link:hover img,
 .oh-qr-code-chip.link:focus-visible img {
-  border-color: var(--oh-forest);
-  box-shadow: 0 0 0 2px rgba(22, 56, 50, 0.2);
+  border-color: var(--oh-ink);
+  box-shadow: 0 0 0 2px rgba(23, 36, 58, 0.2);
 }
 
 .oh-qr-code-chip.link span {
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   font-weight: 600;
 }
 
@@ -1099,7 +1057,7 @@
   padding: 0;
   font: inherit;
   font-weight: 700;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
@@ -1136,17 +1094,17 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   background: var(--oh-white);
-  color: var(--oh-red);
+  color: var(--oh-danger);
   font-size: 0.8rem;
   line-height: 1;
 }
 
 .oh-folder-delete:hover,
 .oh-folder-delete:focus-visible {
-  border-color: var(--oh-red);
-  background: var(--oh-red-bg);
+  border-color: var(--oh-danger);
+  background: var(--oh-danger-bg);
 }
 
 .oh-btn-with-spinner {
@@ -1172,13 +1130,13 @@
 /* ---------- Field-level alert (e.g. a batch no that's already used) ---------- */
 .oh-field input.invalid,
 .oh-field input.invalid:focus {
-  border-color: var(--oh-red);
+  border-color: var(--oh-danger);
 }
 
 .oh-field-alert {
   margin-top: 6px;
-  background: var(--oh-red-bg);
-  color: var(--oh-red);
+  background: var(--oh-danger-bg);
+  color: var(--oh-danger);
   border-radius: var(--oh-radius-sm);
   padding: 7px 10px;
   font-size: 0.78rem;
@@ -1192,7 +1150,7 @@
 
 .oh-folder-delete:disabled {
   cursor: default;
-  color: var(--oh-red);
+  color: var(--oh-danger);
 }
 
 /* Room for the spinner while a full-size image downloads. */
@@ -1203,7 +1161,7 @@
 .oh-lightbox-image.loading {
   min-width: min(80vw, 420px);
   min-height: 280px;
-  background: var(--oh-cream);
+  background: var(--oh-canvas);
 }
 
 .oh-lightbox-image.loading img {
@@ -1212,5 +1170,5 @@
 }
 
 .oh-dropzone-icon .oh-loader {
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }

@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { AtSign, LogOut, Pencil, Phone, UserRound } from 'lucide-react';
 import { updateProfile, logout } from '../../store/authSlice';
 import { Spinner } from '../../components/Loader.jsx';
+import { userCode } from '../../utils/format';
 import '../../styles/admin.css';
 import '../../styles/app-shell.css';
 
+// The signed-in admin's own account: their name (editable), username or mobile, and Log out.
 const AdminProfile = () => {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -13,16 +16,28 @@ const AdminProfile = () => {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   if (!user) return null;
 
   const handleSave = async () => {
     setSaving(true);
+    setError('');
     const fd = new FormData();
     fd.append('name', name);
-    await dispatch(updateProfile(fd));
+    const result = await dispatch(updateProfile(fd));
     setSaving(false);
+    if (updateProfile.rejected.match(result)) {
+      setError(result.payload || 'Could not update profile.');
+      return;
+    }
     setEditing(false);
+  };
+
+  const cancel = () => {
+    setEditing(false);
+    setName(user.name || '');
+    setError('');
   };
 
   const handleLogout = () => {
@@ -31,87 +46,122 @@ const AdminProfile = () => {
   };
 
   const initial = (user.name || 'A').charAt(0).toUpperCase();
+  const role = user.isSuperAdmin ? 'Super-admin' : 'Admin';
 
   return (
-    <div style={{ maxWidth: 420 }}>
-      <h1 className="oh-admin-title" style={{ marginBottom: 18 }}>
-        Admin profile
-      </h1>
+    <div className="oh-account">
+      <header className="oh-admin-header">
+        <div>
+          <span className="oh-eyebrow">Settings</span>
+          <h1 className="oh-admin-title">Admin profile</h1>
+          <p className="oh-admin-subtitle">Your name appears beside the batches and changes you make.</p>
+        </div>
+      </header>
 
-      <div className="oh-profile-card">
-        <div className="oh-avatar-wrap">
-          <div className="oh-avatar">{initial}</div>
-          <div className="oh-profile-name">{user.name || 'Admin'}</div>
-          <div className="oh-profile-mobile">
+      <div className="oh-account-grid">
+        <section className="oh-account-card oh-account-identity" aria-label="Your account">
+          <div className="oh-account-avatar">
+            <span>{initial}</span>
+          </div>
+          <div className="oh-account-name">{user.name || 'Admin'}</div>
+          <div className="oh-account-sub">
             {user.username ? `@${user.username}` : user.mobile ? `+91 ${user.mobile}` : ''}
           </div>
-          <span className="oh-badge farmer">{user.isSuperAdmin ? 'Super-admin' : 'Admin'}</span>
-        </div>
-
-        <div className="oh-section-label">Account details</div>
-
-        <div className="oh-detail-row" onClick={() => setEditing(true)}>
-          <div className="oh-detail-left">
-            <div className="oh-detail-icon">👤</div>
-            <div>
-              <div className="oh-detail-label">Full name</div>
-              <div className="oh-detail-value">{user.name || 'Nil'}</div>
-            </div>
+          <div className="oh-account-stamps">
+            <span className="oh-user-code">{userCode(user.id)}</span>
+            <span className="oh-badge admin-role">{role}</span>
           </div>
-          <span style={{ color: 'var(--oh-forest)' }}>✎</span>
-        </div>
-
-        {user.username && (
-          <div className="oh-detail-row">
-            <div className="oh-detail-left">
-              <div className="oh-detail-icon">🔑</div>
-              <div>
-                <div className="oh-detail-label">Username</div>
-                <div className="oh-detail-value">@{user.username}</div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {user.mobile && (
-          <div className="oh-detail-row">
-            <div className="oh-detail-left">
-              <div className="oh-detail-icon">📞</div>
-              <div>
-                <div className="oh-detail-label">Mobile number</div>
-                <div className="oh-detail-value">+91 {user.mobile}</div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {editing && (
-          <div className="oh-edit-inline">
-            <label>Edit full name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
-            <div className="oh-edit-actions">
-              <button className="oh-btn-cancel" onClick={() => setEditing(false)} type="button">
-                Cancel
-              </button>
-              <button className="oh-btn-save" onClick={handleSave} type="button" disabled={saving}>
-                {saving ? (
-                  <>
-                    <Spinner />
-                    Saving…
-                  </>
-                ) : (
-                  'Save'
-                )}
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="oh-logout-row">
-          <button className="oh-btn-logout" onClick={handleLogout} type="button">
+          <button className="oh-account-logout" onClick={handleLogout} type="button">
+            <LogOut size={16} strokeWidth={1.75} aria-hidden="true" />
             Log out
           </button>
-        </div>
+        </section>
+
+        <section className="oh-account-card" aria-labelledby="oh-admin-account-details">
+          <div className="oh-account-card-head">
+            <h2 id="oh-admin-account-details">Account details</h2>
+            <p>Your sign-in details are managed by a super-admin from Users &rsaquo; Admins.</p>
+          </div>
+
+          <dl className="oh-account-list">
+            <div className={`oh-account-row ${editing ? 'editing' : ''}`}>
+              <dt>
+                <UserRound size={16} strokeWidth={1.75} aria-hidden="true" />
+                Full name
+              </dt>
+              {editing ? (
+                <dd className="oh-edit-inline">
+                  <label htmlFor="oh-admin-name" className="oh-sr-only">
+                    Edit full name
+                  </label>
+                  <input
+                    id="oh-admin-name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSave();
+                      if (e.key === 'Escape') cancel();
+                    }}
+                    autoFocus
+                  />
+                  {error && (
+                    <div className="oh-field-alert" role="alert">
+                      {error}
+                    </div>
+                  )}
+                  <div className="oh-edit-actions">
+                    <button className="oh-btn-cancel" onClick={cancel} type="button">
+                      Cancel
+                    </button>
+                    <button className="oh-btn-save" onClick={handleSave} type="button" disabled={saving}>
+                      {saving ? (
+                        <>
+                          <Spinner />
+                          Saving…
+                        </>
+                      ) : (
+                        'Save'
+                      )}
+                    </button>
+                  </div>
+                </dd>
+              ) : (
+                <dd>
+                  <span className={`oh-account-value ${user.name ? '' : 'empty'}`}>{user.name || 'Nil'}</span>
+                  <button type="button" className="oh-account-edit" onClick={() => setEditing(true)}>
+                    <Pencil size={14} strokeWidth={1.75} aria-hidden="true" />
+                    Edit<span className="oh-sr-only"> full name</span>
+                  </button>
+                </dd>
+              )}
+            </div>
+
+            {user.username && (
+              <div className="oh-account-row">
+                <dt>
+                  <AtSign size={16} strokeWidth={1.75} aria-hidden="true" />
+                  Username
+                </dt>
+                <dd>
+                  <span className="oh-account-value">@{user.username}</span>
+                  <span className="oh-account-locked">Sign-in</span>
+                </dd>
+              </div>
+            )}
+
+            {user.mobile && (
+              <div className="oh-account-row">
+                <dt>
+                  <Phone size={16} strokeWidth={1.75} aria-hidden="true" />
+                  Mobile number
+                </dt>
+                <dd>
+                  <span className="oh-account-value">+91 {user.mobile}</span>
+                </dd>
+              </div>
+            )}
+          </dl>
+        </section>
       </div>
     </div>
   );

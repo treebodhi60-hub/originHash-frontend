@@ -320,7 +320,7 @@ export const CheckoutModal = ({ purchase, onClose, onDone }) => {
         description: order.description,
         prefill: order.prefill,
         notes: { purpose: 'sticker_purchase' },
-        theme: { color: '#163832' },
+        theme: { color: '#12151a' },
         handler: verify,
         modal: {
           confirm_close: true,

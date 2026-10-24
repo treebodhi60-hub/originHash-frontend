@@ -1,3 +1,4 @@
+import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api/axios';
@@ -34,7 +35,9 @@ const Verify = () => {
 
       {status === 'error' && (
         <div className="ov-card">
-          <div className="ov-error-icon">✕</div>
+          <div className="ov-error-icon" aria-hidden="true">
+            <X size={22} strokeWidth={2} />
+          </div>
           <h1 className="ov-title">Code not found</h1>
           <p className="ov-subtitle">This QR code isn't recognised. It may have been removed.</p>
         </div>

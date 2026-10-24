@@ -4,14 +4,14 @@
    ========================================================================== */
 
 .oh-plans {
-  --payg: var(--oh-orange-dark);
-  --payg-soft: #fff4ea;
-  --payg-tint: #fde3cc;
+  --payg: var(--oh-amber-strong);
+  --payg-soft: var(--oh-warning-bg);
+  --payg-tint: var(--oh-warning-bg);
   --sub: var(--oh-badge-retailer-text);
-  --sub-soft: #f2f6ff;
+  --sub-soft: var(--oh-info-bg);
   --sub-tint: var(--oh-badge-retailer-bg);
-  --fixed: var(--oh-green);
-  --fixed-soft: #f0faf4;
+  --fixed: var(--oh-success);
+  --fixed-soft: var(--oh-success-bg);
   --fixed-tint: var(--oh-badge-farmer-bg);
 }
 
@@ -32,7 +32,7 @@
 .oh-plans-head h2 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-plans-head p {
@@ -45,7 +45,7 @@
 .oh-segment {
   display: inline-flex;
   padding: 4px;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: 12px;
   background: var(--oh-white);
 }
@@ -61,8 +61,10 @@
 }
 
 .oh-segment button.active {
-  background: var(--oh-forest);
-  color: var(--oh-white);
+  background: var(--oh-blue-soft);
+  color: var(--oh-blue-hover);
+  border-color: rgba(82, 111, 229, 0.45);
+  box-shadow: none;
 }
 
 .oh-plans-save {
@@ -105,7 +107,7 @@
 
 .oh-plan-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 34px rgba(22, 56, 50, 0.12);
+  box-shadow: 0 16px 34px rgba(23, 36, 58, 0.12);
 }
 
 .oh-plan-card.current {
@@ -158,7 +160,7 @@
   padding: 16px;
   border-radius: var(--oh-radius-md);
   background: var(--oh-white);
-  border: 1px solid #f0e9dd;
+  border: 1px solid var(--oh-well);
 }
 
 .oh-plan-label {
@@ -184,11 +186,11 @@
 .oh-plan-stepper-hint {
   font-size: 0.72rem;
   font-weight: 600;
-  color: var(--oh-red);
+  color: var(--oh-danger);
 }
 
 .oh-plan-stepper.invalid {
-  border-color: var(--oh-red);
+  border-color: var(--oh-danger);
 }
 
 .oh-plan-stepper button {
@@ -224,7 +226,7 @@
   display: inline-flex;
   align-self: center;
   align-items: stretch;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: 12px;
   overflow: hidden;
   background: var(--oh-white);
@@ -235,7 +237,7 @@
   place-items: center;
   width: 42px;
   border: none;
-  background: #f7f3ec;
+  background: var(--oh-hover);
   color: var(--oh-text);
 }
 
@@ -253,8 +255,8 @@
   width: 96px;
   height: 44px;
   border: none;
-  border-left: 1.5px solid var(--oh-border);
-  border-right: 1.5px solid var(--oh-border);
+  border-left: 1px solid var(--oh-border);
+  border-right: 1px solid var(--oh-border);
   outline: none;
   text-align: center;
   font-family: var(--oh-font-display);
@@ -292,7 +294,7 @@
   margin: 8px 0 0;
   appearance: none;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--tone) var(--fill), #e6e0d4 var(--fill));
+  background: linear-gradient(90deg, var(--tone) var(--fill), var(--oh-border) var(--fill));
   outline: none;
   cursor: pointer;
 }
@@ -395,7 +397,7 @@
 
 .oh-plan-big {
   padding: 8px 12px;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: 10px;
   font-family: var(--oh-font-display);
   font-size: 1.15rem;
@@ -481,7 +483,7 @@
 .oh-plans-compare th,
 .oh-plans-compare td {
   padding: 10px 12px;
-  border-bottom: 1px solid #f1ebe0;
+  border-bottom: 1px solid var(--oh-well);
   text-align: center;
 }
 
@@ -528,7 +530,7 @@
 
 .oh-plans-no {
   display: inline-grid;
-  color: #c9c2b6;
+  color: var(--oh-border-strong);
 }
 
 /* ---------- How it works ---------- */
@@ -584,8 +586,8 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: var(--oh-forest);
-  color: var(--oh-white);
+  background: var(--oh-blue-soft);
+  color: var(--oh-blue-hover);
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -597,8 +599,8 @@
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: #f1ebe0;
-  color: var(--oh-forest);
+  background: var(--oh-well);
+  color: var(--oh-ink);
 }
 
 .oh-plans-step strong {
@@ -622,7 +624,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 8px 0;
-  border-bottom: 1px solid #f1ebe0;
+  border-bottom: 1px solid var(--oh-well);
   font-size: 0.84rem;
 }
 
@@ -651,7 +653,7 @@
 .oh-plan-confirm dl > div.total dd {
   font-family: var(--oh-font-display);
   font-size: 1.35rem;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 /* Fixed + Variable while a month is running: what's left, instead of the fee. */

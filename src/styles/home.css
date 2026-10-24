@@ -16,7 +16,7 @@
 /* ---------- Hero ---------- */
 .oh-home-hero {
   grid-area: hero;
-  background: linear-gradient(160deg, var(--oh-forest) 0%, #0f2621 100%);
+  background: linear-gradient(160deg, var(--oh-ink) 0%, var(--oh-ink-deep) 100%);
   border-radius: var(--oh-radius-lg);
   padding: 18px 18px 20px;
   color: var(--oh-white);
@@ -31,7 +31,7 @@
 }
 
 .oh-home-hero-greeting {
-  color: #b9cfc8;
+  color: var(--oh-on-ink-muted);
   font-size: 0.78rem;
   font-weight: 500;
 }
@@ -48,7 +48,7 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  border: 1.5px solid var(--oh-gold);
+  border: 1.5px solid var(--oh-signal);
   background: rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
@@ -79,7 +79,7 @@
 }
 
 .oh-home-verify-btn svg {
-  color: var(--oh-gold);
+  color: var(--oh-on-ink-accent);
 }
 
 .oh-home-verify-btn:hover,
@@ -119,7 +119,7 @@
 
 .oh-home-stat.success {
   background: var(--oh-badge-farmer-bg);
-  border-color: #bde8cb;
+  border-color: #b5dfca;
 }
 
 .oh-home-stat.success .oh-home-stat-label,
@@ -128,13 +128,13 @@
 }
 
 .oh-home-stat.danger {
-  background: var(--oh-red-bg);
-  border-color: #fbc9c9;
+  background: var(--oh-danger-bg);
+  border-color: #f2c4c1;
 }
 
 .oh-home-stat.danger .oh-home-stat-label,
 .oh-home-stat.danger .oh-home-stat-value {
-  color: #b91c1c;
+  color: #a8231f;
 }
 
 /* ---------- Scan QR card ---------- */
@@ -145,7 +145,7 @@
   gap: 12px;
   padding: 14px;
   background: var(--oh-white);
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: var(--oh-radius-md);
   text-decoration: none;
   color: var(--oh-text);
@@ -153,7 +153,7 @@
 }
 
 .oh-home-scan-card:hover {
-  border-color: var(--oh-forest);
+  border-color: var(--oh-ink);
   box-shadow: var(--oh-shadow);
 }
 
@@ -161,8 +161,8 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: var(--oh-forest);
-  color: var(--oh-gold);
+  background: var(--oh-ink);
+  color: var(--oh-signal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -194,6 +194,8 @@
 
 .oh-home-scan-cta {
   display: none;
+  background: var(--oh-blue);
+  color: var(--oh-white);
 }
 
 /* ---------- Recent verifications ---------- */
@@ -212,7 +214,7 @@
 .oh-home-recent-all {
   font-size: 0.82rem;
   font-weight: 700;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   text-decoration: none;
 }
 
@@ -260,18 +262,18 @@
 }
 
 .oh-home-recent-icon.danger {
-  background: var(--oh-red-bg);
-  color: var(--oh-red);
+  background: var(--oh-danger-bg);
+  color: var(--oh-danger);
 }
 
 .oh-home-recent-icon.warning {
   background: var(--oh-badge-changed-bg);
-  color: #c2410c;
+  color: var(--oh-warning);
 }
 
 .oh-home-recent-icon.neutral {
-  background: #eef6f0;
-  color: var(--oh-forest);
+  background: var(--oh-signal-soft);
+  color: var(--oh-ink);
 }
 
 .oh-home-recent-icon.muted {
@@ -312,15 +314,15 @@
 }
 
 .oh-home-recent-status.danger {
-  color: var(--oh-red);
+  color: var(--oh-danger);
 }
 
 .oh-home-recent-status.warning {
-  color: #c2410c;
+  color: var(--oh-warning);
 }
 
 .oh-home-recent-status.neutral {
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-home-recent-status.muted {
@@ -371,7 +373,7 @@
 
   .oh-home-hero-sub {
     display: block;
-    color: #cfe0da;
+    color: var(--oh-border);
     font-size: 0.92rem;
     /* Bottom margin keeps a gap above the button when the hero is only as tall as its content. */
     margin: 8px 0 22px;
@@ -439,7 +441,7 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    background: var(--oh-forest);
+    background: var(--oh-ink);
     color: var(--oh-white);
     border-radius: var(--oh-radius-sm);
     padding: 12px;
@@ -458,7 +460,7 @@
 
   .oh-home-recent-title {
     font-size: 1.05rem;
-    color: var(--oh-forest);
+    color: var(--oh-ink);
   }
 
   .oh-home-recent-row {

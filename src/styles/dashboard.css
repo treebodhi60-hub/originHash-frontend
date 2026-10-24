@@ -5,16 +5,16 @@
 
 .oh-dash {
   --dash-gap: 18px;
-  --dash-tint-forest: color-mix(in srgb, var(--oh-forest) 9%, var(--oh-white));
-  --dash-tint-gold: color-mix(in srgb, var(--oh-gold) 20%, var(--oh-white));
-  --dash-tint-green: color-mix(in srgb, var(--oh-green) 12%, var(--oh-white));
-  --dash-tint-purple: color-mix(in srgb, var(--oh-purple) 11%, var(--oh-white));
-  --dash-tint-red: var(--oh-red-bg);
-  --dash-tint-orange: color-mix(in srgb, var(--oh-orange) 20%, var(--oh-white));
+  --dash-tint-forest: color-mix(in srgb, var(--oh-ink) 9%, var(--oh-white));
+  --dash-tint-gold: color-mix(in srgb, var(--oh-accent) 20%, var(--oh-white));
+  --dash-tint-green: var(--oh-success-bg);
+  --dash-tint-purple: color-mix(in srgb, var(--oh-ink) 11%, var(--oh-white));
+  --dash-tint-red: var(--oh-danger-bg);
+  --dash-tint-orange: color-mix(in srgb, var(--oh-amber) 20%, var(--oh-white));
   --dash-tint-neutral: color-mix(in srgb, var(--oh-text-muted) 11%, var(--oh-white));
-  --dash-ink-gold: color-mix(in srgb, var(--oh-gold), #000 32%);
-  --dash-ink-orange: color-mix(in srgb, var(--oh-orange-dark), #000 22%);
-  --dash-track: color-mix(in srgb, var(--oh-border) 55%, var(--oh-cream));
+  --dash-ink-gold: color-mix(in srgb, var(--oh-accent), #000 32%);
+  --dash-ink-orange: color-mix(in srgb, var(--oh-amber-strong), #000 22%);
+  --dash-track: color-mix(in srgb, var(--oh-border) 55%, var(--oh-canvas));
 
   max-width: 1360px;
   margin: 0 auto;
@@ -33,15 +33,15 @@
 }
 
 /* ---------- Tones (icon chips, segments, chips) ---------- */
-.oh-dash .tone-forest { --tone-ink: var(--oh-forest); --tone-bg: var(--dash-tint-forest); --tone-fill: var(--oh-forest); }
-.oh-dash .tone-gold { --tone-ink: var(--dash-ink-gold); --tone-bg: var(--dash-tint-gold); --tone-fill: var(--oh-gold); }
+.oh-dash .tone-forest { --tone-ink: var(--oh-ink); --tone-bg: var(--dash-tint-forest); --tone-fill: var(--oh-ink); }
+.oh-dash .tone-gold { --tone-ink: var(--dash-ink-gold); --tone-bg: var(--dash-tint-gold); --tone-fill: var(--oh-accent); }
 .oh-dash .tone-green,
-.oh-dash .tone-good { --tone-ink: var(--oh-green); --tone-bg: var(--dash-tint-green); --tone-fill: var(--oh-green); }
+.oh-dash .tone-good { --tone-ink: var(--oh-success); --tone-bg: var(--dash-tint-green); --tone-fill: var(--oh-success); }
 .oh-dash .tone-blue { --tone-ink: var(--oh-badge-retailer-text); --tone-bg: var(--oh-badge-retailer-bg); --tone-fill: var(--oh-badge-retailer-text); }
-.oh-dash .tone-purple { --tone-ink: var(--oh-purple); --tone-bg: var(--dash-tint-purple); --tone-fill: var(--oh-purple); }
-.oh-dash .tone-critical { --tone-ink: var(--oh-red); --tone-bg: var(--dash-tint-red); --tone-fill: var(--oh-red); }
-.oh-dash .tone-warning { --tone-ink: var(--dash-ink-orange); --tone-bg: var(--dash-tint-orange); --tone-fill: var(--oh-orange); }
-.oh-dash .tone-neutral { --tone-ink: var(--oh-text-muted); --tone-bg: var(--dash-tint-neutral); --tone-fill: #a8adb6; }
+.oh-dash .tone-purple { --tone-ink: var(--oh-ink); --tone-bg: var(--dash-tint-purple); --tone-fill: var(--oh-ink); }
+.oh-dash .tone-critical { --tone-ink: var(--oh-danger); --tone-bg: var(--dash-tint-red); --tone-fill: var(--oh-danger); }
+.oh-dash .tone-warning { --tone-ink: var(--dash-ink-orange); --tone-bg: var(--dash-tint-orange); --tone-fill: var(--oh-amber); }
+.oh-dash .tone-neutral { --tone-ink: var(--oh-text-muted); --tone-bg: var(--dash-tint-neutral); --tone-fill: var(--oh-text-faint); }
 
 .oh-dash .role-farmer { --tone-ink: var(--oh-badge-farmer-text); --tone-bg: var(--oh-badge-farmer-bg); }
 .oh-dash .role-producer { --tone-ink: var(--oh-badge-producer-text); --tone-bg: var(--oh-badge-producer-bg); }
@@ -60,10 +60,8 @@
   border-radius: var(--oh-radius-lg);
   color: var(--oh-white);
   background:
-    radial-gradient(circle at 92% -20%, rgba(201, 164, 100, 0.32), transparent 42%),
-    radial-gradient(circle at -5% 120%, rgba(31, 143, 95, 0.35), transparent 45%),
-    linear-gradient(135deg, var(--oh-forest) 0%, var(--oh-forest-light) 100%);
-  box-shadow: 0 18px 40px rgba(22, 56, 50, 0.22);
+    linear-gradient(135deg, var(--oh-ink) 0%, var(--oh-ink-2) 100%);
+  box-shadow: 0 18px 40px rgba(23, 36, 58, 0.22);
 }
 
 /* Faint hash-grid texture — a nod to the brand name. */
@@ -89,13 +87,14 @@
   gap: 6px;
   padding: 5px 11px;
   border-radius: 999px;
-  background: rgba(201, 164, 100, 0.16);
-  border: 1px solid rgba(201, 164, 100, 0.35);
-  color: var(--oh-gold);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
+  background: rgba(82, 111, 229, 0.16);
+  border: 1px solid rgba(82, 111, 229, 0.35);
+  color: var(--oh-on-ink-accent);
+  font-family: var(--oh-font-body);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .oh-dash-hero-title {
@@ -178,12 +177,12 @@
 
 .oh-dash-action:hover {
   background: rgba(255, 255, 255, 0.13);
-  border-color: rgba(201, 164, 100, 0.5);
+  border-color: rgba(82, 111, 229, 0.5);
   transform: translateY(-2px);
 }
 
 .oh-dash-action:focus-visible {
-  outline-color: var(--oh-gold);
+  outline-color: var(--oh-signal);
 }
 
 .oh-dash-action-icon {
@@ -193,8 +192,8 @@
   width: 38px;
   height: 38px;
   border-radius: 11px;
-  background: rgba(201, 164, 100, 0.18);
-  color: var(--oh-gold);
+  background: rgba(82, 111, 229, 0.18);
+  color: var(--oh-on-ink-accent);
 }
 
 @media (min-width: 900px) {
@@ -246,19 +245,6 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Soft glow in the card's own tone, top-right. */
-.oh-kpi::after {
-  content: '';
-  position: absolute;
-  top: -50px;
-  right: -50px;
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  background: var(--tone-bg);
-  opacity: 0.9;
-  pointer-events: none;
-}
 
 .oh-kpi > * {
   position: relative;
@@ -267,7 +253,7 @@
 
 .oh-kpi:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 30px rgba(22, 56, 50, 0.12);
+  box-shadow: 0 14px 30px rgba(23, 36, 58, 0.12);
 }
 
 .oh-kpi-top {
@@ -297,11 +283,12 @@
 
 .oh-kpi-value {
   font-family: var(--oh-font-display);
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 600;
   line-height: 1.1;
-  color: var(--oh-forest);
-  letter-spacing: -0.5px;
+  color: var(--oh-ink);
+  letter-spacing: -0.02em;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .oh-kpi-foot {
@@ -345,7 +332,7 @@
 
 .oh-dash-delta.up {
   background: var(--dash-tint-green);
-  color: var(--oh-green);
+  color: var(--oh-success);
 }
 
 /* ---------- Card grid ---------- */
@@ -416,7 +403,7 @@
   flex-shrink: 0;
   border-radius: 11px;
   background: var(--dash-tint-forest);
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-dash-card-titles {
@@ -427,7 +414,7 @@
 .oh-dash-card-titles h2 {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   line-height: 1.25;
 }
 
@@ -444,7 +431,7 @@
   flex-shrink: 0;
   padding: 6px 10px;
   border-radius: 999px;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   font-size: 0.78rem;
   font-weight: 600;
   text-decoration: none;
@@ -464,18 +451,18 @@
 }
 
 .oh-dash-card-empty a {
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   font-weight: 600;
 }
 
 /* ---------- Shared figure styles ---------- */
 .oh-chart-figure {
   font-family: var(--oh-font-display);
-  font-size: 1.9rem;
+  font-size: 1.6rem;
   font-weight: 600;
   line-height: 1.1;
-  color: var(--oh-text);
-  letter-spacing: -0.5px;
+  color: var(--oh-ink);
+  letter-spacing: -0.02em;
 }
 
 .oh-chart-caption {
@@ -561,21 +548,22 @@
 }
 
 .oh-chart-slot.active {
-  background: color-mix(in srgb, var(--oh-forest) 5%, transparent);
+  background: color-mix(in srgb, var(--oh-ink) 5%, transparent);
 }
 
 .oh-chart-bar {
   width: min(24px, 58%);
   min-height: 2px;
   border-radius: 4px 4px 0 0;
-  background: var(--oh-forest);
+  background: var(--oh-chart-muted);
   transition: height 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.15s ease;
   animation: oh-bar-rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   transform-origin: bottom;
 }
 
+/* Today: the signal, edged in ink so it holds on white. */
 .oh-chart-bar.today {
-  background: var(--oh-gold);
+  background: var(--oh-signal);
 }
 
 .oh-chart-bar.empty {
@@ -585,7 +573,7 @@
 }
 
 .oh-chart-slot.active .oh-chart-bar:not(.empty):not(.today) {
-  background: var(--oh-forest-light);
+  background: #9aa8c8;
 }
 
 @keyframes oh-bar-rise {
@@ -603,12 +591,12 @@
   align-items: center;
   padding: 6px 10px;
   border-radius: 10px;
-  background: var(--oh-forest);
+  background: var(--oh-ink);
   color: var(--oh-white);
   font-size: 0.72rem;
   line-height: 1.3;
   white-space: nowrap;
-  box-shadow: 0 8px 18px rgba(22, 56, 50, 0.25);
+  box-shadow: 0 8px 18px rgba(23, 36, 58, 0.25);
   pointer-events: none;
   z-index: 2;
   transition: left 0.15s ease;
@@ -873,7 +861,7 @@
 .oh-mini-stats > div {
   padding: 12px;
   border-radius: 12px;
-  background: var(--oh-cream);
+  background: var(--oh-canvas);
 }
 
 .oh-mini-stats dt {
@@ -908,7 +896,7 @@
   gap: 12px;
   padding: 12px;
   border-radius: 12px;
-  background: var(--oh-cream);
+  background: var(--oh-canvas);
 }
 
 .oh-admin-team .oh-mini-icon {
@@ -936,7 +924,7 @@
   font-family: var(--oh-font-display);
   font-size: 1.35rem;
   font-weight: 600;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 /* ---------- Recent batches ---------- */
@@ -965,7 +953,7 @@
 }
 
 .oh-batch-list li:hover {
-  background: color-mix(in srgb, var(--oh-cream) 70%, var(--oh-white));
+  background: color-mix(in srgb, var(--oh-canvas) 70%, var(--oh-white));
 }
 
 .oh-batch-icon {
@@ -1020,7 +1008,7 @@
   justify-self: end;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1046,7 +1034,7 @@
   background: linear-gradient(
     100deg,
     var(--oh-white) 30%,
-    color-mix(in srgb, var(--oh-cream) 80%, var(--oh-border)) 50%,
+    color-mix(in srgb, var(--oh-canvas) 80%, var(--oh-border)) 50%,
     var(--oh-white) 70%
   );
   background-size: 300% 100%;
@@ -1082,7 +1070,7 @@
   gap: 14px;
   margin-bottom: var(--dash-gap);
   padding: 16px 18px;
-  border: 1px solid color-mix(in srgb, var(--oh-red) 25%, var(--oh-white));
+  border: 1px solid color-mix(in srgb, var(--oh-danger) 25%, var(--oh-white));
   border-radius: var(--oh-radius-md);
   background: var(--oh-white);
 }
@@ -1107,12 +1095,12 @@
   padding: 9px 16px;
   border: none;
   border-radius: var(--oh-radius-sm);
-  background: var(--oh-forest);
+  background: var(--oh-ink);
   color: var(--oh-white);
   font-size: 0.84rem;
   font-weight: 600;
 }
 
 .oh-dash-retry:hover {
-  background: var(--oh-forest-light);
+  background: var(--oh-ink-2);
 }

@@ -1,4 +1,4 @@
-import { CheckIcon, MapIcon, PinIcon, UserIcon } from './ScanIcons.jsx';
+import { CheckIcon, MapIcon, PinIcon, ShieldIcon, UserIcon } from './ScanIcons.jsx';
 import StickerMedia from './StickerMedia.jsx';
 import { formatDateShort, formatDateTimeShort, formatPlace } from '../utils/format';
 
@@ -15,6 +15,39 @@ const journeyMapUrl = (points) =>
   points.length === 1
     ? `https://www.google.com/maps/search/?api=1&query=${points[0].latitude},${points[0].longitude}`
     : `https://www.google.com/maps/dir/${points.map((p) => `${p.latitude},${p.longitude}`).join('/')}`;
+
+
+// The journey at a glance: one stop per recorded scan, in order, ending at the final buyer's
+// verification (done or awaited). Every stop comes from the journey data; nothing is inferred.
+const JourneyRoute = ({ journey, buyerVerifiedAt }) => {
+  const summary = journey
+    .map((step, i) => `Scan ${i + 1}${step.userType ? ` (${step.userType})` : ''}: ${step.location?.name || 'location not shared'}`)
+    .join(', ');
+  return (
+    <div
+      className="oh-route"
+      role="img"
+      aria-label={`Journey: ${summary || 'no scans yet'}; ${buyerVerifiedAt ? 'verified by the final buyer' : 'awaiting the final buyer'}.`}
+    >
+      <ol className="oh-route-track" aria-hidden="true">
+        {journey.map((step, i) => (
+          <li key={step.id} className="oh-route-stop">
+            <span className="oh-route-node">{i + 1}</span>
+            <span className="oh-route-role">{step.userType ? capitalize(step.userType) : `Scan ${i + 1}`}</span>
+            <span className="oh-route-place">{step.location?.name || (step.location ? 'Located' : 'Not shared')}</span>
+            <span className="oh-route-date">{formatDateShort(step.createdAt)}</span>
+          </li>
+        ))}
+        <li className={`oh-route-stop end ${buyerVerifiedAt ? 'done' : ''}`}>
+          <span className="oh-route-node">{buyerVerifiedAt ? <CheckIcon size={14} /> : <ShieldIcon size={14} />}</span>
+          <span className="oh-route-role">Final buyer</span>
+          <span className="oh-route-place">{buyerVerifiedAt ? 'Verified' : 'Awaiting'}</span>
+          <span className="oh-route-date">{buyerVerifiedAt ? formatDateShort(buyerVerifiedAt) : '—'}</span>
+        </li>
+      </ol>
+    </div>
+  );
+};
 
 // The "Tracked" pill, product card and product journey timeline. `journeyScope` is 'all' for
 // admins and the batch's creator, 'own' for anyone else (the server only sends their own scans).
@@ -55,6 +88,7 @@ const JourneySection = ({ product, journey, buyerVerifiedAt, journeyScope, scann
       <h2 className="oh-journey-title">
         Product journey · {journey.length} {journey.length === 1 ? 'scan' : 'scans'}
       </h2>
+      <JourneyRoute journey={journey} buyerVerifiedAt={buyerVerifiedAt} />
       {journeyScope === 'own' && (
         <p className="oh-journey-scope">
           Only your scans are shown. The batch's creator and OriginHash admins can see the full journey.

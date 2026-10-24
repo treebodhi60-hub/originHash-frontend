@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import BrandPanel from '../components/BrandPanel.jsx';
+import { ArrowRight, Camera, CircleAlert, Package, Sprout, Store, Truck } from 'lucide-react';
+import AuthShell from '../components/AuthShell.jsx';
+import BrandLogo from '../components/BrandLogo.jsx';
 import { Spinner } from '../components/Loader.jsx';
 import { updateProfile, skipOnboarding } from '../store/authSlice';
 import '../styles/auth.css';
 import { takeReturn } from '../utils/returnTo';
 
 const USER_TYPES = [
-  { value: 'farmer', label: 'Farmer', emoji: '🌾' },
-  { value: 'retailer', label: 'Retailer', emoji: '🏪' },
-  { value: 'distributor', label: 'Distributor', emoji: '🚚' },
-  { value: 'supplier', label: 'Supplier', emoji: '📦' },
+  { value: 'farmer', label: 'Farmer', Icon: Sprout },
+  { value: 'retailer', label: 'Retailer', Icon: Store },
+  { value: 'distributor', label: 'Distributor', Icon: Truck },
+  { value: 'supplier', label: 'Supplier', Icon: Package },
 ];
 
 const Onboarding = () => {
@@ -59,101 +61,120 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="oh-auth-shell">
-      <BrandPanel />
-      <div className="oh-form-panel">
-        <div className="oh-auth-card">
-          <h2 className="oh-auth-heading">Create your account</h2>
-          <p className="oh-auth-sub">Start verifying and tracking products</p>
-
-          {error && <div className="oh-error">{error}</div>}
-
-          <form onSubmit={handleSubmit}>
-            <div className="oh-field">
-              <label htmlFor="name">Full name</label>
-              <input
-                id="name"
-                type="text"
-                placeholder="Your name"
-                value={form.name}
-                onChange={(e) => update('name', e.target.value)}
-              />
-            </div>
-
-            <div className="oh-field">
-              <label>Mobile number</label>
-              <div className="oh-mobile-input">
-                <span className="oh-code">+91</span>
-                <input value={user?.mobile || ''} disabled />
-              </div>
-            </div>
-
-            <div className="oh-field">
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={form.email}
-                onChange={(e) => update('email', e.target.value)}
-              />
-            </div>
-
-            <div className="oh-field">
-              <label>I am a</label>
-              <div className="oh-user-type-grid">
-                {USER_TYPES.map((t) => (
-                  <button
-                    key={t.value}
-                    type="button"
-                    className={`oh-user-type-option ${form.userType === t.value ? 'active' : ''}`}
-                    onClick={() => update('userType', t.value)}
-                  >
-                    <span className="oh-emoji">{t.emoji}</span> {t.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="oh-field">
-              <label htmlFor="address">Address</label>
-              <input
-                id="address"
-                type="text"
-                placeholder="Village / town, district"
-                value={form.address}
-                onChange={(e) => update('address', e.target.value)}
-              />
-            </div>
-
-            <div className="oh-field">
-              <label htmlFor="photo">Photo</label>
-              <input id="photo" type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files[0])} />
-            </div>
-
-            <button className="oh-btn-primary" type="submit" disabled={submitting || skipping}>
-              {submitting ? (
-                <>
-                  <Spinner />
-                  Saving…
-                </>
-              ) : 'Continue →'}
-            </button>
-          </form>
-
-          <p className="oh-auth-footer">
-            <button className="oh-link" type="button" onClick={handleSkip} disabled={skipping || submitting}>
-              {skipping ? (
-                <>
-                  <Spinner />
-                  Skipping…
-                </>
-              ) : 'Skip for now'}
-            </button>
-          </p>
-        </div>
+    <AuthShell wide>
+      <div className="oh-si-hero">
+        <span className="oh-si-icon">
+          <BrandLogo size={64} />
+        </span>
+        <h1 className="oh-si-title">Create your account</h1>
+        <p className="oh-si-sub">Start verifying and tracking products.</p>
       </div>
-    </div>
+
+      <form className="oh-si-form" onSubmit={handleSubmit}>
+        <div className="oh-si-group">
+          <div className="oh-si-float">
+            <input
+              id="name"
+              type="text"
+              placeholder=" "
+              value={form.name}
+              onChange={(e) => update('name', e.target.value)}
+            />
+            <label htmlFor="name">Full name</label>
+          </div>
+          <div className="oh-si-float with-prefix locked">
+            <input id="onboarding-mobile" value={user?.mobile || ''} placeholder=" " disabled />
+            <label htmlFor="onboarding-mobile">Mobile number</label>
+            <span className="oh-si-prefix" aria-hidden="true">
+              +91
+            </span>
+          </div>
+          <div className="oh-si-float">
+            <input
+              id="email"
+              type="email"
+              placeholder=" "
+              value={form.email}
+              onChange={(e) => update('email', e.target.value)}
+            />
+            <label htmlFor="email">Email</label>
+          </div>
+          <div className="oh-si-float">
+            <input
+              id="address"
+              type="text"
+              placeholder=" "
+              value={form.address}
+              onChange={(e) => update('address', e.target.value)}
+            />
+            <label htmlFor="address">Address (village / town, district)</label>
+          </div>
+        </div>
+
+        <fieldset className="oh-si-fieldset">
+          <legend>I am a</legend>
+          <div className="oh-si-choices">
+            {USER_TYPES.map((t) => (
+              <button
+                key={t.value}
+                type="button"
+                className={`oh-si-choice ${form.userType === t.value ? 'active' : ''}`}
+                aria-pressed={form.userType === t.value}
+                onClick={() => update('userType', t.value)}
+              >
+                <t.Icon size={20} strokeWidth={1.6} aria-hidden="true" />
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        <label className="oh-si-photo" htmlFor="photo">
+          <span className="oh-si-photo-icon" aria-hidden="true">
+            <Camera size={18} strokeWidth={1.75} />
+          </span>
+          <span className="oh-si-photo-text">
+            <strong>{photo ? photo.name : 'Add a photo'}</strong>
+            <small>{photo ? 'Tap to choose a different photo' : 'Optional · shown on your profile'}</small>
+          </span>
+          <input id="photo" type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files[0])} />
+        </label>
+
+        {error && (
+          <p className="oh-si-error" role="alert">
+            <CircleAlert size={15} strokeWidth={2} aria-hidden="true" />
+            {error}
+          </p>
+        )}
+
+        <button className="oh-si-button" type="submit" disabled={submitting || skipping}>
+          {submitting ? (
+            <>
+              <Spinner />
+              Saving…
+            </>
+          ) : (
+            <>
+              Continue
+              <ArrowRight size={17} strokeWidth={2} aria-hidden="true" />
+            </>
+          )}
+        </button>
+      </form>
+
+      <div className="oh-si-resend">
+        <button className="oh-si-link" type="button" onClick={handleSkip} disabled={skipping || submitting}>
+          {skipping ? (
+            <>
+              <Spinner />
+              Skipping…
+            </>
+          ) : (
+            'Skip for now'
+          )}
+        </button>
+      </div>
+    </AuthShell>
   );
 };
 

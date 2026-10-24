@@ -25,7 +25,9 @@ export const LightShell = ({ title, subtitle, onBack, children }) => (
             <BrandLogo size={22} />
           </span>
           <div>
-            <strong>OriginHash</strong>
+            <strong className="oh-wordmark on-paper">
+              Origin<span>Hash</span>
+            </strong>
             <span>Verifying authenticity</span>
           </div>
         </header>

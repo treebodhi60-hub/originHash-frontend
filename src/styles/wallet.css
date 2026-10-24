@@ -16,9 +16,8 @@
   border-radius: var(--oh-radius-lg);
   color: var(--oh-white);
   background:
-    radial-gradient(circle at 100% 0%, rgba(201, 164, 100, 0.3), transparent 45%),
-    linear-gradient(135deg, var(--oh-forest) 0%, var(--oh-forest-light) 100%);
-  box-shadow: 0 12px 28px rgba(22, 56, 50, 0.18);
+    linear-gradient(135deg, var(--oh-ink) 0%, var(--oh-ink-2) 100%);
+  box-shadow: 0 12px 28px rgba(23, 36, 58, 0.18);
 }
 
 .oh-wallet-bar-icon {
@@ -28,8 +27,8 @@
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: rgba(201, 164, 100, 0.18);
-  color: var(--oh-gold);
+  background: rgba(82, 111, 229, 0.18);
+  color: var(--oh-signal);
 }
 
 .oh-wallet-bar-main {
@@ -42,8 +41,8 @@
 .oh-wallet-bar-label {
   font-size: 0.74rem;
   font-weight: 600;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: rgba(255, 255, 255, 0.65);
 }
 
@@ -61,7 +60,7 @@
 }
 
 .oh-wallet-bar.low .oh-wallet-bar-sub {
-  color: #f6c98f;
+  color: var(--oh-border-strong);
 }
 
 .oh-wallet-bar-actions {
@@ -80,6 +79,8 @@
   font-weight: 600;
   white-space: nowrap;
   transition: background 0.15s ease, transform 0.15s ease;
+  background: var(--oh-signal-strong);
+  color: var(--oh-white);
 }
 
 .oh-wallet-ghost {
@@ -94,12 +95,12 @@
 
 .oh-wallet-primary {
   border: none;
-  background: var(--oh-gold);
-  color: var(--oh-forest);
+  background: var(--oh-signal);
+  color: var(--oh-ink);
 }
 
 .oh-wallet-primary:hover {
-  background: #d4b276;
+  background: var(--oh-signal-hover);
   transform: translateY(-1px);
 }
 
@@ -129,8 +130,8 @@
   margin-right: 4px;
   font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: rgba(255, 255, 255, 0.6);
 }
 
@@ -154,7 +155,7 @@
 }
 
 .oh-sticker-tab:focus-visible {
-  outline: 2px solid var(--oh-gold);
+  outline: 2px solid var(--oh-signal);
   outline-offset: 2px;
 }
 
@@ -168,14 +169,14 @@
 }
 
 .oh-sticker-tab.active {
-  border-color: var(--oh-gold);
-  background: var(--oh-gold);
-  color: var(--oh-forest);
+  border-color: var(--oh-signal-strong);
+  background: var(--oh-signal-strong);
+  color: var(--oh-white);
 }
 
 .oh-sticker-tab.active b {
-  background: var(--oh-forest);
-  color: var(--oh-gold);
+  background: var(--oh-white);
+  color: var(--oh-signal-ink);
 }
 
 @media (max-width: 560px) {
@@ -196,7 +197,7 @@
   padding: 12px 14px;
   border: 1px solid var(--oh-border);
   border-radius: var(--oh-radius-sm);
-  background: var(--oh-cream);
+  background: var(--oh-canvas);
   font-size: 0.86rem;
 }
 
@@ -214,7 +215,7 @@
 .oh-qr-cost-row strong {
   font-family: var(--oh-font-display);
   font-size: 1.05rem;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-qr-cost-row.muted {
@@ -223,15 +224,15 @@
 }
 
 .oh-qr-cost.short {
-  border-color: #f3c6a0;
-  background: #fff6ee;
+  border-color: var(--oh-border-strong);
+  background: var(--oh-warning-bg);
 }
 
 .oh-qr-cost-row.short {
   flex-wrap: wrap;
   padding-top: 8px;
-  border-top: 1px dashed #f3c6a0;
-  color: #9a3412;
+  border-top: 1px dashed var(--oh-border-strong);
+  color: var(--oh-badge-changed-text);
   font-size: 0.82rem;
 }
 
@@ -243,7 +244,7 @@
   padding: 7px 14px;
   border: none;
   border-radius: 999px;
-  background: var(--oh-orange);
+  background: var(--oh-amber);
   color: var(--oh-white);
   font-size: 0.8rem;
   font-weight: 700;
@@ -251,7 +252,7 @@
 }
 
 .oh-qr-cost-add:hover {
-  background: var(--oh-orange-dark);
+  background: var(--oh-amber-strong);
 }
 
 .oh-qr-success-charge {
@@ -268,7 +269,7 @@
   display: grid;
   place-items: center;
   padding: 16px;
-  background: rgba(15, 30, 26, 0.45);
+  background: rgba(17, 27, 45, 0.45);
   animation: oh-wallet-fade 0.15s ease-out;
 }
 
@@ -285,7 +286,7 @@
   padding: 20px 22px 22px;
   border-radius: var(--oh-radius-lg);
   background: var(--oh-white);
-  box-shadow: 0 24px 60px rgba(15, 30, 26, 0.3);
+  box-shadow: 0 24px 60px rgba(17, 27, 45, 0.3);
   animation: oh-wallet-rise 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -311,7 +312,7 @@
 .oh-wallet-modal-head h2 {
   font-size: 1.15rem;
   font-weight: 600;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-wallet-close {
@@ -322,7 +323,7 @@
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: #f4efe6;
+  background: var(--oh-hover);
   color: var(--oh-text-muted);
 }
 
@@ -341,7 +342,7 @@
   margin: 0 0 14px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: var(--oh-cream);
+  background: var(--oh-canvas);
   font-size: 0.82rem;
   color: var(--oh-text-muted);
 }
@@ -358,26 +359,26 @@
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: 12px;
   cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .oh-reset-option:hover {
-  background: var(--oh-hover, #f7f2ea);
+  background: var(--oh-hover, var(--oh-hover));
 }
 
 .oh-reset-option.active {
-  border-color: var(--oh-red);
-  background: #fff5f5;
+  border-color: var(--oh-danger);
+  background: var(--oh-danger-bg);
 }
 
 .oh-reset-option input {
   width: 16px;
   height: 16px;
   margin: 0;
-  accent-color: var(--oh-red);
+  accent-color: var(--oh-danger);
 }
 
 .oh-reset-option-name {
@@ -400,11 +401,11 @@
 }
 
 .oh-wallet-pay.danger {
-  background: var(--oh-red);
+  background: var(--oh-danger);
 }
 
 .oh-wallet-pay.danger:hover:not(:disabled) {
-  background: #b91c1c;
+  background: #a8231f;
 }
 
 .oh-wallet-ghost:disabled {
@@ -422,8 +423,8 @@
   margin-bottom: 6px;
   font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--oh-text-muted);
 }
 
@@ -432,19 +433,19 @@
   align-items: center;
   gap: 6px;
   padding: 0 14px;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: 12px;
   background: var(--oh-white);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .oh-wallet-amount:focus-within {
-  border-color: var(--oh-forest);
-  box-shadow: 0 0 0 3px rgba(22, 56, 50, 0.1);
+  border-color: var(--oh-ink);
+  box-shadow: 0 0 0 3px rgba(23, 36, 58, 0.1);
 }
 
 .oh-wallet-amount.invalid {
-  border-color: var(--oh-red);
+  border-color: var(--oh-danger);
 }
 
 .oh-wallet-amount span {
@@ -478,9 +479,9 @@
   align-items: center;
   gap: 5px;
   padding: 7px 13px;
-  border: 1.5px solid #e2c992;
+  border: 1px solid var(--oh-border-strong);
   border-radius: 999px;
-  background: #fdf1dc;
+  background: var(--oh-surface);
   color: var(--oh-text);
   font-size: 0.82rem;
   font-weight: 600;
@@ -489,18 +490,20 @@
 .oh-wallet-chip small {
   font-size: 0.66rem;
   font-weight: 700;
-  text-transform: uppercase;
-  color: #9a3412;
+  text-transform: none;
+  color: var(--oh-badge-changed-text);
+  letter-spacing: 0;
 }
 
 .oh-wallet-chip.active {
-  border-color: var(--oh-forest);
-  background: var(--oh-forest);
-  color: var(--oh-white);
+  border-color: rgba(82, 111, 229, 0.45);
+  background: var(--oh-blue-soft);
+  color: var(--oh-blue-hover);
+  box-shadow: none;
 }
 
 .oh-wallet-chip.active small {
-  color: var(--oh-gold);
+  color: var(--oh-signal);
 }
 
 .oh-wallet-hint {
@@ -510,7 +513,7 @@
 }
 
 .oh-wallet-hint.error {
-  color: var(--oh-red);
+  color: var(--oh-danger);
 }
 
 /* Buying light QR stickers: price, validity, total. */
@@ -523,7 +526,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 9px 0;
-  border-bottom: 1px solid #f1ebe0;
+  border-bottom: 1px solid var(--oh-well);
   font-size: 0.86rem;
 }
 
@@ -553,7 +556,7 @@
 .oh-buy-light-lines > div.total dd {
   font-family: var(--oh-font-display);
   font-size: 1.35rem;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-wallet-pay {
@@ -565,7 +568,7 @@
   padding: 14px;
   border: none;
   border-radius: 12px;
-  background: var(--oh-forest);
+  background: var(--oh-blue);
   color: var(--oh-white);
   font-size: 0.95rem;
   font-weight: 700;
@@ -573,7 +576,7 @@
 }
 
 .oh-wallet-pay:hover:not(:disabled) {
-  background: var(--oh-forest-light);
+  background: var(--oh-ink-2);
 }
 
 .oh-wallet-pay:disabled {
@@ -606,13 +609,13 @@
   margin-bottom: 6px;
   border-radius: 50%;
   background: var(--oh-badge-farmer-bg);
-  color: var(--oh-green);
+  color: var(--oh-success);
 }
 
 .oh-wallet-success strong {
   font-family: var(--oh-font-display);
   font-size: 1.4rem;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-wallet-success p {
@@ -655,7 +658,7 @@
 }
 
 .oh-wallet-ledger li + li {
-  border-top: 1px solid #f1ebe0;
+  border-top: 1px solid var(--oh-well);
 }
 
 .oh-wallet-ledger-icon {
@@ -669,12 +672,12 @@
 
 .oh-wallet-ledger-icon.credit {
   background: var(--oh-badge-farmer-bg);
-  color: var(--oh-green);
+  color: var(--oh-success);
 }
 
 .oh-wallet-ledger-icon.debit {
-  background: #fdf1dc;
-  color: #8a6d35;
+  background: var(--oh-surface);
+  color: var(--oh-signal-ink);
 }
 
 .oh-wallet-ledger-main {
@@ -716,7 +719,7 @@
 }
 
 .oh-wallet-ledger-amount strong.credit {
-  color: var(--oh-green);
+  color: var(--oh-success);
 }
 
 .oh-wallet-ledger-amount strong.debit {
@@ -740,10 +743,10 @@
   width: 34px;
   height: 34px;
   padding: 0;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: 9px;
   background: var(--oh-white);
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-wallet-pager button:disabled {

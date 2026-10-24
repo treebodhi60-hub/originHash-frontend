@@ -1,3 +1,4 @@
+import { X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../api/axios';
@@ -142,7 +143,9 @@ const LightUpdate = () => {
       {status === 'loading' && <LoadingState className="olq-loading" label="Loading…" />}
       {status === 'missing' && (
         <div className="olq-missing">
-          <span aria-hidden="true">✕</span>
+          <span aria-hidden="true">
+            <X size={22} strokeWidth={2} />
+          </span>
           <h2>QR code not found</h2>
           <p>This code isn&apos;t in OriginHash records.</p>
         </div>
@@ -178,7 +181,7 @@ const LightUpdate = () => {
               <div className="olq-photo">
                 <img src={photo.url} alt="Chosen photo" />
                 <button type="button" className="olq-photo-remove" onClick={() => setPhoto(null)} aria-label="Remove photo" disabled={saving}>
-                  ✕
+                  <X size={14} strokeWidth={2} aria-hidden="true" />
                 </button>
               </div>
             ) : (

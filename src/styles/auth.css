@@ -2,7 +2,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--oh-cream);
+  background: var(--oh-canvas);
 }
 
 @media (min-width: 900px) {
@@ -13,7 +13,7 @@
 
 /* ---------- Brand panel ---------- */
 .oh-brand-panel {
-  background: linear-gradient(160deg, var(--oh-forest) 0%, #0f2621 100%);
+  background: var(--oh-ink);
   color: var(--oh-white);
   padding: 48px 32px;
   display: flex;
@@ -25,12 +25,7 @@
   min-height: 220px;
 }
 
-@media (min-width: 900px) {
-  .oh-brand-panel {
-    flex: 1;
-    min-height: 100vh;
-  }
-}
+
 
 @media (max-width: 899px) {
   .oh-brand-panel {
@@ -41,10 +36,11 @@
 }
 
 .oh-brand-badge {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  border: 1.5px solid var(--oh-gold);
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--oh-ink-2);
+  box-shadow: inset 0 0 0 1px rgba(82, 111, 229, 0.35), 0 0 0 6px rgba(82, 111, 229, 0.05);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,19 +61,16 @@
 }
 
 .oh-brand-title {
-  font-size: 1.6rem;
-  letter-spacing: 1px;
-  font-weight: 600;
-}
-
-.oh-brand-title span {
-  color: var(--oh-gold);
+  font-size: 1.9rem;
 }
 
 .oh-brand-tagline {
-  color: #d8e4df;
+  color: var(--oh-on-ink-muted);
   margin: 6px 0 18px;
-  font-size: 0.95rem;
+  font-size: clamp(1.9rem, 1.4rem + 1.2vw, 2.4rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 @media (max-width: 899px) {
@@ -88,10 +81,12 @@
 }
 
 .oh-brand-motto {
-  letter-spacing: 3px;
-  font-size: 0.75rem;
-  color: var(--oh-gold);
+  font-family: var(--oh-font-body);
+  letter-spacing: 0;
+  font-size: 0.72rem;
+  color: var(--oh-signal);
   margin: 0;
+  text-transform: none;
 }
 
 .oh-brand-dots {
@@ -165,7 +160,7 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: var(--oh-forest);
+  background: var(--oh-ink);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -175,7 +170,7 @@
 .oh-auth-heading {
   text-align: center;
   font-size: 1.15rem;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   margin-bottom: 4px;
 }
 
@@ -188,7 +183,7 @@
 
 .oh-login-mode-tabs {
   display: flex;
-  background: var(--oh-cream);
+  background: var(--oh-canvas);
   border-radius: var(--oh-radius-sm);
   padding: 4px;
   margin-bottom: 20px;
@@ -207,7 +202,7 @@
 
 .oh-login-mode-tab.active {
   background: var(--oh-white);
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
@@ -219,25 +214,25 @@
   display: block;
   font-size: 0.78rem;
   font-weight: 600;
-  letter-spacing: 0.4px;
+  letter-spacing: 0;
   color: var(--oh-text-muted);
   margin-bottom: 6px;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .oh-mobile-input {
   display: flex;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: var(--oh-radius-sm);
   overflow: hidden;
-  background: var(--oh-cream);
+  background: var(--oh-white);
 }
 
 .oh-mobile-input .oh-code {
   padding: 12px 14px;
   color: var(--oh-text);
   font-weight: 600;
-  border-right: 1.5px solid var(--oh-border);
+  border-right: 1px solid var(--oh-border);
   background: var(--oh-white);
 }
 
@@ -257,16 +252,16 @@
 .oh-field input,
 .oh-field select,
 .oh-field textarea {
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: var(--oh-radius-sm);
-  background: var(--oh-cream);
+  background: var(--oh-white);
 }
 
 .oh-field input:focus,
 .oh-field select:focus,
 .oh-field textarea:focus,
 .oh-mobile-input:focus-within {
-  border-color: var(--oh-forest);
+  border-color: var(--oh-ink);
 }
 
 .oh-otp-input input {
@@ -278,7 +273,7 @@
 
 .oh-btn-primary {
   width: 100%;
-  background: var(--oh-forest);
+  background: var(--oh-ink);
   color: var(--oh-white);
   border: none;
   border-radius: var(--oh-radius-sm);
@@ -289,7 +284,7 @@
 }
 
 .oh-btn-primary:hover:not(:disabled) {
-  background: var(--oh-forest-light);
+  background: var(--oh-ink-2);
 }
 
 .oh-btn-primary:disabled {
@@ -300,8 +295,8 @@
 .oh-btn-secondary {
   width: 100%;
   background: var(--oh-white);
-  color: var(--oh-forest);
-  border: 1.5px solid var(--oh-forest);
+  color: var(--oh-ink);
+  border: 1.5px solid var(--oh-ink);
   border-radius: var(--oh-radius-sm);
   padding: 12px;
   font-weight: 600;
@@ -315,8 +310,8 @@
   margin: 20px 0;
   color: var(--oh-text-muted);
   font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .oh-divider::before,
@@ -336,7 +331,7 @@
 
 .oh-auth-footer a,
 .oh-link {
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
@@ -346,8 +341,8 @@
 }
 
 .oh-error {
-  background: var(--oh-red-bg);
-  color: var(--oh-red);
+  background: var(--oh-danger-bg);
+  color: var(--oh-danger);
   border-radius: var(--oh-radius-sm);
   padding: 10px 12px;
   font-size: 0.85rem;
@@ -355,9 +350,9 @@
 }
 
 .oh-demo-otp-banner {
-  background: #eef6f0;
-  border: 1px dashed var(--oh-forest);
-  color: var(--oh-forest);
+  background: var(--oh-signal-soft);
+  border: 1px dashed var(--oh-ink);
+  color: var(--oh-ink);
   border-radius: var(--oh-radius-sm);
   padding: 12px 14px;
   font-size: 0.85rem;
@@ -384,9 +379,9 @@
 }
 
 .oh-user-type-option {
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: var(--oh-radius-sm);
-  background: var(--oh-cream);
+  background: var(--oh-canvas);
   padding: 12px 10px;
   text-align: left;
   font-size: 0.85rem;
@@ -398,11 +393,44 @@
 }
 
 .oh-user-type-option.active {
-  border-color: var(--oh-forest);
-  background: #eef6f0;
-  color: var(--oh-forest);
+  border-color: var(--oh-ink);
+  background: var(--oh-signal-soft);
+  color: var(--oh-ink);
 }
 
 .oh-user-type-option .oh-emoji {
   font-size: 1.1rem;
+}
+
+/* Laptop (kept last so it wins over the base rules above): an editorial column — mark, wordmark, a large serif line, the motto in mono. */
+@media (min-width: 900px) {
+  .oh-brand-panel {
+    flex: 1;
+    min-height: 100vh;
+    align-items: flex-start;
+    text-align: left;
+    padding: 56px clamp(40px, 6vw, 96px);
+    border-right: 1px solid var(--oh-ink-3);
+  }
+
+  .oh-brand-tagline {
+    max-width: 11ch;
+    font-family: var(--oh-font-display);
+    font-size: clamp(3rem, 2rem + 3vw, 4.6rem);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    color: var(--oh-on-ink);
+  }
+
+  .oh-brand-dots {
+    display: none;
+  }
+}
+
+/* Tablet portrait: the form starts near the top instead of floating mid-screen. */
+@media (min-width: 600px) and (max-width: 899px) {
+  .oh-form-panel {
+    align-items: flex-start;
+    padding-top: 56px;
+  }
 }

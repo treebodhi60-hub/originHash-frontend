@@ -1,10 +1,16 @@
-const BrandLogo = ({ size = 20 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path
-      d="M12 2c-2.2 0-4 1.8-4 4v1H7a1 1 0 0 0 0 2h1v2H7a1 1 0 0 0 0 2h1v1c0 2.2 1.8 4 4 4s4-1.8 4-4v-1h1a1 1 0 1 0 0-2h-1V9h1a1 1 0 1 0 0-2h-1V6c0-2.2-1.8-4-4-4Zm-2 4c0-1.1.9-2 2-2s2 .9 2 2v1h-4V6Zm4 5v2h-4v-2h4Zm0 4v1c0 1.1-.9 2-2 2s-2-.9-2-2v-1h4Z"
-      fill="var(--oh-gold)"
-    />
-  </svg>
+// The OriginHash mark (the same artwork as the brand website), round and decorative: the wordmark
+// or a label beside it always names the product. `size` is the drawn size in px.
+const BrandLogo = ({ size = 20, className = '' }) => (
+  <img
+    className={`oh-brand-mark ${className}`}
+    src={size <= 64 ? '/brand/originhash-logo-256.webp' : '/brand/originhash-logo-512.webp'}
+    width={size}
+    height={size}
+    alt=""
+    aria-hidden="true"
+    draggable={false}
+    decoding="async"
+  />
 );
 
 export default BrandLogo;

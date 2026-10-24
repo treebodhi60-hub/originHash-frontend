@@ -32,6 +32,13 @@
   }
 }
 
+/* Phones: the live preview stays first but compact, so the form starts within reach. */
+@media (max-width: 640px) {
+  .oh-bulk-aside .oh-bulk-label {
+    zoom: 0.72;
+  }
+}
+
 /* ---------- Steps ---------- */
 .oh-bulk-step {
   margin-bottom: 18px;
@@ -39,7 +46,7 @@
   border: 1px solid var(--oh-border);
   border-radius: var(--oh-radius-lg);
   background: var(--oh-white);
-  box-shadow: var(--oh-shadow-sm, 0 4px 12px rgba(22, 56, 50, 0.05));
+  box-shadow: var(--oh-shadow-sm, 0 4px 12px rgba(23, 36, 58, 0.05));
 }
 
 @media (max-width: 600px) {
@@ -62,16 +69,16 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: var(--oh-forest);
-  color: var(--oh-white);
+  background: var(--oh-blue-soft);
+  color: var(--oh-blue-hover);
   font-family: var(--oh-font-display);
   font-weight: 700;
-  box-shadow: 0 0 0 4px rgba(22, 56, 50, 0.08);
+  box-shadow: 0 0 0 4px rgba(23, 36, 58, 0.08);
 }
 
 .oh-bulk-step h2 {
   font-size: 1.1rem;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-bulk-step > header p {
@@ -102,7 +109,7 @@
 }
 
 .oh-bulk-field .req {
-  color: var(--oh-red);
+  color: var(--oh-danger);
 }
 
 .oh-bulk-field .opt {
@@ -113,16 +120,15 @@
 .oh-bulk-input {
   display: flex;
   align-items: stretch;
-  border: 1.5px solid var(--oh-border);
-  border-radius: 12px;
-  background: var(--oh-cream);
+  border: 1px solid var(--oh-border-strong);
+  border-radius: var(--oh-radius-control);
+  background: var(--oh-white);
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
 .oh-bulk-input:focus-within {
-  border-color: var(--oh-forest);
-  background: var(--oh-white);
-  box-shadow: 0 0 0 3px rgba(22, 56, 50, 0.1);
+  border-color: var(--oh-ink);
+  box-shadow: 0 0 0 3px rgba(82, 111, 229, 0.7);
 }
 
 .oh-bulk-input-icon {
@@ -131,7 +137,7 @@
   flex-shrink: 0;
   width: 44px;
   border-right: 1px solid var(--oh-border);
-  color: #8a7a5c;
+  color: var(--oh-signal-ink);
 }
 
 .oh-bulk-input input,
@@ -153,7 +159,7 @@
 }
 
 .oh-bulk-input input::placeholder {
-  color: #a8a29a;
+  color: var(--oh-text-faint);
 }
 
 /* ---------- Quantity ---------- */
@@ -171,9 +177,9 @@
   width: 150px;
   height: 48px;
   padding: 0 14px;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: 12px;
-  background: var(--oh-cream);
+  background: var(--oh-white);
   font-family: var(--oh-font-display);
   font-size: 1.15rem;
   font-weight: 600;
@@ -182,13 +188,13 @@
 
 .oh-bulk-qty input:focus {
   outline: none;
-  border-color: var(--oh-forest);
+  border-color: var(--oh-ink);
   background: var(--oh-white);
-  box-shadow: 0 0 0 3px rgba(22, 56, 50, 0.1);
+  box-shadow: 0 0 0 3px rgba(23, 36, 58, 0.1);
 }
 
 .oh-bulk-qty input[aria-invalid='true'] {
-  border-color: var(--oh-red);
+  border-color: var(--oh-danger);
 }
 
 .oh-bulk-qty span {
@@ -203,7 +209,7 @@
 }
 
 .oh-bulk-hint.error {
-  color: var(--oh-red);
+  color: var(--oh-danger);
 }
 
 .oh-bulk-print {
@@ -217,10 +223,10 @@
   gap: 12px;
   margin-top: 20px;
   padding: 14px 16px;
-  border: 1px solid #ecdcbc;
+  border: 1px solid var(--oh-border-strong);
   border-radius: 12px;
-  background: #fbf2e1;
-  color: #8a6d35;
+  background: var(--oh-surface-2);
+  color: var(--oh-signal-ink);
 }
 
 .oh-bulk-info > svg {
@@ -239,7 +245,7 @@
 
 .oh-bulk-info strong {
   overflow-wrap: anywhere;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   white-space: pre-wrap;
 }
 
@@ -267,24 +273,24 @@
 
 .oh-bulk-btn.primary {
   border: none;
-  background: var(--oh-forest);
+  background: var(--oh-ink);
   color: var(--oh-white);
-  box-shadow: 0 10px 22px rgba(22, 56, 50, 0.18);
+  box-shadow: 0 10px 22px rgba(23, 36, 58, 0.18);
 }
 
 .oh-bulk-btn.primary:hover:not(:disabled) {
-  background: var(--oh-forest-light);
+  background: var(--oh-ink-2);
   transform: translateY(-1px);
 }
 
 .oh-bulk-btn.ghost {
-  border: 1.5px solid var(--oh-forest);
+  border: 1.5px solid var(--oh-ink);
   background: var(--oh-white);
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-bulk-btn.ghost:hover:not(:disabled) {
-  background: var(--oh-hover, #f7f2ea);
+  background: var(--oh-hover, var(--oh-hover));
 }
 
 .oh-bulk-btn:disabled {
@@ -305,7 +311,7 @@
   padding: 0;
   border: none;
   background: none;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   font-size: 0.88rem;
   font-weight: 600;
   text-decoration: underline;
@@ -321,7 +327,7 @@
 
 .oh-bulk-download-error {
   font-size: 0.74rem;
-  color: var(--oh-red);
+  color: var(--oh-danger);
 }
 
 /* ---------- Done ---------- */
@@ -353,13 +359,13 @@
   margin-bottom: 6px;
   border-radius: 50%;
   background: var(--oh-badge-farmer-bg);
-  color: var(--oh-green);
+  color: var(--oh-success);
 }
 
 .oh-bulk-done h2 {
   font-family: var(--oh-font-display);
   font-size: 1.35rem;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-bulk-done p {
@@ -376,8 +382,8 @@
 .oh-bulk-done code {
   padding: 2px 7px;
   border-radius: 6px;
-  background: #f4ede0;
-  color: var(--oh-forest);
+  background: var(--oh-well);
+  color: var(--oh-ink);
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -419,14 +425,14 @@
   padding: 12px 13px 10px;
   border-radius: 14px;
   background: var(--oh-white);
-  box-shadow: 0 14px 34px rgba(22, 56, 50, 0.14);
+  box-shadow: 0 14px 34px rgba(23, 36, 58, 0.14);
 }
 
 .oh-bulk-label-top {
   overflow: hidden;
   margin-top: 4px;
   font-size: 0.8rem;
-  color: var(--oh-forest);
+  color: var(--oh-print-ink);
   white-space: nowrap;
   text-overflow: ellipsis;
 }
@@ -438,7 +444,7 @@
   gap: 6px;
   margin-top: 10px;
   padding: 12px 0 8px;
-  border: 1px solid var(--oh-border);
+  border: 1px solid var(--oh-print-line);
   border-radius: 10px;
 }
 
@@ -450,21 +456,21 @@
 }
 
 .oh-bulk-label-qr .ink {
-  fill: var(--oh-forest);
+  fill: var(--oh-print-ink);
 }
 
 .oh-bulk-label-brand {
   font-family: var(--oh-font-display);
   font-size: 1rem;
   font-weight: 700;
-  color: var(--oh-forest);
+  color: var(--oh-print-ink);
 }
 
 .oh-bulk-label-bar {
   margin-top: 6px;
   padding: 6px 11px;
   overflow: hidden;
-  background: var(--oh-orange-dark);
+  background: var(--oh-print-bar);
   color: var(--oh-white);
   font-size: 0.74rem;
   font-weight: 700;
@@ -481,8 +487,8 @@
   margin-left: 8px;
   padding: 1px 8px;
   border-radius: 999px;
-  background: #f1e7d4;
-  color: var(--oh-forest);
+  background: var(--oh-well);
+  color: var(--oh-ink);
   font-size: 0.74rem;
   font-weight: 700;
 }
@@ -528,7 +534,7 @@
 .oh-bulk-table th,
 .oh-bulk-table td {
   padding: 13px 14px;
-  border-bottom: 1px solid #f1ebe0;
+  border-bottom: 1px solid var(--oh-well);
   text-align: left;
   vertical-align: middle;
 }
@@ -538,15 +544,15 @@
 }
 
 .oh-bulk-table tbody tr:hover {
-  background: var(--oh-hover, #f7f2ea);
+  background: var(--oh-hover, var(--oh-hover));
 }
 
 .oh-bulk-table thead th {
-  background: #faf6ef;
+  background: var(--oh-surface-2);
   font-size: 0.74rem;
   font-weight: 700;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--oh-text-muted);
   white-space: nowrap;
 }
@@ -565,7 +571,7 @@
 .oh-bulk-cell-main {
   display: block;
   font-weight: 600;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-bulk-cell-main.nowrap {
@@ -585,14 +591,14 @@
   margin-top: 3px;
   padding: 1px 6px;
   border-radius: 5px;
-  background: #f4ede0;
-  color: var(--oh-forest);
+  background: var(--oh-well);
+  color: var(--oh-ink);
   font-size: 0.72rem;
   font-weight: 700;
 }
 
 .oh-bulk-muted {
-  color: #b8b2a7;
+  color: var(--oh-text-faint);
 }
 
 .oh-bulk-pill {
@@ -610,8 +616,8 @@
 }
 
 .oh-bulk-pill.expired {
-  background: var(--oh-red-bg);
-  color: var(--oh-red);
+  background: var(--oh-danger-bg);
+  color: var(--oh-danger);
 }
 
 .oh-bulk-list-actions {
@@ -637,7 +643,7 @@
   align-self: flex-start;
   font-size: 0.88rem;
   font-weight: 600;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   text-decoration: none;
 }
 
@@ -654,7 +660,7 @@
   border: 1px solid var(--oh-border);
   border-radius: var(--oh-radius-lg);
   background: var(--oh-white);
-  box-shadow: var(--oh-shadow-sm, 0 4px 12px rgba(22, 56, 50, 0.05));
+  box-shadow: var(--oh-shadow-sm, 0 4px 12px rgba(23, 36, 58, 0.05));
 }
 
 @media (max-width: 760px) {
@@ -671,15 +677,15 @@
 .oh-bb-label {
   padding: 16px;
   border-radius: 18px;
-  background: var(--oh-cream);
+  background: var(--oh-canvas);
 }
 
 .oh-bb-eyebrow {
   font-size: 0.76rem;
   font-weight: 700;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  color: #a5813f;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--oh-signal-ink);
 }
 
 .oh-bb-info h1 {
@@ -687,7 +693,7 @@
   font-family: var(--oh-font-display);
   font-size: 1.7rem;
   line-height: 1.2;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-bb-pack {
@@ -713,7 +719,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 9px 0;
-  border-bottom: 1px solid #f1ebe0;
+  border-bottom: 1px solid var(--oh-well);
   font-size: 0.88rem;
 }
 
@@ -733,8 +739,8 @@
 .oh-bb-details code {
   padding: 2px 8px;
   border-radius: 6px;
-  background: #f4ede0;
-  color: var(--oh-forest);
+  background: var(--oh-well);
+  color: var(--oh-ink);
   font-weight: 700;
 }
 
@@ -762,7 +768,7 @@
   gap: 2px;
   padding: 14px 16px;
   border: 1px solid var(--oh-border);
-  border-top: 3px solid var(--oh-forest);
+  border-top: 3px solid var(--oh-ink);
   border-radius: 14px;
   background: var(--oh-white);
 }
@@ -802,7 +808,7 @@
 
 .oh-bb-scans-head h2 {
   font-size: 1.15rem;
-  color: var(--oh-forest);
+  color: var(--oh-ink);
 }
 
 .oh-bb-scans-head p {
@@ -821,7 +827,7 @@
   align-items: center;
   gap: 8px;
   padding: 0 12px;
-  border: 1.5px solid var(--oh-border);
+  border: 1px solid var(--oh-border);
   border-radius: var(--oh-radius-sm);
   background: var(--oh-white);
   font-size: 0.82rem;
@@ -870,7 +876,7 @@
 }
 
 .oh-bb-coords:hover {
-  color: var(--oh-forest);
+  color: var(--oh-ink);
   text-decoration: underline;
 }
 
@@ -899,7 +905,7 @@
 }
 
 .oh-lq-status.ready {
-  color: var(--oh-green);
+  color: var(--oh-success);
 }
 
 .oh-lq-status.scanned {

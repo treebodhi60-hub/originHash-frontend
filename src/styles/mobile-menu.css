@@ -27,7 +27,7 @@
 .oh-menu-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(15, 30, 26, 0.45);
+  background: rgba(17, 27, 45, 0.45);
   animation: oh-menu-fade 0.2s ease;
 }
 
@@ -40,7 +40,7 @@
   display: flex;
   flex-direction: column;
   padding: calc(14px + env(safe-area-inset-top)) 12px calc(16px + env(safe-area-inset-bottom));
-  background: var(--oh-forest);
+  background: var(--oh-ink);
   color: var(--oh-white);
   box-shadow: 12px 0 32px rgba(0, 0, 0, 0.25);
   overflow-y: auto;
@@ -64,7 +64,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1.5px solid var(--oh-gold);
+  border: 1.5px solid var(--oh-signal);
 }
 
 .oh-menu-brand {
@@ -102,7 +102,7 @@
   border: none;
   border-radius: 12px;
   background: none;
-  color: #d7e6e1;
+  color: var(--oh-border);
   font-size: 0.95rem;
   font-weight: 600;
   text-align: left;
@@ -121,7 +121,7 @@
 
 .oh-menu-logout {
   margin-top: auto;
-  color: #f4b8ae;
+  color: #f2c4c1;
 }
 
 @keyframes oh-menu-slide {

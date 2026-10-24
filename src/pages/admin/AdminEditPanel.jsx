@@ -1,3 +1,4 @@
+import { X } from 'lucide-react';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addAdmin, editAdmin } from '../../store/adminsSlice';
@@ -66,9 +67,9 @@ const AdminEditPanel = ({ mode, admin, onClose }) => {
 
   return (
     <div className="oh-panel-backdrop" onClick={onClose}>
-      <div className="oh-slide-panel" onClick={(e) => e.stopPropagation()}>
+      <div className="oh-slide-panel" role="dialog" aria-modal="true" aria-label={isAdd ? 'Add admin' : 'Edit admin'} onClick={(e) => e.stopPropagation()}>
         <button className="oh-panel-close" onClick={onClose} type="button" aria-label="Close">
-          ✕
+          <X size={18} strokeWidth={1.75} aria-hidden="true" />
         </button>
 
         <div className="oh-panel-header">

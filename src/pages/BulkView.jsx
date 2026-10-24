@@ -1,3 +1,4 @@
+import { ArrowLeft, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -81,11 +82,13 @@ const BulkView = () => {
             <span className="obv-logo">
               <BrandLogo size={16} />
             </span>
-            OriginHash
+            <span className="oh-wordmark">
+              Origin<span>Hash</span>
+            </span>
           </span>
           {signedIn && window.history.length > 1 && (
             <button type="button" className="obv-back" onClick={() => navigate(-1)}>
-              ← Back
+              <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" /> Back
             </button>
           )}
         </header>
@@ -95,7 +98,7 @@ const BulkView = () => {
         {status === 'missing' && (
           <div className="obv-missing">
             <span className="obv-missing-icon" aria-hidden="true">
-              ✕
+              <X size={22} strokeWidth={2} />
             </span>
             <h1>QR code not found</h1>
             <p>This code isn&apos;t in OriginHash records. Check that you scanned the right label.</p>
