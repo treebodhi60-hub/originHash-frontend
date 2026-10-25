@@ -83,7 +83,7 @@ const Login = () => {
           aria-pressed={mode === 'admin'}
           onClick={() => switchMode('admin')}
         >
-          Admin
+          Retailer
         </button>
       </div>
 

@@ -8,6 +8,7 @@ import TopBar from "../components/TopBar.jsx";
 import { LogOut } from "lucide-react";
 import BrandLogo from "../components/BrandLogo.jsx";
 import { logout } from "../store/authSlice";
+import { USER_STICKERS_ENABLED } from "../utils/features";
 import "../styles/admin.css";
 import "../styles/app-shell.css";
 
@@ -21,7 +22,7 @@ const USER_NAV = [
       { to: "/history", label: "History", icon: "history" },
     ],
   },
-  {
+  USER_STICKERS_ENABLED && {
     label: "Catalogue & stickers",
     items: [
       { to: "/images", label: "Image stock", icon: "images" },
@@ -30,7 +31,7 @@ const USER_NAV = [
       { to: "/light-qr", label: "Light QR stickers", hint: "Generate light QR stickers", icon: "light" },
     ],
   },
-];
+].filter(Boolean);
 const USER_NAV_BOTTOM = [{ to: "/profile", label: "Profile", icon: "person" }];
 
 const UserLayout = () => {

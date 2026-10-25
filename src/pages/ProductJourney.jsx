@@ -5,6 +5,7 @@ import api from '../api/axios';
 import { LoadingState } from '../components/Loader.jsx';
 import JourneySection, { hasPlaceNames } from '../components/JourneySection.jsx';
 import { ArrowLeftIcon } from '../components/ScanIcons.jsx';
+import { USER_STICKERS_ENABLED } from '../utils/features';
 import '../styles/app-shell.css';
 import '../styles/scan.css';
 import '../styles/history.css';
@@ -41,7 +42,7 @@ const ProductJourney = () => {
 
   const goBack = () => {
     if (location.key !== 'default') navigate(-1);
-    else navigate(user?.isAdmin ? '/admin/qr-stickers' : '/qr-stickers', { replace: true });
+    else navigate(user?.isAdmin ? '/admin/qr-stickers' : USER_STICKERS_ENABLED ? '/qr-stickers' : '/home', { replace: true });
   };
 
   return (

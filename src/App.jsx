@@ -31,6 +31,9 @@ import ImageStock from "./pages/admin/ImageStock.jsx";
 import QrStickers from "./pages/admin/QrStickers.jsx";
 import AdminProfile from "./pages/admin/AdminProfile.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import { USER_STICKERS_ENABLED } from "./utils/features";
+
+const userStickers = (page) => (USER_STICKERS_ENABLED ? page : <Navigate to="/home" replace />);
 
 function App() {
   const dispatch = useDispatch();
@@ -88,12 +91,13 @@ function App() {
         <Route path="/history/:id" element={<ScanDetails />} />
         <Route path="/journey/:uuid" element={<ProductJourney />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/images" element={<ImageStock />} />
-        <Route path="/qr-stickers" element={<QrStickers />} />
-        <Route path="/bulk-qr" element={<BulkQr />} />
-        <Route path="/bulk-qr/:id" element={<BulkBatchDetails />} />
-        <Route path="/light-qr" element={<LightQr />} />
-        <Route path="/light-qr/:id" element={<LightBatchDetails />} />
+        {/* Catalogue & stickers: hidden from normal users for now (see utils/features). */}
+        <Route path="/images" element={userStickers(<ImageStock />)} />
+        <Route path="/qr-stickers" element={userStickers(<QrStickers />)} />
+        <Route path="/bulk-qr" element={userStickers(<BulkQr />)} />
+        <Route path="/bulk-qr/:id" element={userStickers(<BulkBatchDetails />)} />
+        <Route path="/light-qr" element={userStickers(<LightQr />)} />
+        <Route path="/light-qr/:id" element={userStickers(<LightBatchDetails />)} />
       </Route>
 
       <Route
