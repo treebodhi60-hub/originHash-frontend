@@ -1,7 +1,14 @@
 import axios from 'axios';
 
+// The backend serves everything under /api. Accept VITE_API_BASE_URL with or without it
+// (e.g. "https://x.onrender.com" or "https://x.onrender.com/api/").
+const apiBase = () => {
+  const raw = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api').trim().replace(/\/+$/, '');
+  return /\/api$/.test(raw) ? raw : `${raw}/api`;
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+  baseURL: apiBase(),
 });
 
 api.interceptors.request.use((config) => {
