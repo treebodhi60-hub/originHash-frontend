@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import BottomNav, { userMenuItems } from "../components/BottomNav.jsx";
 import { MenuButton, MenuDrawer } from "../components/MobileMenu.jsx";
 import SideNav from "../components/SideNav.jsx";
+import NavIcon from "../components/NavIcons.jsx";
 import TopBar from "../components/TopBar.jsx";
 import { LogOut } from "lucide-react";
 import BrandLogo from "../components/BrandLogo.jsx";
@@ -34,10 +35,45 @@ const USER_NAV = [
 ].filter(Boolean);
 const USER_NAV_BOTTOM = [{ to: "/profile", label: "Profile", icon: "person" }];
 
+// Supply chain: a producer's admin and staff get their producer pages; everyone else their scanned
+// products (and, for consumers, chats with brands).
+export const chainNavFor = (user) => {
+  if (!user) return null;
+  if (user.producerId) {
+    const admin = user.producerRole === "admin";
+    return {
+      label: "Producer",
+      items: [
+        { to: "/producer", label: "Dashboard", hint: "Producer dashboard", icon: "dashboard", end: true },
+        { to: "/producer/products", label: "Products", icon: "product" },
+        { to: "/producer/offers", label: "Discounts", hint: "Discounts & loyalty", icon: "offer" },
+        { to: "/producer/batches", label: "QR batches", icon: "batches" },
+        ...(admin || user.canChat ? [{ to: "/producer/chats", label: "Chat", hint: "Chat with brand", icon: "chat" }] : []),
+        { to: "/producer/team", label: "Team", icon: "users" },
+        { to: "/producer/settings", label: "Settings", hint: "Producer settings", icon: "settings" },
+      ],
+    };
+  }
+  return {
+    label: "Supply chain",
+    items: [
+      { to: "/chain/history", label: user.partnerRole ? "Product scans" : "My products", icon: "product" },
+      ...(user.partnerRole ? [] : [{ to: "/chain/chats", label: "Brand chats", hint: "Chats with brands", icon: "chat" }]),
+    ],
+  };
+};
+
 const UserLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const user = useSelector((s) => s.auth.user);
+  const chainNav = chainNavFor(user);
+  const groups = chainNav ? (user?.producerId ? [chainNav, ...USER_NAV] : [USER_NAV[0], chainNav, ...USER_NAV.slice(1)]) : USER_NAV;
+  const menuItems = [
+    ...(chainNav ? chainNav.items.map((i) => ({ to: i.to, label: i.hint || i.label, icon: <NavIcon name={i.icon} /> })) : []),
+    ...userMenuItems,
+  ];
 
   // Phone ☰ menu, opened from the top bar (shown, pinned, on every page on phones and tablets).
   const [menuOpen, setMenuOpen] = useState(false);
@@ -52,7 +88,7 @@ const UserLayout = () => {
 
   return (
   <div className="oh-admin-shell oh-user-shell">
-    <SideNav className="oh-user-sidebar" groups={USER_NAV} bottom={USER_NAV_BOTTOM} onLogout={handleLogout} />
+    <SideNav className="oh-user-sidebar" groups={groups} bottom={USER_NAV_BOTTOM} onLogout={handleLogout} />
 
     <div className="oh-user-content-col">
       <header className="oh-mobile-topbar">
@@ -76,7 +112,7 @@ const UserLayout = () => {
         </button>
       </header>
 
-      <TopBar groups={USER_NAV} bottom={USER_NAV_BOTTOM} profileTo="/profile" />
+      <TopBar groups={groups} bottom={USER_NAV_BOTTOM} profileTo="/profile" />
 
       <main className="oh-admin-main oh-user-main">
         {/* No openMenu for pages: the top bar has the only ☰ button. */}
@@ -85,7 +121,7 @@ const UserLayout = () => {
     </div>
 
     <BottomNav />
-    <MenuDrawer open={menuOpen} onClose={closeMenu} items={userMenuItems} onLogout={handleLogout} />
+    <MenuDrawer open={menuOpen} onClose={closeMenu} items={menuItems} onLogout={handleLogout} />
   </div>
   );
 };

@@ -19,6 +19,7 @@ import {
 } from '../components/ScanIcons.jsx';
 import useRollbackOnLeave, { rollBackScan } from '../hooks/useRollbackOnLeave';
 import { createQrDecoder, drawToCanvas, extractBulkCode, extractCode, extractLightToken } from '../utils/qr';
+import { pathFromQr } from '../connect/qrPath';
 import { scanRoutes } from '../utils/scanRoutes';
 import '../styles/app-shell.css';
 import '../styles/scan.css';
@@ -231,9 +232,11 @@ const Scan = () => {
     // Bulk and light QR labels aren't stickers to record or verify here: open their own pages.
     const bulkCode = extractBulkCode(raw);
     const lightToken = extractLightToken(raw);
-    if (bulkCode || lightToken) {
+    // Supply-chain retailer / consumer QR codes open their own pages too.
+    const chainPath = pathFromQr(raw);
+    if (bulkCode || lightToken || chainPath) {
       stopCamera();
-      navigate(bulkCode ? `/b/${bulkCode}` : `/l/${lightToken}`);
+      navigate(chainPath || (bulkCode ? `/b/${bulkCode}` : `/l/${lightToken}`));
       return;
     }
     const snapshot = snapshotRef.current;

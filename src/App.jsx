@@ -32,6 +32,8 @@ import QrStickers from "./pages/admin/QrStickers.jsx";
 import AdminProfile from "./pages/admin/AdminProfile.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import { USER_STICKERS_ENABLED } from "./utils/features";
+import { chainAdminRoutes, chainPublicRoutes, chainUserRoutes } from "./connect/routes.jsx";
+import { homeOf } from "./connect/useChain";
 
 const userStickers = (page) => (USER_STICKERS_ENABLED ? page : <Navigate to="/home" replace />);
 
@@ -50,7 +52,7 @@ function App() {
         path="/login"
         element={
           token && user ? (
-            <Navigate to={user.isAdmin ? "/admin/users" : "/home"} replace />
+            <Navigate to={user.isAdmin ? "/admin/users" : homeOf(user)} replace />
           ) : (
             <Login />
           )
@@ -64,6 +66,8 @@ function App() {
       <Route path="/l/:token" element={<LightView />} />
       <Route path="/l/:token/update" element={<LightUpdate />} />
       <Route path="/l/:token/history" element={<LightHistory />} />
+      {/* Supply-chain module: the superadmin's own login route, and the retailer / consumer QR pages. */}
+      {chainPublicRoutes()}
 
       <Route
         path="/onboarding"
@@ -98,6 +102,8 @@ function App() {
         <Route path="/bulk-qr/:id" element={userStickers(<BulkBatchDetails />)} />
         <Route path="/light-qr" element={userStickers(<LightQr />)} />
         <Route path="/light-qr/:id" element={userStickers(<LightBatchDetails />)} />
+        {/* Supply chain: producer users (/producer), distributors / retailers / consumers (/chain). */}
+        {chainUserRoutes()}
       </Route>
 
       <Route
@@ -126,6 +132,8 @@ function App() {
         <Route path="history/:id" element={<ScanDetails />} />
         <Route path="journey/:uuid" element={<ProductJourney />} />
         <Route path="profile" element={<AdminProfile />} />
+        {/* Supply chain: the OriginHash superadmin's pages. */}
+        {chainAdminRoutes()}
         <Route index element={<Navigate to="users" replace />} />
       </Route>
 

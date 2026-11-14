@@ -53,7 +53,8 @@ const Login = () => {
 
     const result = await dispatch(adminLogin({ username: username.trim(), password }));
     if (adminLogin.fulfilled.match(result)) {
-      navigate(takeReturn() || '/admin/users');
+      // Admins go to the admin panel; producer users to their producer pages.
+      navigate(takeReturn() || (result.payload.user.isAdmin ? '/admin/users' : '/producer'));
     }
   };
 
@@ -83,7 +84,7 @@ const Login = () => {
           aria-pressed={mode === 'admin'}
           onClick={() => switchMode('admin')}
         >
-          Retailer
+          Producer
         </button>
       </div>
 

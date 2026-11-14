@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import AdminBottomNav, { adminMenuItems } from '../../components/AdminBottomNav.jsx';
+import NavIcon from '../../components/NavIcons.jsx';
 import { MenuButton, MenuDrawer } from '../../components/MobileMenu.jsx';
 import SideNav from '../../components/SideNav.jsx';
 import TopBar from '../../components/TopBar.jsx';
@@ -33,12 +34,29 @@ const ADMIN_NAV = [
   },
   { label: 'Soon', items: [{ label: 'Coming soon', icon: 'shield', disabled: true }] },
 ];
+// Supply chain: the OriginHash superadmin only.
+const CHAIN_NAV = {
+  label: 'Supply chain',
+  items: [
+    { to: '/admin/chain', label: 'Overview', hint: 'Supply chain overview', icon: 'chain', end: true },
+    { to: '/admin/chain/batches', label: 'QR batches', hint: 'Retailer + consumer QR batches', icon: 'batches' },
+    { to: '/admin/chain/producers', label: 'Producers', icon: 'producer' },
+    { to: '/admin/chain/accounts/distributor', label: 'Distributors', icon: 'distributor' },
+    { to: '/admin/chain/accounts/retailer', label: 'Retailers', icon: 'retailer' },
+    { to: '/admin/chain/accounts/consumer', label: 'Consumers', icon: 'consumer' },
+  ],
+};
 const ADMIN_NAV_BOTTOM = [{ to: '/admin/profile', label: 'Settings / Profile', icon: 'settings' }];
+
+const chainMenuItems = CHAIN_NAV.items.map((i) => ({ to: i.to, label: i.label === 'Overview' ? 'Supply chain' : i.label, icon: <NavIcon name={i.icon} /> }));
 
 const AdminLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const isSuperAdmin = useSelector((s) => Boolean(s.auth.user?.isSuperAdmin));
+  const nav = isSuperAdmin ? [ADMIN_NAV[0], CHAIN_NAV, ...ADMIN_NAV.slice(1)] : ADMIN_NAV;
+  const menuItems = isSuperAdmin ? [...chainMenuItems, ...adminMenuItems] : adminMenuItems;
 
   // Phone ☰ menu, opened from the top bar (shown, pinned, on every page on phones and tablets).
   const [menuOpen, setMenuOpen] = useState(false);
@@ -53,7 +71,7 @@ const AdminLayout = () => {
 
   return (
     <div className="oh-admin-shell">
-      <SideNav groups={ADMIN_NAV} bottom={ADMIN_NAV_BOTTOM} onLogout={handleLogout} />
+      <SideNav groups={nav} bottom={ADMIN_NAV_BOTTOM} onLogout={handleLogout} />
 
       <div className="oh-user-content-col">
         <header className="oh-mobile-topbar">
@@ -77,7 +95,7 @@ const AdminLayout = () => {
           </button>
         </header>
 
-        <TopBar groups={ADMIN_NAV} bottom={ADMIN_NAV_BOTTOM} profileTo="/admin/profile" />
+        <TopBar groups={nav} bottom={ADMIN_NAV_BOTTOM} profileTo="/admin/profile" />
 
         <main className="oh-admin-main">
           {/* No openMenu for pages: the top bar has the only ☰ button. */}
@@ -86,7 +104,7 @@ const AdminLayout = () => {
       </div>
 
       <AdminBottomNav />
-      <MenuDrawer open={menuOpen} onClose={closeMenu} items={adminMenuItems} onLogout={handleLogout} />
+      <MenuDrawer open={menuOpen} onClose={closeMenu} items={menuItems} onLogout={handleLogout} />
     </div>
   );
 };

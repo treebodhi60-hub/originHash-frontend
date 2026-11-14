@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import NavIcon from './NavIcons.jsx';
 import { USER_STICKERS_ENABLED } from '../utils/features';
 import '../styles/app-shell.css';
@@ -20,12 +21,18 @@ export const userMenuItems = USER_STICKERS_ENABLED
     ]
   : [];
 
-const BottomNav = () => (
+// Producer users start on their producer dashboard instead of Home.
+const producerItems = [{ to: '/producer', label: 'Dashboard', icon: 'dashboard', end: true }, ...items.slice(1)];
+
+const BottomNav = () => {
+  const isProducer = useSelector((s) => Boolean(s.auth.user?.producerId));
+  return (
   <nav className="oh-bottom-nav" aria-label="Main">
-    {items.map((item) => (
+    {(isProducer ? producerItems : items).map((item) => (
       <NavLink
         key={item.label}
         to={item.disabled ? '#' : item.to}
+        end={item.end}
         onClick={(e) => item.disabled && e.preventDefault()}
         className={({ isActive }) => `oh-nav-item ${isActive && !item.disabled ? 'active' : ''} ${item.disabled ? 'disabled' : ''}`}
       >
@@ -34,6 +41,7 @@ const BottomNav = () => (
       </NavLink>
     ))}
   </nav>
-);
+  );
+};
 
 export default BottomNav;

@@ -32,7 +32,15 @@ const Item = ({ item }) =>
   );
 
 const roleOf = (user) =>
-  user?.isSuperAdmin ? 'Super-admin' : user?.isAdmin ? 'Admin' : user?.userType ? user.userType : 'Member';
+  user?.isSuperAdmin
+    ? 'Super-admin'
+    : user?.isAdmin
+      ? 'Admin'
+      : user?.producerId
+        ? user.producerRole === 'admin'
+          ? 'Producer admin'
+          : 'Producer staff'
+        : user?.partnerRole || user?.userType || 'Member';
 
 const SideNav = ({ groups, bottom = [], onLogout, className = '' }) => {
   const asideRef = useRef(null);

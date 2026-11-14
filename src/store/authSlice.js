@@ -65,6 +65,19 @@ export const adminLogin = createAsyncThunk(
   }
 );
 
+// The OriginHash superadmin's own sign-in (its page is on a route no other page links to).
+export const superAdminLogin = createAsyncThunk(
+  'auth/superAdminLogin',
+  async ({ username, password }, { rejectWithValue }) => {
+    try {
+      const { data } = await api.post('/auth/superadmin-login', { username, password });
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Could not log in.');
+    }
+  }
+);
+
 export const fetchMe = createAsyncThunk('auth/fetchMe', async (_, { rejectWithValue }) => {
   try {
     const { data } = await api.get('/users/me');
@@ -170,6 +183,21 @@ const authSlice = createSlice({
         localStorage.setItem("oh_user", JSON.stringify(action.payload.user));
       })
       .addCase(adminLogin.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+      })
+      .addCase(superAdminLogin.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(superAdminLogin.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.token = action.payload.token;
+        state.user = action.payload.user;
+        localStorage.setItem("oh_token", action.payload.token);
+        localStorage.setItem("oh_user", JSON.stringify(action.payload.user));
+      })
+      .addCase(superAdminLogin.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
       })

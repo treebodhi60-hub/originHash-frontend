@@ -1,5 +1,14 @@
 import {
+  Boxes,
   ClipboardClock,
+  Factory,
+  MessageCircle,
+  Network,
+  Package,
+  ShoppingBag,
+  Store,
+  TicketPercent,
+  Truck,
   Images,
   Layers,
   LayoutGrid,
@@ -28,6 +37,16 @@ const ICONS = {
   shield: ShieldCheck,
   person: SquareUserRound,
   settings: Settings2,
+  // Supply-chain module
+  chain: Network,
+  batches: Boxes,
+  producer: Factory,
+  distributor: Truck,
+  retailer: Store,
+  consumer: ShoppingBag,
+  product: Package,
+  offer: TicketPercent,
+  chat: MessageCircle,
 };
 
 const NavIcon = ({ name, size = 20 }) => {
