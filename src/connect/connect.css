@@ -532,6 +532,25 @@
   line-height: 1.5;
 }
 
+/* Producer Scan / Home: each recent-activity row is a link to the unit. */
+.cx-home-recent .oh-home-recent-row {
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.cx-home-recent li:not(:last-child) .oh-home-recent-row {
+  border-bottom: 1px solid var(--oh-border);
+}
+
+.cx-home-recent li:last-child .oh-home-recent-row {
+  border-bottom: none;
+}
+
+.cx-home-recent .oh-home-recent-row:hover {
+  background: var(--oh-hover, var(--oh-well));
+}
+
 /* QR batch print layout preview: each retailer + consumer pair outlined. */
 .cx-pair-preview {
   color: var(--oh-print-ink);

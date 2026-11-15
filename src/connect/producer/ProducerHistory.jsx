@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import connectApi from '../api';
-import { roleLabel } from '../ui.jsx';
+import { byText, bySub, eventOf, whatHappened } from '../historyEvents.jsx';
 import { LoadingState, Spinner } from '../../components/Loader.jsx';
 import { MenuButton } from '../../components/MobileMenu.jsx';
-import { CheckIcon, CrossIcon, PinIcon, QrIcon, SearchIcon, ShieldIcon, UserIcon } from '../../components/ScanIcons.jsx';
+import { CrossIcon, PinIcon, SearchIcon } from '../../components/ScanIcons.jsx';
 import { Pagination } from '../../pages/History.jsx';
 import { formatCoords, formatDateTimeShort } from '../../utils/format';
 import '../../styles/app-shell.css';
@@ -26,34 +26,6 @@ const FILTERS = [
 const PAGE_SIZES = [10, 20, 50];
 const DEFAULT_PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 350;
-
-// What an entry was, as a status chip.
-// `short` is for the phone cards, where the chip shares the row with the text.
-const eventOf = (h) => {
-  if (h.action === 'sold') return { label: 'Sold', short: 'Sold', tone: 'success', icon: <CheckIcon size={18} /> };
-  if (h.qrType === 'consumer') return { label: 'Consumer scan', short: 'Consumer', tone: 'info', icon: <UserIcon size={18} /> };
-  if (h.actorType === 'retailer') return { label: 'Retailer scan', short: 'Retailer', tone: 'muted', icon: <PinIcon size={18} /> };
-  if (h.actorType === 'distributor') return { label: 'Distributor scan', short: 'Distrib.', tone: 'muted', icon: <PinIcon size={18} /> };
-  if (h.actorType === 'producer') return { label: 'Team scan', short: 'Team', tone: 'muted', icon: <ShieldIcon size={18} /> };
-  if (h.actorType === 'admin') return { label: 'OriginHash scan', short: 'Admin', tone: 'muted', icon: <ShieldIcon size={18} /> };
-  return { label: 'Retailer QR opened', short: 'Opened', tone: 'muted', icon: <QrIcon size={18} /> };
-};
-
-// What happened, in words (the consumer QR rows say whose scan it was).
-const whatHappened = (h) => {
-  if (h.action === 'sold') return 'Marked sold';
-  if (h.qrType === 'consumer') return h.actorType === 'consumer' ? 'Consumer QR scanned' : `Consumer QR scanned by a ${roleLabel(h.actorType).toLowerCase()}`;
-  return 'Retailer QR scanned';
-};
-
-const byText = (h) => {
-  if (h.isYou) return 'You';
-  return h.by?.name || roleLabel(h.actorType);
-};
-const bySub = (h) => {
-  const role = h.actorType === 'producer' ? 'Your team' : roleLabel(h.actorType);
-  return [role !== byText(h) ? role : null, h.by?.city].filter(Boolean).join(' · ');
-};
 
 const positiveInt = (value, fallback) => {
   const n = Number(value);

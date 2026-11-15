@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import api from '../api/axios';
@@ -37,7 +37,7 @@ const StatTile = ({ label, value, tone = 'plain' }) => (
   </div>
 );
 
-const UserHome = () => {
+const VerificationHome = () => {
   const { user } = useSelector((state) => state.auth);
   const paths = scanRoutes(user);
   // From the layout: opens the phone ☰ menu (this page hides the layout's top bar).
@@ -155,6 +155,21 @@ const UserHome = () => {
       </section>
     </div>
   );
+};
+
+// Producer users (admin and staff) get the supply-chain version of Home / Scan.
+const ProducerScanHome = lazy(() => import('../connect/producer/ProducerScanHome.jsx'));
+
+const UserHome = () => {
+  const { user } = useSelector((state) => state.auth);
+  if (user?.producerId) {
+    return (
+      <Suspense fallback={<LoadingState label="Loading…" />}>
+        <ProducerScanHome />
+      </Suspense>
+    );
+  }
+  return <VerificationHome />;
 };
 
 export default UserHome;
