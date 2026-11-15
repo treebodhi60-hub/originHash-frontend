@@ -67,9 +67,6 @@ export const DownloadButtons = ({ base, batchNo }) => {
       <Button variant="primary" className="small" busy={busy === 'pdf'} onClick={() => get('pdf')}>
         Download QR PDF
       </Button>
-      <Button variant="ghost" className="small" busy={busy === 'csv'} onClick={() => get('csv')}>
-        CSV
-      </Button>
       {error && <span className="cx-field-error">{error}</span>}
     </>
   );
