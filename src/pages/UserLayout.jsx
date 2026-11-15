@@ -51,7 +51,8 @@ export const chainNavFor = (user) => {
         { to: "/history", label: "History", hint: "Supply chain history", icon: "history" },
         { to: "/producer/retailers", label: "Retailers", icon: "retailer" },
         ...(admin || user.canChat ? [{ to: "/producer/chats", label: "Chat", hint: "Chat with brand", icon: "chat" }] : []),
-        { to: "/producer/team", label: "Team", icon: "users" },
+        // Team: the producer admin only (the superadmin sees teams in the console).
+        ...(admin ? [{ to: "/producer/team", label: "Team", icon: "users" }] : []),
         { to: "/producer/settings", label: "Settings", hint: "Producer settings", icon: "settings" },
       ],
     };

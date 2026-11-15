@@ -192,7 +192,7 @@ const ProducerRoutes = () => {
         <Route path="units/:id" element={<ProducerUnit />} />
         {canChat && <Route path="chats" element={<ProducerChats />} />}
         {canChat && <Route path="chats/:id" element={<ProducerChats />} />}
-        <Route path="team" element={<ProducerTeam />} />
+        {isProducerAdmin(user) && <Route path="team" element={<ProducerTeam />} />}
         <Route path="retailers" element={<ProducerRetailers />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/producer" replace />} />
