@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Package, Plus } from 'lucide-react';
 import connectApi, { errorText } from '../api';
 import { useProducer } from '../useChain';
@@ -10,6 +10,8 @@ import { Badge, Button, Card, Empty, ErrorNote, Field, FileUpload, Input, Loadin
 
 export const ProducerProducts = () => {
   const navigate = useNavigate();
+  // "… added." after creating a product (passed in the navigation state).
+  const notice = useLocation().state?.notice || '';
   const [products, setProducts] = useState(null);
   const [error, setError] = useState('');
   useEffect(() => {
@@ -30,6 +32,7 @@ export const ProducerProducts = () => {
           </Button>
         }
       />
+      {notice && <Notice tone="success">{notice}</Notice>}
       <ErrorNote>{error}</ErrorNote>
       <Card flush>
         {!products ? (
@@ -161,7 +164,10 @@ export const ProductForm = () => {
     try {
       const body = { ...form, nablCertificate: nabl, images: images.map((i) => i.ref), certifications: certs.map(docBody), warrantyDocs: warrantyDocs.map(docBody) };
       const { data } = isNew ? await connectApi.post('/producer/products', body) : await connectApi.put(`/producer/products/${id}`, body);
-      if (isNew) navigate(`/producer/products/${data.product.id}`, { replace: true });
+      if (isNew) {
+        navigate('/producer/products', { state: { notice: `${data.product.name} added.` } });
+        return;
+      }
       setSaved(data.message);
     } catch (err) {
       setError(err, 'Could not save the product.');
