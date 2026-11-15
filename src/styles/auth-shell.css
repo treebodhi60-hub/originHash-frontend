@@ -309,6 +309,58 @@
   cursor: not-allowed;
 }
 
+/* ---------- Who signs in on the mobile tab ---------- */
+.oh-si-roles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+  animation: oh-si-rise 620ms var(--oh-ease-out) 90ms both;
+}
+
+.oh-si-roles li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 9px 6px;
+  text-align: center;
+  border: 1px solid var(--oh-border);
+  border-radius: 10px;
+  background: var(--oh-white);
+  color: var(--oh-cobalt);
+}
+
+.oh-si-roles li svg {
+  flex: none;
+}
+
+.oh-si-roles span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  line-height: 1.25;
+}
+
+.oh-si-roles strong {
+  color: var(--oh-ink-900);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.oh-si-roles small {
+  overflow: hidden;
+  color: var(--oh-text-muted);
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .oh-si-hint {
   margin: 8px 4px 0;
   color: var(--oh-text-muted);

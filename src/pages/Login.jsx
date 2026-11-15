@@ -1,13 +1,20 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, CircleAlert } from 'lucide-react';
+import { ArrowRight, CircleAlert, ShoppingBag, Store, Truck } from 'lucide-react';
 import AuthShell from '../components/AuthShell.jsx';
 import BrandLogo from '../components/BrandLogo.jsx';
 import { Spinner } from '../components/Loader.jsx';
 import { sendOtp, adminLogin, clearError } from '../store/authSlice';
 import '../styles/auth.css';
 import { takeReturn } from '../utils/returnTo';
+
+// The mobile + OTP tab is for everyone outside the producers' teams.
+const USER_ROLES = [
+  { label: 'Consumer', hint: 'Verify & buy', Icon: ShoppingBag },
+  { label: 'Retailer', hint: 'Scan & sell', Icon: Store },
+  { label: 'Distributor', hint: 'Scan in transit', Icon: Truck },
+];
 
 const Login = () => {
   const [mode, setMode] = useState('user'); // 'user' | 'admin'
@@ -65,7 +72,11 @@ const Login = () => {
           <BrandLogo size={64} />
         </span>
         <h1 className="oh-si-title">Sign in to OriginHash</h1>
-        <p className="oh-si-sub">Log in to continue verifying products.</p>
+        <p className="oh-si-sub">
+          {mode === 'user'
+            ? 'Consumers, retailers and distributors: log in with your mobile number.'
+            : 'Producer teams: log in with the username and password from OriginHash.'}
+        </p>
       </div>
 
       <div className="oh-si-seg" data-active={mode} role="group" aria-label="Sign in as">
@@ -76,7 +87,7 @@ const Login = () => {
           aria-pressed={mode === 'user'}
           onClick={() => switchMode('user')}
         >
-          Customer
+          Consumer &amp; trade
         </button>
         <button
           type="button"
@@ -90,6 +101,18 @@ const Login = () => {
 
       {mode === 'user' ? (
         <form className="oh-si-form" onSubmit={handleUserSubmit}>
+          {/* Who signs in on this tab: the app works out which they are from the number. */}
+          <ul className="oh-si-roles" aria-label="Who signs in here">
+            {USER_ROLES.map(({ label, hint, Icon }) => (
+              <li key={label} title={hint}>
+                <Icon size={15} strokeWidth={1.9} aria-hidden="true" />
+                <span>
+                  <strong>{label}</strong>
+                  <small>{hint}</small>
+                </span>
+              </li>
+            ))}
+          </ul>
           <div className="oh-si-group">
             <div className="oh-si-float with-prefix">
               <input
@@ -109,7 +132,7 @@ const Login = () => {
             </div>
           </div>
           <p id="oh-si-mobile-hint" className="oh-si-hint">
-            10-digit number. We&rsquo;ll text you a one-time code.
+            The 10-digit number registered with OriginHash. We&rsquo;ll text you a one-time code.
           </p>
 
           {(localError || error) && (
@@ -183,8 +206,13 @@ const Login = () => {
         </form>
       )}
 
-      {mode === 'user' && (
-        <p className="oh-si-note">Registration uses the same mobile + OTP flow — just enter your number above.</p>
+      {mode === 'user' ? (
+        <p className="oh-si-note">
+          New here? Enter your number to sign up as a consumer. Retailers can then choose <strong>Become a retailer</strong> from the menu;
+          distributors are added by OriginHash.
+        </p>
+      ) : (
+        <p className="oh-si-note">Producer accounts are created by OriginHash. Ask your producer admin for a team login.</p>
       )}
     </AuthShell>
   );
