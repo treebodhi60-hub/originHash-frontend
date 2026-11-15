@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
-import { Link, useOutletContext } from 'react-router-dom';
+import { Link, Navigate, useLocation, useOutletContext } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import api from '../api/axios';
 import BrandLogo from '../components/BrandLogo.jsx';
@@ -162,7 +162,10 @@ const ProducerScanHome = lazy(() => import('../connect/producer/ProducerScanHome
 
 const UserHome = () => {
   const { user } = useSelector((state) => state.auth);
+  const { pathname } = useLocation();
   if (user?.producerId) {
+    // Producers have no Home tab: their Dashboard is their home. Scan stays.
+    if (pathname === '/home') return <Navigate to="/producer" replace />;
     return (
       <Suspense fallback={<LoadingState label="Loading…" />}>
         <ProducerScanHome />

@@ -69,7 +69,11 @@ const UserLayout = () => {
   const { pathname } = useLocation();
   const user = useSelector((s) => s.auth.user);
   const chainNav = chainNavFor(user);
-  const groups = chainNav ? (user?.producerId ? [chainNav, ...USER_NAV] : [USER_NAV[0], chainNav, ...USER_NAV.slice(1)]) : USER_NAV;
+  // Producer users have no Home tab (their Dashboard is their home).
+  const userNav = user?.producerId
+    ? USER_NAV.map((g, i) => (i === 0 ? { ...g, items: g.items.filter((item) => item.to !== "/home") } : g))
+    : USER_NAV;
+  const groups = chainNav ? (user?.producerId ? [chainNav, ...userNav] : [userNav[0], chainNav, ...userNav.slice(1)]) : userNav;
   const menuItems = [
     ...(chainNav ? chainNav.items.map((i) => ({ to: i.to, label: i.hint || i.label, icon: <NavIcon name={i.icon} /> })) : []),
     ...userMenuItems,
