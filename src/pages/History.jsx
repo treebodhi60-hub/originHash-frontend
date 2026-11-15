@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import api from '../api/axios';
@@ -67,7 +67,7 @@ const positiveInt = (value, fallback) => {
   return Number.isInteger(n) && n > 0 ? n : fallback;
 };
 
-const Pagination = ({ page, totalPages, pageSize, total, onPage, onPageSize, disabled }) => {
+export const Pagination = ({ page, totalPages, pageSize, total, onPage, onPageSize, disabled }) => {
   const first = total ? (page - 1) * pageSize + 1 : 0;
   const last = Math.min(page * pageSize, total);
 
@@ -140,7 +140,7 @@ const Pagination = ({ page, totalPages, pageSize, total, onPage, onPageSize, dis
 // "Verification history": every scan the user has made (every user's, for admins), newest
 // first — filterable, searchable and paginated. Filter, search and page all live in the URL,
 // so coming back from a scan's details lands on the same page of the same results.
-const History = () => {
+const VerificationHistory = () => {
   const { user } = useSelector((state) => state.auth);
   // From the layout: opens the phone ☰ menu (this page hides the layout's top bar).
   const { openMenu } = useOutletContext() || {};
@@ -488,6 +488,21 @@ const History = () => {
       </div>
     </div>
   );
+};
+
+// Producer users (admin and staff) get their company's supply-chain history instead.
+const ProducerHistory = lazy(() => import('../connect/producer/ProducerHistory.jsx'));
+
+const History = () => {
+  const { user } = useSelector((state) => state.auth);
+  if (user?.producerId) {
+    return (
+      <Suspense fallback={<LoadingState label="Loading history…" />}>
+        <ProducerHistory />
+      </Suspense>
+    );
+  }
+  return <VerificationHistory />;
 };
 
 export default History;
