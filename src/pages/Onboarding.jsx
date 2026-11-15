@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Camera, CircleAlert, Package, Sprout, Store, Truck } from 'lucide-react';
+import { ArrowRight, Camera, CircleAlert, Package, ShoppingBag, Store, Truck } from 'lucide-react';
 import AuthShell from '../components/AuthShell.jsx';
 import BrandLogo from '../components/BrandLogo.jsx';
 import { Spinner } from '../components/Loader.jsx';
@@ -10,11 +10,14 @@ import '../styles/auth.css';
 import { takeReturn } from '../utils/returnTo';
 
 const USER_TYPES = [
-  { value: 'farmer', label: 'Farmer', Icon: Sprout },
+  { value: 'consumer', label: 'Consumer', Icon: ShoppingBag },
   { value: 'retailer', label: 'Retailer', Icon: Store },
   { value: 'distributor', label: 'Distributor', Icon: Truck },
   { value: 'supplier', label: 'Supplier', Icon: Package },
 ];
+// Retailer and distributor are supply-chain roles: the account starts as a consumer; retailers then
+// register (Become a retailer), distributors are set up by OriginHash.
+const TRADE = { retailer: 'Next you’ll register as a retailer and upload your ID.', distributor: 'Distributor accounts are set up by OriginHash — ask them to add your mobile number. Until then you can verify products as a consumer.' };
 
 const Onboarding = () => {
   const [form, setForm] = useState({ name: '', email: '', userType: '', address: '' });
@@ -40,7 +43,7 @@ const Onboarding = () => {
     const fd = new FormData();
     fd.append('name', form.name);
     fd.append('email', form.email);
-    fd.append('userType', form.userType);
+    fd.append('userType', TRADE[form.userType] ? 'consumer' : form.userType);
     fd.append('address', form.address);
     if (photo) fd.append('photo', photo);
 
@@ -48,7 +51,7 @@ const Onboarding = () => {
     const result = await dispatch(updateProfile(fd));
     setSubmitting(false);
     if (updateProfile.fulfilled.match(result)) {
-      navigate(takeReturn() || '/home', { replace: true });
+      navigate(form.userType === 'retailer' ? '/chain/retailer' : takeReturn() || '/home', { replace: true });
     } else {
       setError(result.payload || 'Could not save your details.');
     }
@@ -127,6 +130,7 @@ const Onboarding = () => {
               </button>
             ))}
           </div>
+          {TRADE[form.userType] && <p className="oh-si-hint">{TRADE[form.userType]}</p>}
         </fieldset>
 
         <label className="oh-si-photo" htmlFor="photo">
