@@ -3,13 +3,32 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';
 import connectApi, { errorText } from '../api';
 import { Badge, Button, Card, Empty, ErrorNote, Input, Loading, Modal, Notice, PageHead, Select, Stat, StatusBadge, Tabs, fmtDate, fmtDateTime, num, placeText, roleLabel, useFormError } from '../ui.jsx';
-import { BatchFacts, DownloadButtons, QrPair, UnitsTable, WarrantyForm, WarrantyList, discountText, scanLine } from '../shared.jsx';
+import { BatchFacts, DownloadButtons, QrPair, UnitsTable, WarrantyForm, WarrantyList, currentOfferFor, discountText, scanLine } from '../shared.jsx';
 
 // Producer: QR batches. Request a batch (units, max discount, expiry) from OriginHash; once
 // allotted, link it to a product, print the QR pairs, and follow every unit.
 
-const RequestModal = ({ products, onClose, onDone }) => {
-  const [form, setForm] = useState({ quantity: '', maxDiscountPercent: '', expiryDate: '', productId: products[0] ? String(products[0].id) : '', batchNo: '', note: '' });
+// The chosen product's discount (Discounts tab) fills Max discount % and the expiry date.
+const fromOffer = (offers, productId, form) => {
+  const offer = currentOfferFor(offers, productId);
+  return offer
+    ? { maxDiscountPercent: String(offer.discountPercent ?? ''), expiryDate: offer.validTill || form.expiryDate }
+    : { maxDiscountPercent: '' };
+};
+
+const RequestModal = ({ products, offers, onClose, onDone }) => {
+  const [form, setFormRaw] = useState(() => {
+    const blank = { quantity: '', maxDiscountPercent: '', expiryDate: '', productId: products[0] ? String(products[0].id) : '', batchNo: '', note: '' };
+    return { ...blank, ...fromOffer(offers, blank.productId, blank) };
+  });
+  const setForm = (update) =>
+    setFormRaw((f) => {
+      const next = typeof update === 'function' ? update(f) : update;
+      return next.productId !== f.productId ? { ...next, ...fromOffer(offers, next.productId, next) } : next;
+    });
+  const offer = currentOfferFor(offers, form.productId);
+  // A discount that exists for the product but is inactive or expired.
+  const stale = !offer && form.productId ? offers.find((o) => String(o.productId) === form.productId) : null;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useFormError();
   const fe = (f) => (error.field === f ? error.message : null);
@@ -41,6 +60,16 @@ const RequestModal = ({ products, onClose, onDone }) => {
       }
     >
       <div className="cx-form two">
+        <Select
+          form={form}
+          setForm={setForm}
+          name="productId"
+          label="Product"
+          wide
+          placeholder="Choose later"
+          options={products.map((p) => ({ value: String(p.id), label: p.name }))}
+          error={fe('productId')}
+        />
         <Input
           form={form}
           setForm={setForm}
@@ -62,21 +91,28 @@ const RequestModal = ({ products, onClose, onDone }) => {
           min={0}
           max={100}
           step="0.01"
-          hint="0 or empty for no discount. Each unit gets its own unique coupon code."
+          hint={
+            offer
+              ? `From this product’s discount ${offer.couponCode} (${discountText(offer.discountPercent)}). Each unit gets its own unique coupon code.`
+              : stale
+                ? `This product’s discount ${stale.couponCode} is ${stale.isActive ? 'expired' : 'inactive'}; edit it in Discounts to use it. 0 or empty for no discount.`
+                : form.productId
+                ? 'This product has no discount yet (add one in Discounts). 0 or empty for no discount.'
+                : '0 or empty for no discount. Each unit gets its own unique coupon code.'
+          }
           error={fe('maxDiscountPercent')}
         />
-        <Input form={form} setForm={setForm} name="expiryDate" label="Expiry date" type="date" required hint="Coupons stay valid until this date." error={fe('expiryDate')} />
-        <Input form={form} setForm={setForm} name="batchNo" label="Your batch number" placeholder="e.g. PW-2026-001" error={fe('batchNo')} />
-        <Select
+        <Input
           form={form}
           setForm={setForm}
-          name="productId"
-          label="Product"
-          wide
-          placeholder="Choose later"
-          options={products.map((p) => ({ value: String(p.id), label: p.name }))}
-          error={fe('productId')}
+          name="expiryDate"
+          label="Expiry date"
+          type="date"
+          required
+          hint={offer?.validTill ? 'From the discount’s expiry date. Coupons stay valid until this date.' : 'Coupons stay valid until this date.'}
+          error={fe('expiryDate')}
         />
+        <Input form={form} setForm={setForm} name="batchNo" label="Your batch number" placeholder="e.g. PW-2026-001" error={fe('batchNo')} />
         <Input form={form} setForm={setForm} name="note" label="Note to OriginHash" wide />
       </div>
       <Notice>QR codes are free for now. OriginHash reviews the request and allots the batch.</Notice>
@@ -93,17 +129,24 @@ export const ProducerBatches = () => {
   const [batches, setBatches] = useState(null);
   const [requests, setRequests] = useState([]);
   const [products, setProducts] = useState([]);
+  const [offers, setOffers] = useState([]);
   const [requesting, setRequesting] = useState(false);
   const [serial, setSerial] = useState('');
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
 
   const load = useCallback(() => {
-    Promise.all([connectApi.get('/producer/batches'), connectApi.get('/producer/batch-requests'), connectApi.get('/producer/products')])
-      .then(([b, r, p]) => {
+    Promise.all([
+      connectApi.get('/producer/batches'),
+      connectApi.get('/producer/batch-requests'),
+      connectApi.get('/producer/products'),
+      connectApi.get('/producer/offers'),
+    ])
+      .then(([b, r, p, o]) => {
         setBatches(b.data.batches);
         setRequests(r.data.requests);
         setProducts(p.data.products.filter((x) => x.isActive));
+        setOffers(o.data.offers);
       })
       .catch((err) => setError(errorText(err, 'Could not load batches.')));
   }, []);
@@ -231,6 +274,7 @@ export const ProducerBatches = () => {
       {requesting && (
         <RequestModal
           products={products}
+          offers={offers}
           onClose={() => setRequesting(false)}
           onDone={(d) => {
             setRequesting(false);

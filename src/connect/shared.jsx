@@ -8,6 +8,10 @@ import { Badge, Button, Empty, ErrorNote, Field, FileUpload, Loading, Modal, Sta
 
 export const discountText = (pct) => (pct ? `${Number(pct)}%` : 'No discount');
 
+// A product's discount that applies today (active, not expired), from the producer's offers.
+export const currentOfferFor = (offers, productId) =>
+  (productId && offers.find((o) => String(o.productId) === String(productId) && o.isActive && (!o.validTill || o.validTill >= todayStr()))) || null;
+
 export const BatchFacts = ({ batch }) => (
   <dl className="cx-dl">
     <dt>Batch no.</dt>

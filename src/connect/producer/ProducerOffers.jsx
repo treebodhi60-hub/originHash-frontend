@@ -1,17 +1,26 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import connectApi, { errorText } from '../api';
-import { Badge, Button, Card, Empty, ErrorNote, Input, Loading, Modal, Notice, PageHead, Select, Toggle, fmtDate, useFormError } from '../ui.jsx';
+import { Badge, Button, Card, Empty, ErrorNote, Input, Loading, Modal, Notice, PageHead, Select, fmtDate, todayStr, useFormError } from '../ui.jsx';
+import { discountText } from '../shared.jsx';
 
-// Producer: discounts and loyalty offers (a coupon code with details). Shown to signed-in consumers
-// on the consumer QR, next to the unit's own unique coupon from the batch.
+// Producer: one discount per product (coupon code, discount %, expiry date). Shown to signed-in
+// consumers on the consumer QR, and used to fill "Max discount %" when requesting a QR batch.
 
-const OfferForm = ({ offer, products, onClose, onSaved }) => {
+const OfferForm = ({ offer, products, offers, onClose, onSaved }) => {
   const [form, setForm] = useState(
     offer
-      ? { ...offer, productId: offer.productId ? String(offer.productId) : '', validTill: offer.validTill || '', details: offer.details || '' }
-      : { title: '', couponCode: '', details: '', validTill: '', productId: '', isActive: true }
+      ? {
+          productId: offer.productId ? String(offer.productId) : '',
+          couponCode: offer.couponCode || '',
+          discountPercent: offer.discountPercent ?? '',
+          validTill: offer.validTill || '',
+        }
+      : { productId: '', couponCode: '', discountPercent: '', validTill: '' }
   );
+  // Active products without a discount yet (plus this offer's own product when editing).
+  const taken = new Set(offers.filter((o) => o.id !== offer?.id && o.productId).map((o) => String(o.productId)));
+  const choices = products.filter((p) => (p.isActive && !taken.has(String(p.id))) || String(p.id) === form.productId);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useFormError();
   const fe = (f) => (error.field === f ? error.message : null);
@@ -28,7 +37,7 @@ const OfferForm = ({ offer, products, onClose, onSaved }) => {
   };
   return (
     <Modal
-      title={offer ? 'Edit offer' : 'Add a discount or loyalty offer'}
+      title={offer ? 'Edit discount' : 'Add a discount'}
       onClose={onClose}
       footer={
         <>
@@ -42,24 +51,36 @@ const OfferForm = ({ offer, products, onClose, onSaved }) => {
       }
     >
       <div className="cx-form two">
-        <Input form={form} setForm={setForm} name="title" label="Title" required wide placeholder="e.g. 10% off your next bottle" error={fe('title')} />
-        <Input form={form} setForm={setForm} name="couponCode" label="Coupon" required placeholder="e.g. WINE10" error={fe('couponCode')} />
-        <Input form={form} setForm={setForm} name="validTill" label="Valid till" type="date" error={fe('validTill')} />
         <Select
           form={form}
           setForm={setForm}
           name="productId"
           label="Product"
+          required
           wide
-          placeholder="All products"
-          options={products.map((p) => ({ value: String(p.id), label: p.name }))}
-          error={fe('productId')}
+          placeholder="Choose a product"
+          options={choices.map((p) => ({ value: String(p.id), label: p.isActive ? p.name : `${p.name} (inactive)` }))}
+          error={fe('productId') || (!choices.length ? 'Every active product already has a discount. Edit one instead.' : null)}
         />
-        <Input form={form} setForm={setForm} name="details" label="Details" type="textarea" wide hint="How to use it, where it applies…" />
-        <div className="cx-field wide">
-          <Toggle checked={form.isActive} onChange={(v) => setForm({ ...form, isActive: v })} label="Active" description="Inactive offers aren't shown to consumers." />
-        </div>
+        <Input form={form} setForm={setForm} name="couponCode" label="Coupon code" required placeholder="e.g. WINE10" error={fe('couponCode')} />
+        <Input
+          form={form}
+          setForm={setForm}
+          name="discountPercent"
+          label="Discount %"
+          type="number"
+          min={0.01}
+          max={100}
+          step="0.01"
+          required
+          hint="Fills “Max discount %” when you request a QR batch for this product."
+          error={fe('discountPercent')}
+        />
+        <Input form={form} setForm={setForm} name="validTill" label="Expiry date" type="date" required min={todayStr()} wide error={fe('validTill')} />
       </div>
+      {offer && (!offer.isActive || (offer.validTill && offer.validTill < todayStr())) && (
+        <Notice tone="warning">This discount is {offer.isActive ? 'expired' : 'inactive'}. Saving it with a future expiry date makes it active again.</Notice>
+      )}
       {error.message && !error.field && <ErrorNote>{error.message}</ErrorNote>}
     </Modal>
   );
@@ -83,7 +104,7 @@ export const ProducerOffers = () => {
   useEffect(load, [load]);
 
   const remove = async (o) => {
-    if (!window.confirm(`Delete "${o.title}"?`)) return;
+    if (!window.confirm(`Delete the ${o.couponCode} discount${o.productName ? ` for ${o.productName}` : ''}?`)) return;
     try {
       const { data } = await connectApi.delete(`/producer/offers/${o.id}`);
       setNotice(data.message);
@@ -98,10 +119,10 @@ export const ProducerOffers = () => {
       <PageHead
         eyebrow="Consumers"
         title="Discounts & loyalty"
-        subtitle="Coupons you offer consumers. Each unit's own unique discount coupon (from the batch) is shown alongside these."
+        subtitle="One discount per product. Consumers see it on the product's consumer QR, and it fills “Max discount %” when you request a QR batch for that product."
         actions={
           <Button onClick={() => setEditing('new')}>
-            <Plus size={16} /> Add offer
+            <Plus size={16} /> Add discount
           </Button>
         }
       />
@@ -115,10 +136,10 @@ export const ProducerOffers = () => {
             <table className="cx-table">
               <thead>
                 <tr>
-                  <th>Offer</th>
-                  <th>Coupon</th>
                   <th>Product</th>
-                  <th>Valid till</th>
+                  <th>Coupon code</th>
+                  <th>Discount</th>
+                  <th>Expiry date</th>
                   <th>Status</th>
                   <th />
                 </tr>
@@ -128,14 +149,22 @@ export const ProducerOffers = () => {
                   <tr key={o.id}>
                     <td>
                       <div className="cx-cell-main">
-                        <strong>{o.title}</strong>
-                        {o.details && <span>{o.details.slice(0, 80)}</span>}
+                        <strong>{o.productName || 'All products'}</strong>
+                        {o.discountPercent === null && <span>{o.title}</span>}
                       </div>
                     </td>
                     <td className="cx-mono">{o.couponCode}</td>
-                    <td>{o.productName || 'All products'}</td>
+                    <td>{o.discountPercent !== null ? discountText(o.discountPercent) : '—'}</td>
                     <td>{o.validTill ? fmtDate(o.validTill) : 'No end date'}</td>
-                    <td>{o.isActive ? <Badge tone="success">Active</Badge> : <Badge>Inactive</Badge>}</td>
+                    <td>
+                      {!o.isActive ? (
+                        <Badge>Inactive</Badge>
+                      ) : o.validTill && o.validTill < todayStr() ? (
+                        <Badge tone="warning">Expired</Badge>
+                      ) : (
+                        <Badge tone="success">Active</Badge>
+                      )}
+                    </td>
                     <td className="actions">
                       <Button variant="ghost" className="small" onClick={() => setEditing(o)}>
                         Edit
@@ -150,13 +179,14 @@ export const ProducerOffers = () => {
             </table>
           </div>
         ) : (
-          <Empty title="No offers yet." />
+          <Empty title="No discounts yet." />
         )}
       </Card>
       {editing && (
         <OfferForm
           offer={editing === 'new' ? null : editing}
           products={products}
+          offers={offers || []}
           onClose={() => setEditing(null)}
           onSaved={(d) => {
             setEditing(null);
