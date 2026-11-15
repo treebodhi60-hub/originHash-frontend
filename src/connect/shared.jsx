@@ -37,6 +37,8 @@ export const BatchFacts = ({ batch }) => (
     <dd className="cx-mono">{batch.firstSerial ? `${batch.firstSerial} – ${batch.lastSerial}` : '—'}</dd>
     <dt>Allotted</dt>
     <dd>{fmtDate(batch.allottedAt)}</dd>
+    <dt>Who can mark sold</dt>
+    <dd>{batch.soldAccess === 'producer' ? 'Only the producer’s own retailers' : 'All retailers (the producer’s + general)'}</dd>
     {batch.printLayout && (
       <>
         <dt>Print layout</dt>

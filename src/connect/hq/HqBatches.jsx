@@ -5,6 +5,7 @@ import connectApi, { CHAIN_ADMIN, errorText } from '../api';
 import { Badge, Button, Card, Empty, ErrorNote, Input, Loading, Modal, Notice, PageHead, Select, Stat, Tabs, fmtDate, fmtDateTime, num, useFormError } from '../ui.jsx';
 import { BatchFacts, DownloadButtons, UnitsTable, discountText } from '../shared.jsx';
 import { PRINT_DEFAULTS, PairPrintLayout } from '../printLayout.jsx';
+import { SoldAccessCard } from '../retailers.jsx';
 
 // Superadmin: batch requests from producers, allotting batches (with max discount and expiry, a
 // unique coupon per unit), and every batch's units.
@@ -421,6 +422,7 @@ export const HqBatch = () => {
       <Card title="Batch">
         <BatchFacts batch={batch} />
       </Card>
+      <SoldAccessCard batch={batch} endpoint={`/admin/batches/${batch.id}/sold-access`} canEdit onSaved={updateBatch} />
       <PrintLayoutCard batch={batch} onSaved={updateBatch} />
       <Card title="Units" flush>
         <UnitsTable units={units} qrBase="/admin/units" />

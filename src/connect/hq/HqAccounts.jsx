@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { FileSpreadsheet, Plus } from 'lucide-react';
 import connectApi, { errorText } from '../api';
+import { BulkUploadModal } from '../retailers.jsx';
 import { Badge, Button, Card, Empty, ErrorNote, Input, Loading, Modal, Notice, PageHead, Select, Tabs, fmtDate, useFormError } from '../ui.jsx';
 
 // Superadmin: distributors, retailers and consumers (one page per role). They log in with their
@@ -16,7 +17,7 @@ const COPY = {
   retailer: {
     title: 'Retailers',
     one: 'retailer',
-    note: 'Each retailer is associated with one producer and can press Sold only on that producer’s products (unlocking the consumer QR); they can scan other producers’ retailer QRs but not sell them. Retailers can also apply themselves — approve them under Requests. If the mobile already has an app account, it becomes a retailer.',
+    note: 'A retailer of a producer can press Sold on that producer’s products; a general retailer (no producer) on any batch open to all retailers. Nobody sells another producer’s products. Retailers you or producers add are approved at once; people who register themselves are general retailers until you approve them under Requests and choose their producer.',
   },
   consumer: {
     title: 'Consumers',
@@ -67,23 +68,23 @@ const AccountForm = ({ role, account, producers, onClose, onSaved }) => {
       }
     >
       <div className="cx-form two">
-        <Input form={form} setForm={setForm} name="mobile" label="Mobile (OTP login)" required inputMode="numeric" maxLength={10} error={fe('mobile')} />
-        <Input form={form} setForm={setForm} name="name" label={role === 'consumer' ? 'Name' : 'Contact person'} required error={fe('name')} />
-        {role !== 'consumer' && <Input form={form} setForm={setForm} name="businessName" label="Business name" required wide error={fe('businessName')} />}
+        <Input form={form} setForm={setForm} name="mobile" label="Mobile (OTP login)" required inputMode="numeric" maxLength={14} error={fe('mobile')} />
+        <Input form={form} setForm={setForm} name="name" label={role === 'distributor' ? 'Contact person' : 'Name'} required error={fe('name')} />
+        <Input form={form} setForm={setForm} name="email" label="Email" type="email" error={fe('email')} />
         {role === 'retailer' && (
           <Select
             form={form}
             setForm={setForm}
             name="producerId"
-            label="Producer (can mark only their products sold)"
-            required
-            wide
-            placeholder="Choose the producer"
+            label="Producer"
+            placeholder="General retailer (no producer)"
             options={producerOptions(producers, form.producerId)}
             error={fe('producerId')}
           />
         )}
-        <Input form={form} setForm={setForm} name="email" label="Email" type="email" error={fe('email')} />
+        {role !== 'consumer' && (
+          <Input form={form} setForm={setForm} name="businessName" label="Business name" required={role === 'distributor'} wide error={fe('businessName')} />
+        )}
         <Input form={form} setForm={setForm} name="city" label="City" />
         <Input form={form} setForm={setForm} name="address" label="Address" wide />
       </div>
@@ -180,7 +181,7 @@ const RetailerRequests = ({ producers, onChanged }) => {
     onChanged();
   };
   const reject = async (a) => {
-    const note = window.prompt(`Reject ${a.businessName}? Add a short reason for them (optional):`, '');
+    const note = window.prompt(`Decline ${a.businessName}? They stay a general retailer (no producer). Add a short reason for them (optional):`, '');
     if (note === null) return;
     try {
       done((await connectApi.post(`/admin/retailer-applications/${a.id}/reject`, { decisionNote: note })).data);
@@ -200,7 +201,7 @@ const RetailerRequests = ({ producers, onChanged }) => {
             tabs={[
               { value: 'pending', label: 'Waiting', count: data?.pending },
               { value: 'approved', label: 'Approved' },
-              { value: 'rejected', label: 'Rejected' },
+              { value: 'rejected', label: 'Declined' },
             ]}
           />
         </div>
@@ -245,7 +246,7 @@ const RetailerRequests = ({ producers, onChanged }) => {
                           Approve
                         </Button>
                         <Button variant="danger" className="small" onClick={() => reject(a)}>
-                          Reject
+                          Decline
                         </Button>
                       </td>
                     )}
@@ -255,8 +256,9 @@ const RetailerRequests = ({ producers, onChanged }) => {
             </table>
           </div>
         ) : (
-          <Empty title={status === 'pending' ? 'No requests waiting.' : `No ${status} requests.`}>
-            {status === 'pending' && 'Anyone signed in to the app can apply to be a retailer from their menu.'}
+          <Empty title={status === 'pending' ? 'No requests waiting.' : `No ${status === 'rejected' ? 'declined' : status} requests.`}>
+            {status === 'pending' &&
+              'Anyone signed in to the app can register as a retailer from their menu. They are general retailers until you approve them and choose their producer.'}
           </Empty>
         )}
       </Card>
@@ -275,6 +277,8 @@ export const HqAccounts = () => {
   const [error, setError] = useState('');
   const [producers, setProducers] = useState([]);
   const [view, setView] = useState('accounts'); // retailers: 'accounts' | 'requests'
+  const [uploading, setUploading] = useState(false);
+  const [bulkProducer, setBulkProducer] = useState({ producerId: '' });
   const [pendingRequests, setPendingRequests] = useState(0);
 
   const loadRequestCount = useCallback(() => {
@@ -327,9 +331,16 @@ export const HqAccounts = () => {
         title={copy.title}
         subtitle={copy.note}
         actions={
-          <Button onClick={() => setEditing('new')}>
-            <Plus size={16} /> Add {copy.one}
-          </Button>
+          <>
+            {role === 'retailer' && (
+              <Button variant="ghost" onClick={() => setUploading(true)}>
+                <FileSpreadsheet size={16} /> Bulk upload
+              </Button>
+            )}
+            <Button onClick={() => setEditing('new')}>
+              <Plus size={16} /> Add {copy.one}
+            </Button>
+          </>
         }
       />
       {role === 'retailer' && (
@@ -391,7 +402,7 @@ export const HqAccounts = () => {
                       {fmtDate(a.createdAt)}
                     </td>
                     {role === 'retailer' ? (
-                      <td>{a.producerName || <Badge tone="warning">Not set · can’t sell</Badge>}</td>
+                      <td>{a.producerName || <Badge>General</Badge>}</td>
                     ) : (
                       <td style={{ textTransform: 'capitalize' }}>{a.userType || '—'}</td>
                     )}
@@ -414,6 +425,29 @@ export const HqAccounts = () => {
         )}
       </Card>
       </>
+      )}
+      {uploading && (
+        <BulkUploadModal
+          title="Upload retailers"
+          endpoint="/admin/retailers/bulk"
+          templateEndpoint="/admin/retailers/template"
+          fields={bulkProducer}
+          extra={
+            <Select
+              form={bulkProducer}
+              setForm={setBulkProducer}
+              name="producerId"
+              label="Producer for everyone in the sheet"
+              placeholder="General retailers (no producer)"
+              options={producerOptions(producers, bulkProducer.producerId)}
+            />
+          }
+          onClose={() => setUploading(false)}
+          onDone={(d) => {
+            setNotice(d.message);
+            load();
+          }}
+        />
       )}
       {editing && (
         <AccountForm

@@ -4,6 +4,8 @@ import { Plus, Search } from 'lucide-react';
 import connectApi, { errorText } from '../api';
 import { Badge, Button, Card, Empty, ErrorNote, Field, Input, Loading, Modal, Notice, PageHead, Select, Stat, StatusBadge, Tabs, fmtDate, fmtDateTime, num, placeText, roleLabel, useFormError } from '../ui.jsx';
 import { BatchFacts, DownloadButtons, QrPair, UnitsTable, WarrantyForm, WarrantyList, currentOfferFor, discountText, scanLine } from '../shared.jsx';
+import { SoldAccessCard } from '../retailers.jsx';
+import { isProducerAdmin, useAppUser } from '../useChain';
 
 // Producer: QR batches. Request a batch (units, max discount, expiry) from OriginHash; once
 // allotted, link it to a product, print the QR pairs, and follow every unit.
@@ -291,6 +293,7 @@ export const ProducerBatches = () => {
 export const ProducerBatch = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const user = useAppUser();
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
 
@@ -324,6 +327,12 @@ export const ProducerBatch = () => {
       <Card title="Batch">
         <BatchFacts batch={batch} />
       </Card>
+      <SoldAccessCard
+        batch={batch}
+        endpoint={`/producer/batches/${batch.id}/sold-access`}
+        canEdit={isProducerAdmin(user)}
+        onSaved={(b) => setData((d) => ({ ...d, batch: { ...d.batch, ...b } }))}
+      />
       <Card title="Units" flush>
         <UnitsTable units={units} qrBase="/producer/units" onOpen={(u) => navigate(`/producer/units/${u.id}`)} />
       </Card>

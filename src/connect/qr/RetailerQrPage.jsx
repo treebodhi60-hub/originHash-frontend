@@ -153,7 +153,7 @@ const RetailerQrPage = () => {
             <p className="cx-small">
               Are you a retailer?{' '}
               <Link className="cx-link" to="/chain/retailer">
-                Apply for a retailer account
+                Register as a retailer
               </Link>
             </p>
           </>
@@ -163,8 +163,8 @@ const RetailerQrPage = () => {
               Log in
             </Button>
             <p className="cx-small">
-              Distributors and retailers log in with their mobile and OTP; producers with their username and password. New retailer? Log in with your mobile and apply
-              from the menu (“Become a retailer”).
+              Distributors and retailers log in with their mobile and OTP; producers with their username and password. New retailer? Log in with your mobile and
+              register from the menu (“Become a retailer”).
             </p>
           </>
         )}
@@ -270,8 +270,8 @@ const RetailerQrPage = () => {
             ? `This is ${info.producer.name}'s product. You can scan it like a distributor; only ${info.producer.name} or its retailers can mark it sold.`
             : info.sellBlocked === 'otherProducer'
             ? `Your scan is recorded, but only ${info.producer.name} or its retailers can mark this product sold.`
-            : info.sellBlocked === 'noProducer'
-              ? 'Your retailer account isn’t associated with a producer yet, so you can’t mark products sold. Contact OriginHash.'
+            : info.sellBlocked === 'producerRetailersOnly'
+              ? `Your scan is recorded. ${info.producer.name} has limited this batch to its own retailers, so general retailers can't mark it sold.`
               : `As a ${roleLabel(info.viewer.role).toLowerCase()} you can scan this QR. Only ${info.producer.name} or its retailers can mark it sold.`}
         </p>
       )}

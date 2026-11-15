@@ -49,6 +49,7 @@ export const chainNavFor = (user) => {
         { to: "/producer/offers", label: "Discounts", hint: "Discounts & loyalty", icon: "offer" },
         { to: "/producer/batches", label: "QR batches", icon: "batches" },
         { to: "/history", label: "History", hint: "Supply chain history", icon: "history" },
+        { to: "/producer/retailers", label: "Retailers", icon: "retailer" },
         ...(admin || user.canChat ? [{ to: "/producer/chats", label: "Chat", hint: "Chat with brand", icon: "chat" }] : []),
         { to: "/producer/team", label: "Team", icon: "users" },
         { to: "/producer/settings", label: "Settings", hint: "Producer settings", icon: "settings" },
