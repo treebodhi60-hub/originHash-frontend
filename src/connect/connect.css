@@ -532,6 +532,15 @@
   line-height: 1.5;
 }
 
+/* Read-only values shown in a form (e.g. a batch request's max discount). */
+.cx-field input:disabled {
+  background: var(--oh-well);
+  color: var(--oh-ink-900);
+  -webkit-text-fill-color: var(--oh-ink-900);
+  font-weight: 600;
+  cursor: not-allowed;
+}
+
 .cx-field input:focus,
 .cx-field select:focus,
 .cx-field textarea:focus,

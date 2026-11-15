@@ -2,23 +2,23 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';
 import connectApi, { errorText } from '../api';
-import { Badge, Button, Card, Empty, ErrorNote, Input, Loading, Modal, Notice, PageHead, Select, Stat, StatusBadge, Tabs, fmtDate, fmtDateTime, num, placeText, roleLabel, useFormError } from '../ui.jsx';
+import { Badge, Button, Card, Empty, ErrorNote, Field, Input, Loading, Modal, Notice, PageHead, Select, Stat, StatusBadge, Tabs, fmtDate, fmtDateTime, num, placeText, roleLabel, useFormError } from '../ui.jsx';
 import { BatchFacts, DownloadButtons, QrPair, UnitsTable, WarrantyForm, WarrantyList, currentOfferFor, discountText, scanLine } from '../shared.jsx';
 
 // Producer: QR batches. Request a batch (units, max discount, expiry) from OriginHash; once
 // allotted, link it to a product, print the QR pairs, and follow every unit.
 
-// The chosen product's discount (Discounts tab) fills Max discount % and the expiry date.
+// The chosen product's discount (Discounts tab) sets Max discount % (read-only here) and fills the
+// expiry date.
 const fromOffer = (offers, productId, form) => {
   const offer = currentOfferFor(offers, productId);
-  return offer
-    ? { maxDiscountPercent: String(offer.discountPercent ?? ''), expiryDate: offer.validTill || form.expiryDate }
-    : { maxDiscountPercent: '' };
+  return { expiryDate: offer?.validTill || form.expiryDate };
 };
 
+// `products` are the producer's active products only.
 const RequestModal = ({ products, offers, onClose, onDone }) => {
   const [form, setFormRaw] = useState(() => {
-    const blank = { quantity: '', maxDiscountPercent: '', expiryDate: '', productId: products[0] ? String(products[0].id) : '', batchNo: '', note: '' };
+    const blank = { quantity: '', expiryDate: '', productId: products[0] ? String(products[0].id) : '', batchNo: '', note: '' };
     return { ...blank, ...fromOffer(offers, blank.productId, blank) };
   });
   const setForm = (update) =>
@@ -65,10 +65,11 @@ const RequestModal = ({ products, offers, onClose, onDone }) => {
           setForm={setForm}
           name="productId"
           label="Product"
+          required
           wide
-          placeholder="Choose later"
+          placeholder={products.length ? undefined : 'No active products'}
           options={products.map((p) => ({ value: String(p.id), label: p.name }))}
-          error={fe('productId')}
+          error={fe('productId') || (!products.length ? 'Add or activate a product in Products first.' : null)}
         />
         <Input
           form={form}
@@ -82,26 +83,25 @@ const RequestModal = ({ products, offers, onClose, onDone }) => {
           hint={`You'll get ${num((Number(form.quantity) || 0) * 2)} QR codes: each retailer QR comes with its consumer QR.`}
           error={fe('quantity')}
         />
-        <Input
-          form={form}
-          setForm={setForm}
-          name="maxDiscountPercent"
+        <Field
           label="Max discount %"
-          type="number"
-          min={0}
-          max={100}
-          step="0.01"
           hint={
-            offer
-              ? `From this product’s discount ${offer.couponCode} (${discountText(offer.discountPercent)}). Each unit gets its own unique coupon code.`
-              : stale
-                ? `This product’s discount ${stale.couponCode} is ${stale.isActive ? 'expired' : 'inactive'}; edit it in Discounts to use it. 0 or empty for no discount.`
-                : form.productId
-                ? 'This product has no discount yet (add one in Discounts). 0 or empty for no discount.'
-                : '0 or empty for no discount. Each unit gets its own unique coupon code.'
+            <>
+              The discount can only be changed in the{' '}
+              <Link className="cx-link" to="/producer/offers">
+                Discounts
+              </Link>{' '}
+              tab.{' '}
+              {offer
+                ? `From ${offer.couponCode}; each unit gets its own unique coupon code.`
+                : stale
+                  ? `This product’s discount ${stale.couponCode} is ${stale.isActive ? 'expired' : 'inactive'}, so this batch has no discount.`
+                  : 'This product has no discount, so this batch has no coupons.'}
+            </>
           }
-          error={fe('maxDiscountPercent')}
-        />
+        >
+          {(fid) => <input id={fid} value={offer ? discountText(offer.discountPercent) : 'No discount'} readOnly disabled />}
+        </Field>
         <Input
           form={form}
           setForm={setForm}
