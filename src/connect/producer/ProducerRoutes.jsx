@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import connectApi, { errorText } from '../api';
 import { ProducerContext, isProducerAdmin, useAppUser, useProducer } from '../useChain';
-import { Button, Card, Empty, ErrorNote, Input, Loading, Notice, PageHead, Stat, Toggle, fmtDateTime, num, placeText, useFormError } from '../ui.jsx';
+import { Button, Card, Empty, ErrorNote, Input, Loading, Notice, PageHead, Stat, fmtDateTime, num, placeText, useFormError } from '../ui.jsx';
 import { DayBars, scanLine } from '../shared.jsx';
 import { ProducerProducts, ProductForm } from './ProducerProducts.jsx';
 import { ProducerOffers } from './ProducerOffers.jsx';
@@ -86,7 +86,7 @@ const Dashboard = () => {
           )}
         </Card>
       </div>
-      <Card title="Latest activity" actions={!data.trackingEnabled && <span className="cx-muted">Tracking is off</span>}>
+      <Card title="Latest activity">
         {data.recent.length ? (
           <ol className="cx-timeline">
             {data.recent.map((s) => (
@@ -113,24 +113,10 @@ const Dashboard = () => {
 };
 
 const SettingsPage = () => {
-  const isAdmin = isProducerAdmin(useAppUser());
-  const { producer, refresh } = useProducer();
   const [notice, setNotice] = useState('');
-  const [error, setError] = useState('');
   const [pw, setPw] = useState({ currentPassword: '', newPassword: '' });
   const [pwBusy, setPwBusy] = useState(false);
   const [pwError, setPwError] = useFormError();
-
-  const setFlag = async (key, value) => {
-    setError('');
-    try {
-      const { data } = await connectApi.put('/producer/settings', { [key]: value });
-      refresh();
-      setNotice(data.message);
-    } catch (err) {
-      setError(errorText(err));
-    }
-  };
 
   const changePassword = async (e) => {
     e.preventDefault();
@@ -151,24 +137,9 @@ const SettingsPage = () => {
     <div className="cx-stack" style={{ maxWidth: 760 }}>
       <PageHead eyebrow="Company" title="Settings" />
       {notice && <Notice tone="success">{notice}</Notice>}
-      <ErrorNote>{error}</ErrorNote>
-      <Card title="Consumer features">
-        {!isAdmin && <p className="cx-muted" style={{ marginTop: 0 }}>Only your admin can change these.</p>}
-        <Toggle
-          checked={Boolean(producer?.trackingEnabled)}
-          onChange={(v) => setFlag('trackingEnabled', v)}
-          disabled={!isAdmin}
-          label="Tracking"
-          description="Record every distributor and retailer scan of your retailer QR codes. Sales are always recorded. Consumers never see tracking."
-        />
-        <Toggle
-          checked={Boolean(producer?.chatEnabled)}
-          onChange={(v) => setFlag('chatEnabled', v)}
-          disabled={!isAdmin}
-          label="Chat with brand"
-          description="Let consumers message you from the consumer QR. Your admin and the staff allowed to chat answer."
-        />
-      </Card>
+      <Notice>
+        Tracking and Chat with brand are set for each QR batch: open a batch in <Link className="cx-link" to="/producer/batches">QR batches</Link>.
+      </Notice>
       <Card title="Your password">
         <form className="cx-form two" onSubmit={changePassword}>
           <Input form={pw} setForm={setPw} name="currentPassword" label="Current password" type="password" autoComplete="current-password" error={pwError.field === 'currentPassword' ? pwError.message : null} />

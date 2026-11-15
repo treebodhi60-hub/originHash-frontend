@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
 import { FileSpreadsheet, Upload } from 'lucide-react';
 import connectApi, { downloadFile, errorText } from './api';
-import { Badge, Button, Card, ErrorNote, Modal, Notice } from './ui.jsx';
+import { Badge, Button, Card, ErrorNote, Modal, Notice, Toggle } from './ui.jsx';
 
 // Pieces for retailers, shared by the producer portal and the superadmin console: the Excel / CSV
-// bulk upload, and a QR batch's "Who can mark sold" setting.
+// bulk upload, and a QR batch's "Who can mark sold", Tracking and Chat with brand settings.
 
 // ---------- Bulk upload ----------
 
@@ -186,6 +186,50 @@ export const SoldAccessCard = ({ batch, endpoint, canEdit, onSaved }) => {
         {message && <Notice tone="success">{message}</Notice>}
         <ErrorNote>{error}</ErrorNote>
       </div>
+    </Card>
+  );
+};
+
+// ---------- Tracking and Chat with brand ----------
+
+// A QR batch's two switches. `endpoint` is PUT { trackingEnabled?, chatEnabled? }; without `canEdit`
+// it only shows them (the producer admin and the OriginHash superadmin change them).
+export const BatchFeaturesCard = ({ batch, endpoint, canEdit, onSaved }) => {
+  const [busy, setBusy] = useState(null);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const set = async (key, value) => {
+    setBusy(key);
+    setError('');
+    setMessage('');
+    try {
+      const { data } = await connectApi.put(endpoint, { [key]: value });
+      setMessage(data.message);
+      onSaved(data.batch);
+    } catch (err) {
+      setError(errorText(err, 'Could not save.'));
+    } finally {
+      setBusy(null);
+    }
+  };
+  return (
+    <Card title="Consumer features" actions={!canEdit && <Badge>Set by the producer admin</Badge>}>
+      <Toggle
+        checked={batch.trackingEnabled !== false}
+        onChange={(v) => set('trackingEnabled', v)}
+        disabled={!canEdit || Boolean(busy)}
+        label="Tracking"
+        description="Record every distributor and retailer scan of this batch’s retailer QR codes. Sales are always recorded. Consumers never see tracking."
+      />
+      <Toggle
+        checked={batch.chatEnabled !== false}
+        onChange={(v) => set('chatEnabled', v)}
+        disabled={!canEdit || Boolean(busy)}
+        label="Chat with brand"
+        description="Let consumers message the brand from this batch’s consumer QR. The producer admin and the staff allowed to chat answer."
+      />
+      {message && <Notice tone="success">{message}</Notice>}
+      <ErrorNote>{error}</ErrorNote>
     </Card>
   );
 };

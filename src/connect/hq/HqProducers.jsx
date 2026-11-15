@@ -317,10 +317,6 @@ export const HqProducer = () => {
                 '—'
               )}
             </dd>
-            <dt>Tracking</dt>
-            <dd>{producer.trackingEnabled ? 'On' : 'Off'}</dd>
-            <dt>Chat with brand</dt>
-            <dd>{producer.chatEnabled ? 'On' : 'Off'}</dd>
             <dt>Registered</dt>
             <dd>{fmtDate(producer.createdAt)}</dd>
           </dl>

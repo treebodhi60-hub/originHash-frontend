@@ -4,7 +4,7 @@ import connectApi, { errorText } from '../api';
 import { isProducerAdmin, useAppUser } from '../useChain';
 import { ImagePlus, X } from 'lucide-react';
 import { Spinner } from '../../components/Loader.jsx';
-import { Badge, Button, Card, Empty, ErrorNote, Loading, Notice, PageHead, fmtDateTime, roleLabel, usePoll } from '../ui.jsx';
+import { Badge, Button, Card, Empty, ErrorNote, Loading, PageHead, fmtDateTime, roleLabel, usePoll } from '../ui.jsx';
 
 // Producer: "Chat with brand" — consumers' conversations. New messages arrive by polling.
 
@@ -130,7 +130,6 @@ export const ProducerChats = () => {
   const navigate = useNavigate();
   const isAdmin = isProducerAdmin(useAppUser());
   const [threads, setThreads] = useState(null);
-  const [chatEnabled, setChatEnabled] = useState(true);
   const [current, setCurrent] = useState(null);
   const [messages, setMessages] = useState([]);
   const [team, setTeam] = useState([]);
@@ -139,10 +138,7 @@ export const ProducerChats = () => {
   const loadThreads = useCallback(() => {
     connectApi
       .get('/producer/chats')
-      .then(({ data }) => {
-        setThreads(data.threads);
-        setChatEnabled(data.chatEnabled);
-      })
+      .then(({ data }) => setThreads(data.threads))
       .catch((err) => setError(errorText(err, 'Could not load conversations.')));
   }, []);
   useEffect(loadThreads, [loadThreads]);
@@ -197,7 +193,6 @@ export const ProducerChats = () => {
   return (
     <div className="cx-stack">
       <PageHead eyebrow="Consumers" title="Chat with brand" subtitle="Consumers write from a product's consumer QR. Replies show in their app." />
-      {!chatEnabled && <Notice tone="warning">Chat is switched off in Settings: consumers can&apos;t send new messages.</Notice>}
       <ErrorNote>{error}</ErrorNote>
       <Card flush>
         {!threads ? (
@@ -239,6 +234,11 @@ export const ProducerChats = () => {
                         {current.consumer.city ? ` · ${current.consumer.city}` : ''}
                         {current.unit ? ` · ${current.unit.productName || ''} ${current.unit.serial}` : ''}
                       </span>
+                      {current.chatEnabled === false && (
+                        <span className="cx-small cx-muted">
+                          Chat is off for batch {current.unit?.batchNo || ''}: the customer can&apos;t send new messages. You can still reply.
+                        </span>
+                      )}
                     </div>
                     {isAdmin && (
                       <select className="cx-input" style={{ width: 'auto' }} value={current.assignee?.id || ''} onChange={(e) => assign(e.target.value)} aria-label="Assigned to">

@@ -161,7 +161,7 @@ const Chat = () => {
         <Loading />
       ) : (
         <Card flush>
-          {!data.producer.chatEnabled && <Notice tone="warning">{data.producer.name} isn&apos;t taking chat messages right now.</Notice>}
+          {!data.producer.chatEnabled && <Notice tone="warning">{data.producer.name} isn&apos;t taking chat messages about this product right now.</Notice>}
           <div className="cx-convo">
             <Conversation
               messages={messages}
