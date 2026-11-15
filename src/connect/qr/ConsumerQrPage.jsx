@@ -283,7 +283,12 @@ const ConsumerQrPage = () => {
       {open === 'warranty' && (
         <section className="cx-section">
           <h3>Warranty information</h3>
-          {info.product?.warrantyTerms && <p>{info.product.warrantyTerms}</p>}
+          {info.product?.warrantyTerms && <p style={{ whiteSpace: 'pre-wrap' }}>{info.product.warrantyTerms}</p>}
+          {info.product?.warrantyDocs?.map((d) => (
+            <a key={d.ref} className="cx-doc-link" href={d.url} target="_blank" rel="noreferrer">
+              <FileText size={18} /> {d.title || d.name || 'Warranty document'}
+            </a>
+          ))}
           {info.signedIn ? <WarrantyList warranties={info.warranties || []} /> : <SignInPrompt token={token} what="see the warranty registered for this product" />}
         </section>
       )}

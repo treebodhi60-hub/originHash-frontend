@@ -82,6 +82,45 @@ export const ProducerProducts = () => {
 
 const BLANK = { name: '', category: '', description: '', website: '', warrantyTerms: '', isActive: true };
 
+const docBody = (d) => ({ title: d.title, ref: d.ref, name: d.name });
+
+// A list of titled documents (images or PDFs): each can be renamed, opened or removed.
+const DocList = ({ docs, setDocs, folder, addLabel, titlePlaceholder, max = 12 }) => (
+  <div className="cx-stack" style={{ gap: 8 }}>
+    {docs.map((c, i) => (
+      <div key={c.ref} className="cx-search">
+        <input
+          className="cx-input"
+          value={c.title}
+          onChange={(e) => setDocs(docs.map((x, k) => (k === i ? { ...x, title: e.target.value } : x)))}
+          placeholder={titlePlaceholder}
+          aria-label={titlePlaceholder}
+        />
+        <a className="cx-link" href={c.url} target="_blank" rel="noreferrer">
+          {c.name || 'View'}
+        </a>
+        <Button variant="ghost" className="small" onClick={() => setDocs(docs.filter((_, k) => k !== i))}>
+          Remove
+        </Button>
+      </div>
+    ))}
+    {docs.length < max && (
+      <FileUpload
+        endpoint="/producer/uploads"
+        folder={folder}
+        multiple
+        max={max - docs.length}
+        value={[]}
+        onChange={(files) => {
+          const added = (Array.isArray(files) ? files : [files]).filter(Boolean);
+          if (added.length) setDocs([...docs, ...added.map((f) => ({ ...f, title: (f.name || '').replace(/\.[a-z0-9]+$/i, '') }))].slice(0, max));
+        }}
+        label={addLabel}
+      />
+    )}
+  </div>
+);
+
 export const ProductForm = () => {
   const { id } = useParams();
   const isNew = !id || id === 'new';
@@ -92,6 +131,7 @@ export const ProductForm = () => {
   const [nabl, setNabl] = useState(null);
   const [images, setImages] = useState([]);
   const [certs, setCerts] = useState([]);
+  const [warrantyDocs, setWarrantyDocs] = useState([]);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState('');
   const [error, setError] = useFormError();
@@ -107,6 +147,7 @@ export const ProductForm = () => {
         setNabl(p.nablCertificate);
         setImages(p.images);
         setCerts(p.certifications);
+        setWarrantyDocs(p.warrantyDocs || []);
       })
       .catch((err) => setError(err, 'Could not load the product.'));
   }, [id, isNew, setError]);
@@ -118,7 +159,7 @@ export const ProductForm = () => {
     setError(null);
     setSaved('');
     try {
-      const body = { ...form, nablCertificate: nabl, images: images.map((i) => i.ref), certifications: certs.map((c) => ({ title: c.title, ref: c.ref, name: c.name })) };
+      const body = { ...form, nablCertificate: nabl, images: images.map((i) => i.ref), certifications: certs.map(docBody), warrantyDocs: warrantyDocs.map(docBody) };
       const { data } = isNew ? await connectApi.post('/producer/products', body) : await connectApi.put(`/producer/products/${id}`, body);
       if (isNew) navigate(`/producer/products/${data.product.id}`, { replace: true });
       setSaved(data.message);
@@ -155,32 +196,18 @@ export const ProductForm = () => {
           <Field label="NABL certificate" hint="Image or PDF, up to 10 MB." error={fe('nablCertificate')}>
             <FileUpload endpoint="/producer/uploads" folder="certificates" value={nabl} onChange={setNabl} label="Upload NABL certificate" />
           </Field>
-          <Field label="Other certificates" hint="FSSAI, organic, lab reports…">
-            <div className="cx-stack" style={{ gap: 8 }}>
-              {certs.map((c, i) => (
-                <div key={c.ref} className="cx-search">
-                  <input
-                    className="cx-input"
-                    value={c.title}
-                    onChange={(e) => setCerts(certs.map((x, k) => (k === i ? { ...x, title: e.target.value } : x)))}
-                    placeholder="Certificate name"
-                    aria-label="Certificate name"
-                  />
-                  <a className="cx-link" href={c.url} target="_blank" rel="noreferrer">
-                    {c.name || 'View'}
-                  </a>
-                  <Button variant="ghost" className="small" onClick={() => setCerts(certs.filter((_, k) => k !== i))}>
-                    Remove
-                  </Button>
-                </div>
-              ))}
-              <FileUpload endpoint="/producer/uploads" folder="certificates" value={null} onChange={(f) => f && setCerts([...certs, { ...f, title: (f.name || 'Certificate').replace(/\.[a-z0-9]+$/i, '') }])} label="Add certificate" />
-            </div>
+          <Field label="Other certificates" hint="FSSAI, organic, lab reports… Images or PDFs, up to 10 MB each.">
+            <DocList docs={certs} setDocs={setCerts} folder="certificates" addLabel="Add certificates" titlePlaceholder="Certificate name" />
           </Field>
         </div>
       </Card>
       <Card title="Warranty">
-        <Input form={form} setForm={setForm} name="warrantyTerms" label="Warranty terms" type="textarea" hint="Shown to consumers with the warranty information retailers record at sale." />
+        <div className="cx-form">
+          <Input form={form} setForm={setForm} name="warrantyTerms" label="Warranty terms" type="textarea" hint="Shown to consumers with the warranty information retailers record at sale." />
+          <Field label="Warranty documents" hint="Warranty card, terms sheet, service centres… Images or PDFs, up to 10 MB each, 12 at most. Consumers see them with the warranty.">
+            <DocList docs={warrantyDocs} setDocs={setWarrantyDocs} folder="warranty" addLabel="Add warranty documents" titlePlaceholder="Document name" />
+          </Field>
+        </div>
       </Card>
       <Card>
         <Toggle checked={form.isActive} onChange={(v) => setForm({ ...form, isActive: v })} label="Active" description="Hidden products can't be chosen for new batches." />

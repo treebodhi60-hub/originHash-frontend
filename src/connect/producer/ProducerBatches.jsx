@@ -427,6 +427,15 @@ export const ProducerUnit = () => {
         }
       >
         {product?.warrantyTerms && <p className="cx-muted" style={{ marginTop: 0, whiteSpace: 'pre-wrap' }}>{product.warrantyTerms}</p>}
+        {product?.warrantyDocs?.length > 0 && (
+          <p style={{ marginTop: 0, display: 'flex', flexWrap: 'wrap', gap: '6px 16px' }}>
+            {product.warrantyDocs.map((d) => (
+              <a key={d.ref} className="cx-link" href={d.url} target="_blank" rel="noreferrer">
+                {d.title || d.name || 'Warranty document'}
+              </a>
+            ))}
+          </p>
+        )}
         {adding ? (
           <WarrantyForm
             uploadEndpoint="/producer/uploads"
