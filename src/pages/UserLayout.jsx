@@ -60,7 +60,7 @@ export const chainNavFor = (user) => {
     label: "Supply chain",
     items: [
       { to: "/chain/history", label: user.partnerRole ? "Product scans" : "My products", icon: "product" },
-      ...(user.partnerRole ? [] : [{ to: "/chain/chats", label: "Brand chats", hint: "Chats with brands", icon: "chat" }]),
+      { to: "/chain/chats", label: "Brand chats", hint: "Chats with brands", icon: "chat" },
       // Anyone not yet in the trade can apply to be a retailer; retailers see their account.
       ...(user.partnerRole === "distributor"
         ? []

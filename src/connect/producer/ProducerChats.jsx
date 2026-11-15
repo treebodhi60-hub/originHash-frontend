@@ -2,26 +2,55 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import connectApi, { errorText } from '../api';
 import { isProducerAdmin, useAppUser } from '../useChain';
-import { Button, Card, Empty, ErrorNote, Loading, Notice, PageHead, fmtDateTime, usePoll } from '../ui.jsx';
+import { ImagePlus, X } from 'lucide-react';
+import { Spinner } from '../../components/Loader.jsx';
+import { Badge, Button, Card, Empty, ErrorNote, Loading, Notice, PageHead, fmtDateTime, roleLabel, usePoll } from '../ui.jsx';
 
 // Producer: "Chat with brand" — consumers' conversations. New messages arrive by polling.
 
-export const Conversation = ({ messages, mine, onSend, disabled, placeholder = 'Write a reply…' }) => {
+// A chat: the messages (text and / or a photo) and the box to write one. `onSend(body, image)`;
+// `photoEndpoint` is where an attached photo is uploaded first (POST multipart file → { file }).
+export const Conversation = ({ messages, mine, onSend, disabled, photoEndpoint, placeholder = 'Write a reply…' }) => {
   const [draft, setDraft] = useState('');
+  const [photo, setPhoto] = useState(null); // { ref, url, name } once uploaded
+  const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const endRef = useRef(null);
+  const fileRef = useRef(null);
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: 'end' });
   }, [messages.length]);
+  const pickPhoto = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setError('Only photos can be sent in chat.');
+      return;
+    }
+    setUploading(true);
+    setError('');
+    try {
+      const body = new FormData();
+      body.append('file', file);
+      const { data } = await connectApi.post(photoEndpoint, body);
+      setPhoto(data.file);
+    } catch (err) {
+      setError(errorText(err, 'Could not upload the photo.'));
+    } finally {
+      setUploading(false);
+    }
+  };
   const send = async (e) => {
     e.preventDefault();
-    if (!draft.trim()) return;
+    if (!draft.trim() && !photo) return;
     setBusy(true);
     setError('');
     try {
-      await onSend(draft.trim());
+      await onSend(draft.trim(), photo);
       setDraft('');
+      setPhoto(null);
     } catch (err) {
       setError(errorText(err, 'Could not send.'));
     } finally {
@@ -34,6 +63,11 @@ export const Conversation = ({ messages, mine, onSend, disabled, placeholder = '
         {messages.length ? (
           messages.map((m) => (
             <div key={m.id} className={`cx-msg ${m.from === mine ? 'mine' : ''}`}>
+              {m.image && (
+                <a className="cx-msg-photo" href={m.image.url} target="_blank" rel="noreferrer">
+                  <img src={m.image.url} alt={m.image.name || 'Photo'} loading="lazy" />
+                </a>
+              )}
               {m.body}
               <small>
                 {m.from === 'producer' && m.sender ? `${m.sender} · ` : ''}
@@ -47,7 +81,31 @@ export const Conversation = ({ messages, mine, onSend, disabled, placeholder = '
         <span ref={endRef} />
       </div>
       {error && <ErrorNote>{error}</ErrorNote>}
+      {photo && (
+        <div className="cx-compose-photo">
+          <img src={photo.url} alt="" />
+          <span>{photo.name || 'Photo'}</span>
+          <button type="button" className="cx-icon-btn" onClick={() => setPhoto(null)} aria-label="Remove photo">
+            <X size={14} />
+          </button>
+        </div>
+      )}
       <form className="cx-compose" onSubmit={send}>
+        {photoEndpoint && (
+          <>
+            <button
+              type="button"
+              className="cx-icon-btn cx-compose-attach"
+              onClick={() => fileRef.current?.click()}
+              disabled={disabled || uploading || busy}
+              aria-label="Attach a photo"
+              title="Attach a photo"
+            >
+              {uploading ? <Spinner className="solo" /> : <ImagePlus size={20} />}
+            </button>
+            <input ref={fileRef} type="file" accept="image/*" hidden onChange={pickPhoto} />
+          </>
+        )}
         <textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -59,7 +117,7 @@ export const Conversation = ({ messages, mine, onSend, disabled, placeholder = '
           maxLength={2000}
           aria-label="Message"
         />
-        <Button type="submit" busy={busy} disabled={disabled || !draft.trim()}>
+        <Button type="submit" busy={busy} disabled={disabled || uploading || (!draft.trim() && !photo)}>
           Send
         </Button>
       </form>
@@ -120,8 +178,8 @@ export const ProducerChats = () => {
     [id, lastId]
   );
 
-  const send = async (body) => {
-    const { data } = await connectApi.post(`/producer/chats/${id}/messages`, { body });
+  const send = async (body, image) => {
+    const { data } = await connectApi.post(`/producer/chats/${id}/messages`, { body, image });
     setMessages((m) => [...m, data.message]);
     loadThreads();
   };
@@ -151,7 +209,10 @@ export const ProducerChats = () => {
                 threads.map((t) => (
                   <button key={t.id} type="button" className={String(t.id) === id ? 'active' : ''} onClick={() => navigate(`/producer/chats/${t.id}`)}>
                     <span className="row">
-                      <strong>{t.consumer.name}</strong>
+                      <strong>
+                        {t.consumer.name}
+                        {t.consumer.role && t.consumer.role !== 'consumer' && <span className="cx-muted"> · {roleLabel(t.consumer.role)}</span>}
+                      </strong>
                       {t.unread > 0 && <span className="cx-unread">{t.unread}</span>}
                     </span>
                     <span>{t.lastMessagePreview}</span>
@@ -170,7 +231,9 @@ export const ProducerChats = () => {
                 <>
                   <div className="cx-convo-head">
                     <div className="cx-cell-main">
-                      <strong>{current.consumer.name}</strong>
+                      <strong>
+                        {current.consumer.name} {current.consumer.role && current.consumer.role !== 'consumer' && <Badge tone={`role-${current.consumer.role}`}>{roleLabel(current.consumer.role)}</Badge>}
+                      </strong>
                       <span>
                         {current.consumer.mobile}
                         {current.consumer.city ? ` · ${current.consumer.city}` : ''}
@@ -188,7 +251,7 @@ export const ProducerChats = () => {
                       </select>
                     )}
                   </div>
-                  <Conversation messages={messages} mine="producer" onSend={send} />
+                  <Conversation messages={messages} mine="producer" onSend={send} photoEndpoint="/producer/chat-photo" />
                 </>
               ) : (
                 <Empty title={id ? 'Loading…' : 'Choose a conversation.'} />

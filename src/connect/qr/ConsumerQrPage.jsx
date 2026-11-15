@@ -5,7 +5,9 @@ import connectApi, { errorText } from '../api';
 import { rememberReturn } from '../../utils/returnTo';
 import { useAppUser } from '../useChain';
 import { PhoneShell } from '../Shells.jsx';
-import { Badge, Button, Empty, ErrorNote, Loading, Notice, fmtDate, fmtDateTime, placeText } from '../ui.jsx';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../store/authSlice';
+import { Badge, Button, Empty, ErrorNote, Loading, Notice, fmtDate, fmtDateTime, placeText, roleLabel } from '../ui.jsx';
 import { WarrantyList } from '../shared.jsx';
 
 // What a consumer QR opens. Locked until a retailer marks the unit sold; then: authentic &
@@ -154,9 +156,16 @@ const DiscountSection = ({ info, token, onClaimed }) => {
 const ConsumerQrPage = () => {
   const { token } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const user = useAppUser();
   const [info, setInfo] = useState(null);
   const [error, setError] = useState('');
+  // Signed in with a producer / OriginHash account: log out and come back here as a customer.
+  const switchAccount = () => {
+    dispatch(logout());
+    rememberReturn(`/cq/${token}`);
+    navigate('/login');
+  };
   const [open, setOpen] = useState(null);
 
   const load = useCallback(() => {
@@ -245,7 +254,6 @@ const ConsumerQrPage = () => {
     );
   }
 
-  const consumer = info.viewer?.role === 'consumer';
   const tiles = [
     { key: 'info', label: 'Product info / Certifications', icon: Package },
     { key: 'discounts', label: 'Discounts / Loyalty', icon: TicketPercent },
@@ -253,8 +261,10 @@ const ConsumerQrPage = () => {
     { key: 'history', label: 'My history', icon: History },
     ...(info.features.chat ? [{ key: 'chat', label: 'Chat with brand', icon: MessageCircle }] : []),
   ];
+  // Chat with brand: any customer — consumers, and retailers / distributors buying for themselves.
+  const canChat = ['consumer', 'retailer', 'distributor'].includes(info.viewer?.role);
   const toggle = (key) => {
-    if (key === 'chat' && consumer) {
+    if (key === 'chat' && canChat) {
       navigate(`/chain/chats/${info.producer.id}?unit=${token}`);
       return;
     }
@@ -322,7 +332,20 @@ const ConsumerQrPage = () => {
       {open === 'chat' && (
         <section className="cx-section">
           <h3>Chat with {info.producer.name}</h3>
-          {!info.signedIn ? <SignInPrompt token={token} what="chat with the brand" /> : <p className="cx-muted">Chat is for customers. Log in with a customer account to message the brand.</p>}
+          {!info.signedIn ? (
+            <SignInPrompt token={token} what="chat with the brand" />
+          ) : (
+            <>
+              <p className="cx-muted">
+                You&apos;re signed in as {info.viewer?.role === 'admin' ? 'OriginHash' : `a ${roleLabel(info.viewer?.role).toLowerCase()}`}
+                {info.viewer?.name ? ` (${info.viewer.name})` : ''}. Chat with the brand is for customers: log in with your own mobile number to message{' '}
+                {info.producer.name}.
+              </p>
+              <Button variant="ghost" className="block" onClick={switchAccount}>
+                Log in with another account
+              </Button>
+            </>
+          )}
         </section>
       )}
       <p className="cx-small">Opening this page is recorded for the brand, with your approximate location if you allow it.</p>

@@ -138,8 +138,8 @@ const Chat = () => {
   }, [load]);
   usePoll(() => load(lastId), 5000, [lastId, load]);
 
-  const send = async (body) => {
-    const { data: d } = await connectApi.post(`/me/chats/${producerId}/messages`, { body, unitToken });
+  const send = async (body, image) => {
+    const { data: d } = await connectApi.post(`/me/chats/${producerId}/messages`, { body, image, unitToken });
     setMessages((m) => [...m, d.message]);
   };
 
@@ -163,7 +163,14 @@ const Chat = () => {
         <Card flush>
           {!data.producer.chatEnabled && <Notice tone="warning">{data.producer.name} isn&apos;t taking chat messages right now.</Notice>}
           <div className="cx-convo">
-            <Conversation messages={messages} mine="consumer" onSend={send} disabled={!data.producer.chatEnabled} placeholder="Ask the brand anything…" />
+            <Conversation
+              messages={messages}
+              mine="consumer"
+              onSend={send}
+              photoEndpoint="/me/chat-photo"
+              disabled={!data.producer.chatEnabled}
+              placeholder="Ask the brand anything, or attach a photo…"
+            />
           </div>
         </Card>
       )}
@@ -335,13 +342,14 @@ const RetailerAccount = () => {
 
 const ChainUserRoutes = () => {
   const user = useAppUser();
-  const consumer = user && !user.partnerRole && !user.producerId;
+  // Chat with brand: consumers, retailers and distributors (anyone but producer users).
+  const customer = user && !user.producerId;
   return (
     <Routes>
       <Route path="history" element={<History />} />
       {!user?.producerId && user?.partnerRole !== 'distributor' && <Route path="retailer" element={<RetailerAccount />} />}
-      {consumer && <Route path="chats" element={<Chats />} />}
-      {consumer && <Route path="chats/:producerId" element={<Chat />} />}
+      {customer && <Route path="chats" element={<Chats />} />}
+      {customer && <Route path="chats/:producerId" element={<Chat />} />}}
       <Route path="*" element={<Navigate to="/chain/history" replace />} />
     </Routes>
   );
