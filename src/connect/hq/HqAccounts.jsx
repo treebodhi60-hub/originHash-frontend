@@ -17,7 +17,7 @@ const COPY = {
   retailer: {
     title: 'Retailers',
     one: 'retailer',
-    note: 'A retailer of a producer can press Sold on that producer’s products; a general retailer (no producer) on any batch open to all retailers. Nobody sells another producer’s products. Retailers you or producers add are approved at once; people who register themselves are general retailers until you approve them under Requests and choose their producer.',
+    note: 'A retailer of a producer can press Sold on that producer’s products; any retailer — general or another producer’s — on batches open to all retailers (the default). Retailers you or producers add are approved at once; people who register themselves are general retailers until you approve them under Requests and choose their producer.',
   },
   consumer: {
     title: 'Consumers',

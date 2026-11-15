@@ -130,11 +130,11 @@ export const BulkUploadModal = ({ title = 'Upload retailers', endpoint, template
 // ---------- Who can mark sold ----------
 
 export const SOLD_ACCESS = [
-  { value: 'all', label: 'All retailers', hint: 'This producer’s retailers and general retailers (not linked to any producer).' },
-  { value: 'producer', label: 'Only this producer’s retailers', hint: 'General retailers can scan but not mark sold.' },
+  { value: 'all', label: 'All retailers', hint: 'Every retailer on OriginHash: this producer’s, other producers’ and general retailers.' },
+  { value: 'producer', label: 'Only this producer’s retailers', hint: 'Other producers’ retailers and general retailers can scan but not mark sold.' },
 ];
 export const soldAccessText = (value, producerName) =>
-  value === 'producer' ? `Only ${producerName ? `${producerName}’s` : 'the producer’s'} retailers` : 'All retailers (the producer’s + general)';
+  value === 'producer' ? `Only ${producerName ? `${producerName}’s` : 'the producer’s'} retailers` : 'All retailers (any producer’s + general)';
 
 // `endpoint` is PUT { soldAccess }. Without `canEdit` it only shows the setting.
 export const SoldAccessCard = ({ batch, endpoint, canEdit, onSaved }) => {
@@ -181,7 +181,7 @@ export const SoldAccessCard = ({ batch, endpoint, canEdit, onSaved }) => {
           ))}
         </div>
         <p className="cx-small cx-muted" style={{ margin: 0 }}>
-          The producer and OriginHash can always mark sold; other producers and their retailers can only scan.
+          The producer and OriginHash can always mark sold; other producers can only scan.
         </p>
         {message && <Notice tone="success">{message}</Notice>}
         <ErrorNote>{error}</ErrorNote>

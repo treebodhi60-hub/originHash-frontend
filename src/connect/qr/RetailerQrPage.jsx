@@ -267,12 +267,12 @@ const RetailerQrPage = () => {
       {!sold && !info.canSell && (
         <p className="cx-small">
           {info.sellBlocked === 'otherProducer' && info.viewer.role === 'producer'
-            ? `This is ${info.producer.name}'s product. You can scan it like a distributor; only ${info.producer.name} or its retailers can mark it sold.`
+            ? `This is ${info.producer.name}'s product. You can scan it like a distributor; only ${info.producer.name} or a retailer can mark it sold.`
             : info.sellBlocked === 'otherProducer'
-            ? `Your scan is recorded, but only ${info.producer.name} or its retailers can mark this product sold.`
+            ? `Your scan is recorded, but only ${info.producer.name} or a retailer can mark this product sold.`
             : info.sellBlocked === 'producerRetailersOnly'
-              ? `Your scan is recorded. ${info.producer.name} has limited this batch to its own retailers, so general retailers can't mark it sold.`
-              : `As a ${roleLabel(info.viewer.role).toLowerCase()} you can scan this QR. Only ${info.producer.name} or its retailers can mark it sold.`}
+              ? `Your scan is recorded. ${info.producer.name} has limited this batch to its own retailers, so other retailers can't mark it sold.`
+              : `As a ${roleLabel(info.viewer.role).toLowerCase()} you can scan this QR. Only ${info.producer.name} or a retailer can mark it sold.`}
         </p>
       )}
 

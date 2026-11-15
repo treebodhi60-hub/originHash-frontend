@@ -38,7 +38,7 @@ export const BatchFacts = ({ batch }) => (
     <dt>Allotted</dt>
     <dd>{fmtDate(batch.allottedAt)}</dd>
     <dt>Who can mark sold</dt>
-    <dd>{batch.soldAccess === 'producer' ? 'Only the producer’s own retailers' : 'All retailers (the producer’s + general)'}</dd>
+    <dd>{batch.soldAccess === 'producer' ? 'Only the producer’s own retailers' : 'All retailers (any producer’s + general)'}</dd>
     {batch.printLayout && (
       <>
         <dt>Print layout</dt>

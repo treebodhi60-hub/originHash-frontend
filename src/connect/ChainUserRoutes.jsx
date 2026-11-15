@@ -266,7 +266,7 @@ const RetailerAccount = () => {
       {general && (
         <Card title="General retailer">
           <Notice>
-            You can mark sold the products of any batch its producer has opened to all retailers. Batches limited to a producer&apos;s own retailers can only be
+            You can mark sold the products of any batch open to all retailers (the default). Batches limited to a producer&apos;s own retailers can only be
             scanned.
           </Notice>
           {pending && (

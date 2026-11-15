@@ -60,8 +60,8 @@ const Overview = () => {
           <li>The producer adds products and requests a batch; allot it with a max discount and an expiry date.</li>
           <li>Print the retailer + consumer QR pairs. Distributors and retailers scan the retailer QR along the way.</li>
           <li>
-            The producer itself, one of its retailers, or you presses Sold once; that unlocks the consumer QR with its unique coupon. Other producers and their retailers can only
-            scan it, like a distributor.
+            The producer itself, a retailer (any retailer, unless the batch is limited to the producer’s own), or you presses Sold once; that unlocks the consumer QR with its
+            unique coupon. Other producers can only scan it, like a distributor.
           </li>
         </ol>
       </Card>
