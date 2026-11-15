@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import connectApi, { errorText } from '../api';
 import { isProducerAdmin, useAppUser } from '../useChain';
-import { Badge, Button, Card, Empty, ErrorNote, Input, Loading, Modal, Notice, PageHead, Toggle, fmtDate, useFormError } from '../ui.jsx';
+import { Badge, Button, Card, Empty, ErrorNote, Input, Loading, Modal, Notice, PageHead, Toggle, useFormError } from '../ui.jsx';
+import { LastLogin, LoginHistoryModal } from '../logins.jsx';
 
 // Producer admin: the team — create users (username + password), edit them, allow chat, block.
 
@@ -65,9 +66,12 @@ const UserForm = ({ user, onClose, onSaved }) => {
 };
 
 export const ProducerTeam = () => {
-  const isAdmin = isProducerAdmin(useAppUser());
+  const me = useAppUser();
+  const isAdmin = isProducerAdmin(me);
   const [users, setUsers] = useState(null);
   const [editing, setEditing] = useState(null);
+  const [history, setHistory] = useState(null);
+  const closeHistory = useCallback(() => setHistory(null), []);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
 
@@ -134,7 +138,9 @@ export const ProducerTeam = () => {
                     <td className="cx-mono">{u.username}</td>
                     <td>{u.role === 'admin' ? <Badge tone="role-admin">Admin</Badge> : <Badge tone="role-staff">Staff</Badge>}</td>
                     <td>{u.canChat ? <Badge tone="info">Answers chat</Badge> : '—'}</td>
-                    <td>{fmtDate(u.lastLoginAt)}</td>
+                    <td>
+                      <LastLogin user={u} onHistory={isAdmin || u.id === me?.id ? setHistory : null} />
+                    </td>
                     <td>{u.isBlocked ? <Badge tone="danger">Blocked</Badge> : <Badge tone="success">Active</Badge>}</td>
                     {isAdmin && (
                       <td className="actions">
@@ -157,6 +163,13 @@ export const ProducerTeam = () => {
           <Empty title="No users yet." />
         )}
       </Card>
+      {history && (
+        <LoginHistoryModal
+          endpoint={`/producer/users/${history.id}/logins`}
+          title={`Login history · ${history.name || history.username}`}
+          onClose={closeHistory}
+        />
+      )}
       {editing && (
         <UserForm
           user={editing === 'new' ? null : editing}

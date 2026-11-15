@@ -5,6 +5,7 @@ import connectApi, { CHAIN_ADMIN, errorText } from '../api';
 import { Badge, Button, Card, Empty, ErrorNote, Field, FileUpload, Input, Loading, Modal, Notice, PageHead, RoleBadge, Stat, fmtDate, num, useFormError } from '../ui.jsx';
 import { CategoryInput, discountText } from '../shared.jsx';
 import { AllotBatchModal } from './HqBatches.jsx';
+import { LastLogin, LoginHistoryModal } from '../logins.jsx';
 
 // Superadmin: producers — register, edit, block, reset the admin login, and see each one's team,
 // products, batches and requests.
@@ -236,6 +237,8 @@ export const HqProducer = () => {
   const [notice, setNotice] = useState('');
   const [modal, setModal] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [history, setHistory] = useState(null);
+  const closeHistory = useCallback(() => setHistory(null), []);
 
   const load = useCallback(() => {
     connectApi
@@ -347,6 +350,9 @@ export const HqProducer = () => {
                     <td>
                       <RoleBadge role={u.role === 'admin' ? 'producer' : 'staff'} /> {u.role === 'admin' && <Badge>Admin</Badge>}
                     </td>
+                    <td>
+                      <LastLogin user={u} onHistory={setHistory} />
+                    </td>
                     <td>{u.isBlocked ? <Badge tone="danger">Blocked</Badge> : <Badge tone="success">Active</Badge>}</td>
                   </tr>
                 ))}
@@ -354,6 +360,13 @@ export const HqProducer = () => {
             </table>
           </div>
         </Card>
+        {history && (
+          <LoginHistoryModal
+            endpoint={`/admin/producers/${id}/users/${history.id}/logins`}
+            title={`Login history · ${history.name || history.username}`}
+            onClose={closeHistory}
+          />
+        )}
       </div>
 
       {requests.some((r) => r.status === 'pending') && (
