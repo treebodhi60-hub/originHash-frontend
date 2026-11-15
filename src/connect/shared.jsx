@@ -3,6 +3,7 @@ import { Download, QrCode, X } from 'lucide-react';
 import connectApi from './api';
 import { downloadFile, errorText } from './api';
 import { Badge, Button, Empty, ErrorNote, Field, FileUpload, Loading, Modal, StatusBadge, fmtDate, fmtDateTime, num, roleLabel, todayStr, useFormError } from './ui.jsx';
+import { printLayoutText } from './printLayout.jsx';
 
 // Pieces shared by the superadmin console and the producer portal.
 
@@ -36,6 +37,14 @@ export const BatchFacts = ({ batch }) => (
     <dd className="cx-mono">{batch.firstSerial ? `${batch.firstSerial} – ${batch.lastSerial}` : '—'}</dd>
     <dt>Allotted</dt>
     <dd>{fmtDate(batch.allottedAt)}</dd>
+    {batch.printLayout && (
+      <>
+        <dt>Print layout</dt>
+        <dd>
+          {printLayoutText(batch.printLayout)} <span className="cx-muted">· set by OriginHash</span>
+        </dd>
+      </>
+    )}
   </dl>
 );
 

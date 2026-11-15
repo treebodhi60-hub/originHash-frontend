@@ -58,6 +58,56 @@ export const gridFor = (pageSize, splitType, perPage) => {
   return { ...best, perPage, w, h, sw, sh, left: (best.width - gridWidth) / 2, top: PAGE_MARGIN + HEADER_H };
 };
 
+// Supply-chain QR pairs (mirrors pairGridFor in the backend): `perPage` labels (even) as pairs of a
+// retailer and a consumer label. Horizontal: side by side (retailer, consumer). Vertical: stacked
+// (consumer on top, retailer below). `pairCols` is pairs per row.
+export const MAX_PAIR_LABELS_PER_PAGE = MAX_BULK_PER_PAGE;
+export const pairGridFor = (pageSize, perPage, orientation = 'horizontal') => {
+  const [pw, ph] = PAGE_SIZES[pageSize] || PAGE_SIZES.A4;
+  const { w, h } = stickerSize('bulk');
+  const vertical = orientation === 'vertical';
+  const pairs = Math.max(1, Math.floor(perPage / 2));
+  const labels = pairs * 2;
+  const better = (a, b) => {
+    if (Math.abs(a.scale - b.scale) > 1e-6) return a.scale > b.scale;
+    if (a.upright !== b.upright) return a.upright;
+    const emptyA = a.cols * a.rows - labels;
+    const emptyB = b.cols * b.rows - labels;
+    if (emptyA !== emptyB) return emptyA < emptyB;
+    return a.cols > b.cols;
+  };
+  let best = null;
+  for (const [width, height] of [
+    [pw, ph],
+    [ph, pw],
+  ]) {
+    const availW = width - PAGE_MARGIN * 2;
+    const availH = height - PAGE_MARGIN * 2 - HEADER_H;
+    for (let pairCols = 1; pairCols <= pairs; pairCols += 1) {
+      const pairRows = Math.ceil(pairs / pairCols);
+      const cols = vertical ? pairCols : pairCols * 2;
+      const rows = vertical ? pairRows * 2 : pairRows;
+      const scale = Math.min(1, (availW - (cols - 1) * GAP) / (cols * w), (availH - (rows - 1) * GAP) / (rows * h));
+      const grid = { width, height, cols, rows, pairCols, scale, upright: width === pw };
+      if (scale > 0 && (!best || better(grid, best))) best = grid;
+    }
+  }
+  const sw = w * best.scale;
+  const sh = h * best.scale;
+  const gridWidth = best.cols * sw + (best.cols - 1) * GAP;
+  return { ...best, orientation: vertical ? 'vertical' : 'horizontal', perPage: labels, w, h, sw, sh, left: (best.width - gridWidth) / 2, top: PAGE_MARGIN + HEADER_H };
+};
+
+// Row-major slot of label i on a page (pair i / 2; even i = retailer, odd i = consumer).
+export const pairSlot = (grid, i) => {
+  const pair = Math.floor(i / 2);
+  const retailer = i % 2 === 0;
+  const pairRow = Math.floor(pair / grid.pairCols);
+  const pairCol = pair % grid.pairCols;
+  if (grid.orientation === 'vertical') return (pairRow * 2 + (retailer ? 1 : 0)) * grid.cols + pairCol;
+  return pairRow * grid.cols + pairCol * 2 + (retailer ? 0 : 1);
+};
+
 // The most labels a page can take: the same on every paper; bulk (identical-QR) labels go to 42.
 export const maxPerPage = (pageSize, splitType) => (splitType === 'bulk' ? MAX_BULK_PER_PAGE : MAX_PER_PAGE);
 

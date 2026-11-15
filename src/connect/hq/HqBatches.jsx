@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react';
 import connectApi, { CHAIN_ADMIN, errorText } from '../api';
 import { Badge, Button, Card, Empty, ErrorNote, Input, Loading, Modal, Notice, PageHead, Select, Stat, Tabs, fmtDate, fmtDateTime, num, useFormError } from '../ui.jsx';
 import { BatchFacts, DownloadButtons, UnitsTable, discountText } from '../shared.jsx';
+import { PRINT_DEFAULTS, PairPrintLayout } from '../printLayout.jsx';
 
 // Superadmin: batch requests from producers, allotting batches (with max discount and expiry, a
 // unique coupon per unit), and every batch's units.
@@ -334,6 +335,57 @@ export const HqBatches = () => {
   );
 };
 
+// Superadmin only: how the batch's QR PDF is laid out. Saved on the batch, so the producer's
+// "Download QR PDF" uses the same layout.
+const PrintLayoutCard = ({ batch, onSaved }) => {
+  const saved = batch.printLayout || PRINT_DEFAULTS;
+  const [layout, setLayout] = useState(saved);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const changed = layout.pageSize !== saved.pageSize || layout.perPage !== saved.perPage || layout.orientation !== saved.orientation;
+  const save = async () => {
+    setBusy(true);
+    setError('');
+    setMessage('');
+    try {
+      const { data } = await connectApi.put(`/admin/batches/${batch.id}/print-layout`, layout);
+      setMessage(data.message);
+      onSaved(data.batch);
+    } catch (err) {
+      setError(errorText(err, 'Could not save the print layout.'));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Card
+      title="Print layout"
+      actions={
+        <>
+          {changed && (
+            <Button variant="ghost" className="small" onClick={() => setLayout(saved)} disabled={busy}>
+              Undo changes
+            </Button>
+          )}
+          <Button className="small" busy={busy} disabled={!changed} onClick={save}>
+            Save layout
+          </Button>
+        </>
+      }
+    >
+      <div className="cx-stack" style={{ gap: 12 }}>
+        <PairPrintLayout value={layout} onChange={(v) => { setLayout(v); setMessage(''); }} units={batch.quantity} />
+        <p className="cx-small cx-muted" style={{ margin: 0 }}>
+          Only OriginHash can change this. The producer’s “Download QR PDF” uses the saved layout{changed ? ' — save to apply your changes' : ''}.
+        </p>
+        {message && <Notice tone="success">{message}</Notice>}
+        <ErrorNote>{error}</ErrorNote>
+      </div>
+    </Card>
+  );
+};
+
 export const HqBatch = () => {
   const { id } = useParams();
   const [data, setData] = useState(null);
@@ -347,6 +399,7 @@ export const HqBatch = () => {
   if (error) return <ErrorNote>{error}</ErrorNote>;
   if (!data) return <Loading />;
   const { batch, units } = data;
+  const updateBatch = (b) => setData((d) => ({ ...d, batch: { ...d.batch, ...b } }));
   return (
     <div className="cx-stack">
       <PageHead
@@ -364,6 +417,7 @@ export const HqBatch = () => {
       <Card title="Batch">
         <BatchFacts batch={batch} />
       </Card>
+      <PrintLayoutCard batch={batch} onSaved={updateBatch} />
       <Card title="Units" flush>
         <UnitsTable units={units} qrBase="/admin/units" />
       </Card>

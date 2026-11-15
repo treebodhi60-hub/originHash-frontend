@@ -532,6 +532,19 @@
   line-height: 1.5;
 }
 
+/* QR batch print layout preview: each retailer + consumer pair outlined. */
+.cx-pair-preview {
+  color: var(--oh-print-ink);
+}
+
+.cx-pair-preview .pair {
+  fill: none;
+  stroke: var(--oh-cobalt);
+  stroke-width: 1px;
+  stroke-opacity: 0.6;
+  vector-effect: non-scaling-stroke;
+}
+
 /* Read-only values shown in a form (e.g. a batch request's max discount). */
 .cx-field input:disabled {
   background: var(--oh-well);
