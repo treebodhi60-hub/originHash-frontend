@@ -389,3 +389,24 @@ export const CategoryInput = ({ value, onChange }) => {
     </div>
   );
 };
+
+// Batch numbers are one sequence across OriginHash (OHB-0001, OHB-0002…), assigned when a batch is
+// allotted, so nobody types them. This shows the number the next batch will get.
+export const BatchNoField = ({ endpoint, hint = 'Assigned automatically — one sequence across OriginHash.' }) => {
+  const [next, setNext] = useState('');
+  useEffect(() => {
+    let live = true;
+    connectApi
+      .get(endpoint)
+      .then(({ data }) => live && setNext(data.batchNo || ''))
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [endpoint]);
+  return (
+    <Field label="Batch number" hint={hint}>
+      {(id) => <input id={id} className="cx-mono" value={next || 'Assigned automatically'} readOnly disabled />}
+    </Field>
+  );
+};

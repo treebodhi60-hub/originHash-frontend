@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';
 import connectApi, { errorText } from '../api';
 import { Badge, Button, Card, Empty, ErrorNote, Field, Input, Loading, Modal, Notice, PageHead, Select, Stat, StatusBadge, Tabs, fmtDate, fmtDateTime, num, placeText, roleLabel, useFormError } from '../ui.jsx';
-import { BatchFacts, DownloadButtons, QrPair, UnitsTable, WarrantyForm, WarrantyList, currentOfferFor, discountText, scanLine } from '../shared.jsx';
+import { BatchFacts, BatchNoField, DownloadButtons, QrPair, UnitsTable, WarrantyForm, WarrantyList, currentOfferFor, discountText, scanLine } from '../shared.jsx';
 import { SoldAccessCard } from '../retailers.jsx';
 import { isProducerAdmin, useAppUser } from '../useChain';
 
@@ -20,7 +20,7 @@ const fromOffer = (offers, productId, form) => {
 // `products` are the producer's active products only.
 const RequestModal = ({ products, offers, onClose, onDone }) => {
   const [form, setFormRaw] = useState(() => {
-    const blank = { quantity: '', expiryDate: '', productId: products[0] ? String(products[0].id) : '', batchNo: '', note: '' };
+    const blank = { quantity: '', expiryDate: '', productId: products[0] ? String(products[0].id) : '', note: '' };
     return { ...blank, ...fromOffer(offers, blank.productId, blank) };
   });
   const setForm = (update) =>
@@ -114,7 +114,7 @@ const RequestModal = ({ products, offers, onClose, onDone }) => {
           hint={offer?.validTill ? 'From the discount’s expiry date. Coupons stay valid until this date.' : 'Coupons stay valid until this date.'}
           error={fe('expiryDate')}
         />
-        <Input form={form} setForm={setForm} name="batchNo" label="Your batch number" placeholder="e.g. PW-2026-001" error={fe('batchNo')} />
+        <BatchNoField endpoint="/producer/batches/next-number" hint="Assigned automatically when OriginHash allots the batch — one sequence across OriginHash." />
         <Input form={form} setForm={setForm} name="note" label="Note to OriginHash" wide />
       </div>
       <Notice>QR codes are free for now. OriginHash reviews the request and allots the batch.</Notice>
