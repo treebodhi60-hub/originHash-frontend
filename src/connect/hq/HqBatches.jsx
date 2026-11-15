@@ -11,28 +11,42 @@ import { SoldAccessCard } from '../retailers.jsx';
 // unique coupon per unit), and every batch's units.
 
 // The batch fields: quantity, max discount (0 = no discount), expiry, batch number, product.
-// `fixedProduct` (a producer's request): the product they chose, shown but not changeable.
-const BatchFields = ({ form, setForm, error, products, fixedProduct }) => {
+// `fromRequest` (a producer's request): the max discount and expiry date they set — and
+// `fixedProduct`, the product they chose — are shown but not changeable.
+const FIXED_HINT = 'Set by the producer in their request; it can’t be changed here.';
+const BatchFields = ({ form, setForm, error, products, fixedProduct, fromRequest = false }) => {
   const fe = (f) => (error.field === f ? error.message : null);
   return (
     <div className="cx-form two">
       <Input form={form} setForm={setForm} name="quantity" label="Units" type="number" min={1} max={5000} required hint={`${num((Number(form.quantity) || 0) * 2)} QR codes (retailer + consumer for each unit)`} error={fe('quantity')} />
-      <Input
-        form={form}
-        setForm={setForm}
-        name="maxDiscountPercent"
-        label="Max discount %"
-        type="number"
-        min={0}
-        max={100}
-        step="0.01"
-        hint="0 or empty: no discount, no coupon codes."
-        error={fe('maxDiscountPercent')}
-      />
-      <Input form={form} setForm={setForm} name="expiryDate" label="Expiry date" type="date" required hint="Coupons are valid until this date." error={fe('expiryDate')} />
+      {fromRequest ? (
+        <Field label="Max discount %" hint={FIXED_HINT}>
+          {(id) => <input id={id} value={form.maxDiscountPercent ? `${Number(form.maxDiscountPercent)}%` : 'No discount'} readOnly disabled />}
+        </Field>
+      ) : (
+        <Input
+          form={form}
+          setForm={setForm}
+          name="maxDiscountPercent"
+          label="Max discount %"
+          type="number"
+          min={0}
+          max={100}
+          step="0.01"
+          hint="0 or empty: no discount, no coupon codes."
+          error={fe('maxDiscountPercent')}
+        />
+      )}
+      {fromRequest ? (
+        <Field label="Expiry date" hint={`Coupons are valid until this date. ${FIXED_HINT}`}>
+          {(id) => <input id={id} value={fmtDate(form.expiryDate)} readOnly disabled />}
+        </Field>
+      ) : (
+        <Input form={form} setForm={setForm} name="expiryDate" label="Expiry date" type="date" required hint="Coupons are valid until this date." error={fe('expiryDate')} />
+      )}
       <Input form={form} setForm={setForm} name="batchNo" label="Batch number" placeholder="Auto if empty" error={fe('batchNo')} />
       {fixedProduct ? (
-        <Field label="Product" wide hint="Chosen by the producer in their request; it can’t be changed here.">
+        <Field label="Product" wide hint={FIXED_HINT}>
           {(id) => <input id={id} value={fixedProduct} readOnly disabled />}
         </Field>
       ) : products && (
@@ -181,6 +195,7 @@ const RequestModal = ({ request, onClose, onDone }) => {
           setForm={setForm}
           error={error}
           products={products || []}
+          fromRequest
           fixedProduct={request.productId ? request.productName || products?.find((p) => p.id === request.productId)?.name || `Product #${request.productId}` : null}
         />
         <Input form={form} setForm={setForm} name="decisionNote" label="Message to the producer" wide hint="Shown with the request (e.g. why it was rejected)." />
