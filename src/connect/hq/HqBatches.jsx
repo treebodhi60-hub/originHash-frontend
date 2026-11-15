@@ -362,22 +362,26 @@ const PrintLayoutCard = ({ batch, onSaved }) => {
     <Card
       title="Print layout"
       actions={
-        <>
-          {changed && (
+        changed ? (
+          <>
             <Button variant="ghost" className="small" onClick={() => setLayout(saved)} disabled={busy}>
               Undo changes
             </Button>
-          )}
-          <Button className="small" busy={busy} disabled={!changed} onClick={save}>
-            Save layout
-          </Button>
-        </>
+            <Button className="small" busy={busy} onClick={save}>
+              Save layout
+            </Button>
+          </>
+        ) : (
+          <Badge tone="success">Saved</Badge>
+        )
       }
     >
       <div className="cx-stack" style={{ gap: 12 }}>
         <PairPrintLayout value={layout} onChange={(v) => { setLayout(v); setMessage(''); }} units={batch.quantity} />
         <p className="cx-small cx-muted" style={{ margin: 0 }}>
-          Only OriginHash can change this. The producer’s “Download QR PDF” uses the saved layout{changed ? ' — save to apply your changes' : ''}.
+          {changed
+            ? 'You have unsaved changes. Press “Save layout” to apply them; until then downloads use the saved layout.'
+            : 'Only OriginHash can change this. Change the paper, orientation or QR codes per page, then press “Save layout”. The producer’s “Download QR PDF” uses the saved layout.'}
         </p>
         {message && <Notice tone="success">{message}</Notice>}
         <ErrorNote>{error}</ErrorNote>
