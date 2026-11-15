@@ -48,6 +48,7 @@ export const chainNavFor = (user) => {
         { to: "/producer/products", label: "Products", icon: "product" },
         { to: "/producer/offers", label: "Discounts", hint: "Discounts & loyalty", icon: "offer" },
         { to: "/producer/batches", label: "QR batches", icon: "batches" },
+        { to: "/history", label: "History", hint: "Supply chain history", icon: "history" },
         ...(admin || user.canChat ? [{ to: "/producer/chats", label: "Chat", hint: "Chat with brand", icon: "chat" }] : []),
         { to: "/producer/team", label: "Team", icon: "users" },
         { to: "/producer/settings", label: "Settings", hint: "Producer settings", icon: "settings" },
@@ -59,6 +60,10 @@ export const chainNavFor = (user) => {
     items: [
       { to: "/chain/history", label: user.partnerRole ? "Product scans" : "My products", icon: "product" },
       ...(user.partnerRole ? [] : [{ to: "/chain/chats", label: "Brand chats", hint: "Chats with brands", icon: "chat" }]),
+      // Anyone not yet in the trade can apply to be a retailer; retailers see their account.
+      ...(user.partnerRole === "distributor"
+        ? []
+        : [{ to: "/chain/retailer", label: user.partnerRole === "retailer" ? "Retailer account" : "Become a retailer", icon: "retailer" }]),
     ],
   };
 };
@@ -69,9 +74,10 @@ const UserLayout = () => {
   const { pathname } = useLocation();
   const user = useSelector((s) => s.auth.user);
   const chainNav = chainNavFor(user);
-  // Producer users have no Home tab (their Dashboard is their home).
+  // Producer users have no Home tab (their Dashboard is their home), and History sits in their
+  // Producer group.
   const userNav = user?.producerId
-    ? USER_NAV.map((g, i) => (i === 0 ? { ...g, items: g.items.filter((item) => item.to !== "/home") } : g))
+    ? USER_NAV.map((g, i) => (i === 0 ? { ...g, items: g.items.filter((item) => item.to !== "/home" && item.to !== "/history") } : g))
     : USER_NAV;
   const groups = chainNav ? (user?.producerId ? [chainNav, ...userNav] : [userNav[0], chainNav, ...userNav.slice(1)]) : userNav;
   const menuItems = [

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle2, Lock, Package, Store, X } from 'lucide-react';
 import connectApi, { errorText } from '../api';
 import { rememberReturn } from '../../utils/returnTo';
@@ -148,13 +148,24 @@ const RetailerQrPage = () => {
         </div>
         {details}
         {consumer ? (
-          <Notice>You&apos;re signed in as a customer. Scan the consumer QR on the product to see its details, coupon and warranty.</Notice>
+          <>
+            <Notice>You&apos;re signed in as a customer. Scan the consumer QR on the product to see its details, coupon and warranty.</Notice>
+            <p className="cx-small">
+              Are you a retailer?{' '}
+              <Link className="cx-link" to="/chain/retailer">
+                Apply for a retailer account
+              </Link>
+            </p>
+          </>
         ) : (
           <>
             <Button className="large block" onClick={signIn}>
               Log in
             </Button>
-            <p className="cx-small">Distributors and retailers log in with their mobile and OTP; producers with their username and password.</p>
+            <p className="cx-small">
+              Distributors and retailers log in with their mobile and OTP; producers with their username and password. New retailer? Log in with your mobile and apply
+              from the menu (“Become a retailer”).
+            </p>
           </>
         )}
       </PhoneShell>
@@ -224,7 +235,7 @@ const RetailerQrPage = () => {
       </div>
       <div className="cx-hero-icon">{info.product?.image ? <img src={info.product.image.url} alt="" style={{ width: 76, height: 76, borderRadius: '50%', objectFit: 'cover' }} /> : sold ? <Package size={32} /> : <Store size={32} />}</div>
       <p className="cx-phone-title" style={{ margin: 0, fontWeight: 600 }}>
-        {sold ? 'Already sold' : 'Scan by authorised retailer'}
+        {sold ? 'Already sold' : info.canSell ? 'Scan by authorised retailer' : 'Retailer QR scanned'}
       </p>
       {details}
 
@@ -255,9 +266,13 @@ const RetailerQrPage = () => {
       )}
       {!sold && !info.canSell && (
         <p className="cx-small">
-          {info.viewer.role === 'producer'
-            ? 'Producers can scan the retailer QR. Only a retailer (or OriginHash) can mark it sold.'
-            : `As a ${roleLabel(info.viewer.role).toLowerCase()} you can scan this QR. Only a retailer can mark it sold.`}
+          {info.sellBlocked === 'otherProducer'
+            ? `Your scan is recorded, but only retailers of ${info.producer.name} can mark this product sold.`
+            : info.sellBlocked === 'noProducer'
+              ? 'Your retailer account isn’t associated with a producer yet, so you can’t mark products sold. Contact OriginHash.'
+              : info.viewer.role === 'producer'
+                ? `Producers can scan the retailer QR. Only a retailer of ${info.producer.name} (or OriginHash) can mark it sold.`
+                : `As a ${roleLabel(info.viewer.role).toLowerCase()} you can scan this QR. Only a retailer of ${info.producer.name} can mark it sold.`}
         </p>
       )}
 

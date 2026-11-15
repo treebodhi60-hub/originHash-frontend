@@ -11,16 +11,18 @@ import '../../styles/app-shell.css';
 import '../../styles/scan.css';
 import '../../styles/history.css';
 
-// The History tab for producer users: everything that happened to the company's QR codes, newest
-// first — distributor / retailer scans, sales, consumer scans and the team's own scans. Same look
-// and URL-kept filter / search / page as the verification history.
+// Supply chain history: everything that happened to retailer / consumer QR codes, newest first —
+// distributor / retailer scans, sales, consumer scans and producer teams' scans. Same look and
+// URL-kept filter / search / page as the verification history.
+//   scope="producer" (default): the producer user's History tab — their company's QR codes.
+//   scope="admin": the OriginHash superadmin's — every producer, with a producer filter.
 
-const FILTERS = [
+const filtersFor = (admin) => [
   ['all', 'All'],
   ['trade', 'Trade scans'],
   ['sold', 'Sold'],
   ['consumer', 'Consumer scans'],
-  ['team', 'Our team'],
+  ['team', admin ? 'Producer teams' : 'Our team'],
   ['mine', 'Mine'],
 ];
 const PAGE_SIZES = [10, 20, 50];
@@ -32,11 +34,22 @@ const positiveInt = (value, fallback) => {
   return Number.isInteger(n) && n > 0 ? n : fallback;
 };
 
-const ProducerHistory = () => {
+const ProducerHistory = ({ scope = 'producer' }) => {
+  const admin = scope === 'admin';
+  const FILTERS = filtersFor(admin);
   const { openMenu } = useOutletContext() || {};
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const filter = FILTERS.some(([key]) => key === searchParams.get('filter')) ? searchParams.get('filter') : 'all';
+  const producerId = admin ? positiveInt(searchParams.get('producer'), null) : null;
+  const [producers, setProducers] = useState([]);
+  useEffect(() => {
+    if (!admin) return;
+    connectApi
+      .get('/admin/producers')
+      .then(({ data }) => setProducers(data.producers))
+      .catch(() => setProducers([]));
+  }, [admin]);
   const q = (searchParams.get('q') || '').trim();
   const requestedPage = positiveInt(searchParams.get('page'), 1);
   const pageSize = PAGE_SIZES.includes(Number(searchParams.get('size'))) ? Number(searchParams.get('size')) : DEFAULT_PAGE_SIZE;
@@ -79,7 +92,9 @@ const ProducerHistory = () => {
     const request = ++requestRef.current;
     setStatus('loading');
     connectApi
-      .get('/producer/history', { params: { filter, q: q || undefined, page: requestedPage, pageSize } })
+      .get(admin ? '/admin/history' : '/producer/history', {
+        params: { filter, q: q || undefined, page: requestedPage, pageSize, producerId: producerId || undefined },
+      })
       .then(({ data }) => {
         if (request !== requestRef.current) return;
         setRows(data.history);
@@ -89,7 +104,7 @@ const ProducerHistory = () => {
       .catch(() => {
         if (request === requestRef.current) setStatus('failed');
       });
-  }, [filter, q, requestedPage, pageSize, reloadKey]);
+  }, [admin, filter, q, requestedPage, pageSize, producerId, reloadKey]);
 
   const goToPage = (page) => {
     updateParams({ page }, { keepPage: true });
@@ -100,7 +115,8 @@ const ProducerHistory = () => {
     setQuery('');
     updateParams({ q: '' });
   };
-  const openUnit = (h) => navigate(`/producer/units/${h.unitId}`);
+  // Producers open the unit; the superadmin opens its batch (with all its units).
+  const openUnit = (h) => navigate(admin ? `/admin/chain/batches/${h.batch.id}` : `/producer/units/${h.unitId}`);
   const serial = (index) => (paging.page - 1) * pageSize + index + 1;
 
   const loading = status === 'loading';
@@ -118,6 +134,23 @@ const ProducerHistory = () => {
     </div>
   );
 
+  // Superadmin: narrow to one producer.
+  const producerPicker = admin && (
+    <select
+      className="cx-input cx-history-producer"
+      value={producerId || ''}
+      onChange={(e) => updateParams({ producer: e.target.value || null })}
+      aria-label="Producer"
+    >
+      <option value="">All producers</option>
+      {producers.map((p) => (
+        <option key={p.id} value={p.id}>
+          {p.name}
+        </option>
+      ))}
+    </select>
+  );
+
   const searchBox = (
     <div className="oh-history-search" role="search">
       <SearchIcon size={18} />
@@ -129,7 +162,7 @@ const ProducerHistory = () => {
           if (e.key === 'Enter') updateParams({ q: query.trim() });
           if (e.key === 'Escape' && query) clearSearch();
         }}
-        placeholder="Search serial (OH000123), product, batch, retailer or place"
+        placeholder={admin ? 'Search serial, product, producer, batch, retailer or place' : 'Search serial (OH000123), product, batch, retailer or place'}
         aria-label="Search history"
         maxLength={100}
         enterKeyHint="search"
@@ -151,7 +184,9 @@ const ProducerHistory = () => {
       </button>
     </>
   ) : filter === 'all' ? (
-    'Nothing yet. Scans of your QR codes by distributors, retailers and consumers, and every sale, show up here.'
+    admin
+      ? 'Nothing yet. Scans of producers’ QR codes by distributors, retailers and consumers, and every sale, show up here.'
+      : 'Nothing yet. Scans of your QR codes by distributors, retailers and consumers, and every sale, show up here.'
   ) : (
     'Nothing matches this filter yet.'
   );
@@ -161,12 +196,13 @@ const ProducerHistory = () => {
       <div className="oh-history-desk-head oh-only-desktop">
         <div>
           <h1 className="oh-admin-title">Supply chain history</h1>
-          <p className="oh-admin-subtitle">Every scan and sale of your company&apos;s QR codes</p>
+          <p className="oh-admin-subtitle">{admin ? 'Every scan and sale of every producer’s QR codes' : 'Every scan and sale of your company’s QR codes'}</p>
         </div>
         {searchBox}
       </div>
       <div className="oh-history-desk-toolbar oh-only-desktop">
         {filterChips}
+        {producerPicker}
         {status === 'ready' && (
           <span className="oh-history-count">
             {paging.total} {paging.total === 1 ? 'entry' : 'entries'}
@@ -185,6 +221,7 @@ const ProducerHistory = () => {
         <div className="oh-result-body oh-history-body">
           <div className="oh-only-mobile">
             {searchBox}
+            {producerPicker}
             {filterChips}
           </div>
 
@@ -215,6 +252,7 @@ const ProducerHistory = () => {
                             {h.product?.name || 'No product'} · {h.serial}
                           </div>
                           <div className="oh-history-producer">
+                            {admin && `${h.producer.name} · `}
                             {whatHappened(h)} · Batch {h.batch.batchNo}
                           </div>
                           <div className="oh-history-by">
@@ -254,7 +292,7 @@ const ProducerHistory = () => {
                         </th>
                         <th scope="col">Event</th>
                         <th scope="col">Product</th>
-                        <th scope="col">Batch</th>
+                        <th scope="col">{admin ? 'Producer · batch' : 'Batch'}</th>
                         <th scope="col">By</th>
                         <th scope="col">Location</th>
                         <th scope="col">Date &amp; time</th>
@@ -278,6 +316,7 @@ const ProducerHistory = () => {
                               <div className="oh-history-cell-code">{h.serial}</div>
                             </td>
                             <td>
+                              {admin && <div className="oh-history-cell-main">{h.producer.name}</div>}
                               <div className="oh-history-cell-code">{h.batch.batchNo}</div>
                             </td>
                             <td>

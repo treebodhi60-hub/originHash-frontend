@@ -40,6 +40,7 @@ const CHAIN_NAV = {
   items: [
     { to: '/admin/chain', label: 'Overview', hint: 'Supply chain overview', icon: 'chain', end: true },
     { to: '/admin/chain/batches', label: 'QR batches', hint: 'Retailer + consumer QR batches', icon: 'batches' },
+    { to: '/admin/chain/history', label: 'History', hint: 'Supply chain history', icon: 'history' },
     { to: '/admin/chain/producers', label: 'Producers', icon: 'producer' },
     { to: '/admin/chain/accounts/distributor', label: 'Distributors', icon: 'distributor' },
     { to: '/admin/chain/accounts/retailer', label: 'Retailers', icon: 'retailer' },
@@ -48,7 +49,11 @@ const CHAIN_NAV = {
 };
 const ADMIN_NAV_BOTTOM = [{ to: '/admin/profile', label: 'Settings / Profile', icon: 'settings' }];
 
-const chainMenuItems = CHAIN_NAV.items.map((i) => ({ to: i.to, label: i.label === 'Overview' ? 'Supply chain' : i.label, icon: <NavIcon name={i.icon} /> }));
+const chainMenuItems = CHAIN_NAV.items.map((i) => ({
+  to: i.to,
+  label: i.label === 'Overview' ? 'Supply chain' : i.label === 'History' ? 'Supply chain history' : i.label,
+  icon: <NavIcon name={i.icon} />,
+}));
 
 const AdminLayout = () => {
   const dispatch = useDispatch();
