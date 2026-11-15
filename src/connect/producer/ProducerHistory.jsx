@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import connectApi from '../api';
 import { byText, bySub, eventOf, whatHappened } from '../historyEvents.jsx';
+import { useAppUser } from '../useChain';
 import { LoadingState, Spinner } from '../../components/Loader.jsx';
 import { MenuButton } from '../../components/MobileMenu.jsx';
 import { CrossIcon, PinIcon, SearchIcon } from '../../components/ScanIcons.jsx';
@@ -16,15 +17,37 @@ import '../../styles/history.css';
 // URL-kept filter / search / page as the verification history.
 //   scope="producer" (default): the producer user's History tab — their company's QR codes.
 //   scope="admin": the OriginHash superadmin's — every producer, with a producer filter.
+//   scope="trade": a distributor's or retailer's History tab — their own scans (and sales).
 
-const filtersFor = (admin) => [
-  ['all', 'All'],
-  ['trade', 'Trade scans'],
-  ['sold', 'Sold'],
-  ['consumer', 'Consumer scans'],
-  ['team', admin ? 'Producer teams' : 'Our team'],
-  ['mine', 'Mine'],
-];
+const filtersFor = (scope, retailer) =>
+  scope === 'trade'
+    ? [
+        ['all', 'All'],
+        ['trade', 'Retailer QR scans'],
+        ...(retailer ? [['sold', 'Sold by me']] : []),
+        ['consumer', 'Consumer QR scans'],
+      ]
+    : [
+        ['all', 'All'],
+        ['trade', 'Trade scans'],
+        ['sold', 'Sold'],
+        ['consumer', 'Consumer scans'],
+        ['team', scope === 'admin' ? 'Producer teams' : 'Our team'],
+        ['mine', 'Mine'],
+      ];
+
+// Own scans read as what the person did, not who did it.
+const tradeEventOf = (h) => {
+  const e = eventOf(h);
+  if (h.action === 'sold' || h.qrType === 'consumer') return { ...e, label: h.action === 'sold' ? 'Sold' : 'Consumer QR scan', short: h.action === 'sold' ? 'Sold' : 'Consumer' };
+  return { ...e, label: 'Retailer QR scan', short: 'Scan', icon: e.icon };
+};
+
+const COPY = {
+  producer: { title: 'Supply chain history', sub: 'Every scan and sale of your company’s QR codes', search: 'Search serial (OH000123), product, batch, retailer or place' },
+  admin: { title: 'Supply chain history', sub: 'Every scan and sale of every producer’s QR codes', search: 'Search serial, product, producer, batch, retailer or place' },
+  trade: { title: 'My supply chain history', sub: 'The retailer and consumer QR codes you scanned', search: 'Search serial (OH000123), product, producer, batch or place' },
+};
 const PAGE_SIZES = [10, 20, 50];
 const DEFAULT_PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 350;
@@ -36,7 +59,12 @@ const positiveInt = (value, fallback) => {
 
 const ProducerHistory = ({ scope = 'producer' }) => {
   const admin = scope === 'admin';
-  const FILTERS = filtersFor(admin);
+  const trade = scope === 'trade';
+  const user = useAppUser();
+  const retailer = user?.partnerRole === 'retailer';
+  const FILTERS = filtersFor(scope, retailer);
+  const copy = trade && retailer ? { ...COPY.trade, sub: 'The QR codes you scanned and the products you marked sold' } : COPY[scope] || COPY.producer;
+  const eventFor = trade ? tradeEventOf : eventOf;
   const { openMenu } = useOutletContext() || {};
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -92,7 +120,7 @@ const ProducerHistory = ({ scope = 'producer' }) => {
     const request = ++requestRef.current;
     setStatus('loading');
     connectApi
-      .get(admin ? '/admin/history' : '/producer/history', {
+      .get(admin ? '/admin/history' : trade ? '/me/supply-history' : '/producer/history', {
         params: { filter, q: q || undefined, page: requestedPage, pageSize, producerId: producerId || undefined },
       })
       .then(({ data }) => {
@@ -104,7 +132,7 @@ const ProducerHistory = ({ scope = 'producer' }) => {
       .catch(() => {
         if (request === requestRef.current) setStatus('failed');
       });
-  }, [admin, filter, q, requestedPage, pageSize, producerId, reloadKey]);
+  }, [admin, trade, filter, q, requestedPage, pageSize, producerId, reloadKey]);
 
   const goToPage = (page) => {
     updateParams({ page }, { keepPage: true });
@@ -115,8 +143,9 @@ const ProducerHistory = ({ scope = 'producer' }) => {
     setQuery('');
     updateParams({ q: '' });
   };
-  // Producers open the unit; the superadmin opens its batch (with all its units).
-  const openUnit = (h) => navigate(admin ? `/admin/chain/batches/${h.batch.id}` : `/producer/units/${h.unitId}`);
+  // Producers open the unit; the superadmin its batch (with all its units); the trade the QR they scanned.
+  const openUnit = (h) =>
+    navigate(admin ? `/admin/chain/batches/${h.batch.id}` : trade ? `/${h.qrType === 'consumer' ? 'cq' : 'rq'}/${h.token}` : `/producer/units/${h.unitId}`);
   const serial = (index) => (paging.page - 1) * pageSize + index + 1;
 
   const loading = status === 'loading';
@@ -162,7 +191,7 @@ const ProducerHistory = ({ scope = 'producer' }) => {
           if (e.key === 'Enter') updateParams({ q: query.trim() });
           if (e.key === 'Escape' && query) clearSearch();
         }}
-        placeholder={admin ? 'Search serial, product, producer, batch, retailer or place' : 'Search serial (OH000123), product, batch, retailer or place'}
+        placeholder={copy.search}
         aria-label="Search history"
         maxLength={100}
         enterKeyHint="search"
@@ -184,7 +213,9 @@ const ProducerHistory = ({ scope = 'producer' }) => {
       </button>
     </>
   ) : filter === 'all' ? (
-    admin
+    trade
+      ? 'Nothing yet. Retailer and consumer QR codes you scan from the Scan tab show up here.'
+      : admin
       ? 'Nothing yet. Scans of producers’ QR codes by distributors, retailers and consumers, and every sale, show up here.'
       : 'Nothing yet. Scans of your QR codes by distributors, retailers and consumers, and every sale, show up here.'
   ) : (
@@ -195,8 +226,8 @@ const ProducerHistory = ({ scope = 'producer' }) => {
     <div className="oh-history-page">
       <div className="oh-history-desk-head oh-only-desktop">
         <div>
-          <h1 className="oh-admin-title">Supply chain history</h1>
-          <p className="oh-admin-subtitle">{admin ? 'Every scan and sale of every producer’s QR codes' : 'Every scan and sale of your company’s QR codes'}</p>
+          <h1 className="oh-admin-title">{copy.title}</h1>
+          <p className="oh-admin-subtitle">{copy.sub}</p>
         </div>
         {searchBox}
       </div>
@@ -214,7 +245,7 @@ const ProducerHistory = ({ scope = 'producer' }) => {
       <div className="oh-result-shell oh-history-shell">
         <header className="oh-result-head oh-history-head">
           {openMenu ? <MenuButton onClick={openMenu} /> : <span className="oh-scan-icon-spacer" />}
-          <h1 className="oh-result-title">Supply chain history</h1>
+          <h1 className="oh-result-title">{copy.title}</h1>
           <span className="oh-scan-icon-spacer" />
         </header>
 
@@ -242,7 +273,7 @@ const ProducerHistory = ({ scope = 'producer' }) => {
                 {/* Phone: cards. */}
                 <ul className="oh-history-list oh-only-mobile">
                   {rows.map((h, index) => {
-                    const e = eventOf(h);
+                    const e = eventFor(h);
                     return (
                       <li key={h.id} className="oh-history-card">
                         <span className={`oh-history-icon ${e.tone}`}>{e.icon}</span>
@@ -252,13 +283,15 @@ const ProducerHistory = ({ scope = 'producer' }) => {
                             {h.product?.name || 'No product'} · {h.serial}
                           </div>
                           <div className="oh-history-producer">
-                            {admin && `${h.producer.name} · `}
-                            {whatHappened(h)} · Batch {h.batch.batchNo}
+                            {(admin || trade) && `${h.producer.name} · `}
+                            {trade ? (h.action === 'sold' ? 'You marked it sold' : `You scanned the ${h.qrType} QR`) : whatHappened(h)} · Batch {h.batch.batchNo}
                           </div>
-                          <div className="oh-history-by">
-                            by {byText(h)}
-                            {bySub(h) && <span className="oh-now-called"> · {bySub(h)}</span>}
-                          </div>
+                          {!trade && (
+                            <div className="oh-history-by">
+                              by {byText(h)}
+                              {bySub(h) && <span className="oh-now-called"> · {bySub(h)}</span>}
+                            </div>
+                          )}
                           <div className="oh-history-meta">
                             {h.location && (
                               <span className="oh-history-loc">
@@ -292,8 +325,8 @@ const ProducerHistory = ({ scope = 'producer' }) => {
                         </th>
                         <th scope="col">Event</th>
                         <th scope="col">Product</th>
-                        <th scope="col">{admin ? 'Producer · batch' : 'Batch'}</th>
-                        <th scope="col">By</th>
+                        <th scope="col">{admin || trade ? 'Producer · batch' : 'Batch'}</th>
+                        {!trade && <th scope="col">By</th>}
                         <th scope="col">Location</th>
                         <th scope="col">Date &amp; time</th>
                         <th scope="col" aria-label="Open" />
@@ -301,7 +334,7 @@ const ProducerHistory = ({ scope = 'producer' }) => {
                     </thead>
                     <tbody>
                       {rows.map((h, index) => {
-                        const e = eventOf(h);
+                        const e = eventFor(h);
                         return (
                           <tr key={h.id} onClick={() => openUnit(h)}>
                             <td className="oh-history-cell-sno">{serial(index)}</td>
@@ -316,13 +349,15 @@ const ProducerHistory = ({ scope = 'producer' }) => {
                               <div className="oh-history-cell-code">{h.serial}</div>
                             </td>
                             <td>
-                              {admin && <div className="oh-history-cell-main">{h.producer.name}</div>}
+                              {(admin || trade) && <div className="oh-history-cell-main">{h.producer.name}</div>}
                               <div className="oh-history-cell-code">{h.batch.batchNo}</div>
                             </td>
-                            <td>
-                              <div className="oh-history-cell-main">{byText(h)}</div>
-                              {bySub(h) && <div className="oh-history-cell-sub">{bySub(h)}</div>}
-                            </td>
+                            {!trade && (
+                              <td>
+                                <div className="oh-history-cell-main">{byText(h)}</div>
+                                {bySub(h) && <div className="oh-history-cell-sub">{bySub(h)}</div>}
+                              </td>
+                            )}
                             <td>
                               {h.location ? (
                                 <>

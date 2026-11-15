@@ -177,10 +177,18 @@ const USER_TYPES = [
 ];
 
 const TYPE_LABELS = { ...Object.fromEntries(USER_TYPES.map((t) => [t.value, t.label])), consumer: "Consumer" };
+// What anyone can pick for themselves: retailer and distributor are supply-chain roles that only
+// OriginHash (or, for retailers, "Become a retailer") gives.
+const SELF_TYPES = [
+  { value: "consumer", label: "Consumer" },
+  { value: "farmer", label: "Farmer" },
+  { value: "supplier", label: "Supplier" },
+];
 
 // Producer users (admin and staff) sign in with a username, have no editable user type (their role
-// comes from their producer), and fall back to the company's address.
-const fieldsFor = (isProducer) => [
+// comes from their producer), and fall back to the company's address. Distributors' and retailers'
+// user type is their supply-chain role, set by OriginHash.
+const fieldsFor = (isProducer, isPartner) => [
   { key: "name", label: "Full name", Icon: UserRound, placeholder: "Nil" },
   ...(isProducer ? [{ key: "username", label: "Username", Icon: AtSign, readOnly: true, lock: "Sign-in" }] : []),
   { key: "mobile", label: "Mobile number", Icon: Phone, readOnly: true, lock: isProducer ? "Set by admin" : "Sign-in" },
@@ -190,7 +198,7 @@ const fieldsFor = (isProducer) => [
     Icon: UsersRound,
     placeholder: "Nil",
     isSelect: true,
-    ...(isProducer ? { readOnly: true, lock: "Set by admin" } : {}),
+    ...(isProducer ? { readOnly: true, lock: "Set by admin" } : isPartner ? { readOnly: true, lock: "Set by OriginHash" } : {}),
   },
   { key: "email", label: "Email", Icon: Mail, placeholder: "Nil" },
   {
@@ -236,11 +244,16 @@ const Profile = () => {
   if (!user) return null;
 
   const isProducer = Boolean(user.producerId);
-  const fields = fieldsFor(isProducer);
+  const isPartner = Boolean(user.partnerRole);
+  const fields = fieldsFor(isProducer, isPartner);
   const roleLabel = producerRoleLabel(user);
+  const partnerLabel =
+    user.partnerRole === "distributor" ? "Distributor" : user.partnerRole === "retailer" ? (user.partnerProducerId ? "Retailer" : "General retailer") : null;
+  // A self-chosen "retailer" / "distributor" from before is not a supply-chain role.
+  const selfType = ["retailer", "distributor"].includes(user.userType) ? null : user.userType;
   const typeText = roleLabel
     ? [roleLabel, producer?.name].filter(Boolean).join(" · ")
-    : TYPE_LABELS[user.userType] || user.userType;
+    : partnerLabel || TYPE_LABELS[selfType] || selfType;
 
   const valueOf = (key) => {
     if (key === "mobile") return user.mobile ? `+91 ${user.mobile}` : "";
@@ -253,7 +266,7 @@ const Profile = () => {
     if (field.readOnly) return;
     setSaveError("");
     setEditingField(field.key);
-    setDraft(valueOf(field.key) || "");
+    setDraft(field.key === "userType" ? selfType || "" : valueOf(field.key) || "");
   };
 
   const cancelEdit = () => {
@@ -332,10 +345,10 @@ const Profile = () => {
           </div>
           <div className="oh-account-stamps">
             <span className="oh-user-code">{userCode(user.id)}</span>
-            {roleLabel ? (
-              <span className="oh-badge">{roleLabel}</span>
+            {roleLabel || partnerLabel ? (
+              <span className={`oh-badge ${user.partnerRole || ''}`}>{roleLabel || partnerLabel}</span>
             ) : (
-              user.userType && <span className={`oh-badge ${user.userType}`}>{typeText}</span>
+              selfType && <span className={`oh-badge ${selfType}`}>{typeText}</span>
             )}
           </div>
           {photoError && (
@@ -377,12 +390,17 @@ const Profile = () => {
                       {field.isSelect ? (
                         <select id={`oh-profile-${field.key}`} value={draft} onChange={(e) => setDraft(e.target.value)} autoFocus>
                           <option value="">Select category</option>
-                          {USER_TYPES.map((t) => (
+                          {SELF_TYPES.map((t) => (
                             <option key={t.value} value={t.value}>
                               {t.label}
                             </option>
                           ))}
                         </select>
+                      ) : null}
+                      {field.isSelect ? (
+                        <p className="oh-account-sub" style={{ margin: "6px 0 0", textAlign: "left" }}>
+                          Retailer or distributor? Those accounts are set up by OriginHash — retailers can register from the menu (“Become a retailer”).
+                        </p>
                       ) : (
                         <input
                           id={`oh-profile-${field.key}`}

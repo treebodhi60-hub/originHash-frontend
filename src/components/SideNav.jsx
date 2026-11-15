@@ -40,7 +40,10 @@ const roleOf = (user) =>
         ? user.producerRole === 'admin'
           ? 'Producer admin'
           : 'Producer staff'
-        : user?.partnerRole || user?.userType || 'Member';
+        : // Retailer / distributor only when OriginHash made them one (partnerRole), not a self-chosen
+          // profile "user type".
+          user?.partnerRole ||
+          (user?.userType && !['retailer', 'distributor'].includes(user.userType) ? user.userType : 'Member');
 
 const SideNav = ({ groups, bottom = [], onLogout, className = '' }) => {
   const asideRef = useRef(null);

@@ -490,15 +490,16 @@ const VerificationHistory = () => {
   );
 };
 
-// Producer users (admin and staff) get their company's supply-chain history instead.
+// Producer users (admin and staff) get their company's supply-chain history instead, and
+// distributors / retailers their own supply-chain scans (and sales).
 const ProducerHistory = lazy(() => import('../connect/producer/ProducerHistory.jsx'));
 
 const History = () => {
   const { user } = useSelector((state) => state.auth);
-  if (user?.producerId) {
+  if (user?.producerId || user?.partnerRole) {
     return (
       <Suspense fallback={<LoadingState label="Loading history…" />}>
-        <ProducerHistory />
+        <ProducerHistory scope={user.producerId ? 'producer' : 'trade'} />
       </Suspense>
     );
   }
