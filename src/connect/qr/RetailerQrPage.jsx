@@ -187,7 +187,7 @@ const RetailerQrPage = () => {
         </p>
         <dl className="cx-detail-box">
           <div>
-            <dt>{info.soldBy?.type === 'admin' ? 'Sold by' : 'Retailer'}</dt>
+            <dt>{info.soldBy?.type === 'retailer' ? 'Retailer' : 'Sold by'}</dt>
             <dd>
               {info.soldBy?.name}
               {info.soldBy?.city ? `, ${info.soldBy.city}` : ''}
@@ -235,7 +235,7 @@ const RetailerQrPage = () => {
       </div>
       <div className="cx-hero-icon">{info.product?.image ? <img src={info.product.image.url} alt="" style={{ width: 76, height: 76, borderRadius: '50%', objectFit: 'cover' }} /> : sold ? <Package size={32} /> : <Store size={32} />}</div>
       <p className="cx-phone-title" style={{ margin: 0, fontWeight: 600 }}>
-        {sold ? 'Already sold' : info.canSell ? 'Scan by authorised retailer' : 'Retailer QR scanned'}
+        {sold ? 'Already sold' : !info.canSell ? 'Retailer QR scanned' : info.isOwnProducer ? 'Your product' : 'Scan by authorised retailer'}
       </p>
       {details}
 
@@ -250,7 +250,7 @@ const RetailerQrPage = () => {
           <CheckCircle2 size={26} />
           <div>
             <strong>
-              Sold {fmtDate(info.soldAt)} by {info.soldBy?.name || 'a retailer'}
+              Sold {fmtDate(info.soldAt)} by {info.soldBy?.type === 'producer' ? `${info.soldBy.name} (producer)` : info.soldBy?.name || 'a retailer'}
             </strong>
             <span>The consumer QR is active. A product can be marked sold only once.</span>
           </div>
@@ -266,13 +266,13 @@ const RetailerQrPage = () => {
       )}
       {!sold && !info.canSell && (
         <p className="cx-small">
-          {info.sellBlocked === 'otherProducer'
-            ? `Your scan is recorded, but only retailers of ${info.producer.name} can mark this product sold.`
+          {info.sellBlocked === 'otherProducer' && info.viewer.role === 'producer'
+            ? `This is ${info.producer.name}'s product. You can scan it like a distributor; only ${info.producer.name} or its retailers can mark it sold.`
+            : info.sellBlocked === 'otherProducer'
+            ? `Your scan is recorded, but only ${info.producer.name} or its retailers can mark this product sold.`
             : info.sellBlocked === 'noProducer'
               ? 'Your retailer account isn’t associated with a producer yet, so you can’t mark products sold. Contact OriginHash.'
-              : info.viewer.role === 'producer'
-                ? `Producers can scan the retailer QR. Only a retailer of ${info.producer.name} (or OriginHash) can mark it sold.`
-                : `As a ${roleLabel(info.viewer.role).toLowerCase()} you can scan this QR. Only a retailer of ${info.producer.name} can mark it sold.`}
+              : `As a ${roleLabel(info.viewer.role).toLowerCase()} you can scan this QR. Only ${info.producer.name} or its retailers can mark it sold.`}
         </p>
       )}
 

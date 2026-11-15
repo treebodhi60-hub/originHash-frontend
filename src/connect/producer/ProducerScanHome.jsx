@@ -63,7 +63,7 @@ const ProducerScanHome = () => {
           </span>
         </div>
         <p className="oh-home-hero-sub">
-          Scan a retailer or consumer QR on one of your products to see where it is in the supply chain, who handled it, and to add warranty info.
+          Scan the retailer QR on one of your products to see where it is in the supply chain and who handled it, mark it sold, or add warranty info.
         </p>
         <Link to={paths.camera} className="oh-home-verify-btn">
           <ShieldIcon size={18} />

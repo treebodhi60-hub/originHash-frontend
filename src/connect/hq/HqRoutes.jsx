@@ -59,7 +59,10 @@ const Overview = () => {
           <li>Add distributors and retailers by mobile number (they sign in with OTP as usual), or approve retailers who apply themselves. Each retailer is associated with one producer.</li>
           <li>The producer adds products and requests a batch; allot it with a max discount and an expiry date.</li>
           <li>Print the retailer + consumer QR pairs. Distributors and retailers scan the retailer QR along the way.</li>
-          <li>A retailer of that producer (or you) presses Sold once; that unlocks the consumer QR with its unique coupon. Other producers&apos; retailers can only scan it.</li>
+          <li>
+            The producer itself, one of its retailers, or you presses Sold once; that unlocks the consumer QR with its unique coupon. Other producers and their retailers can only
+            scan it, like a distributor.
+          </li>
         </ol>
       </Card>
     </div>

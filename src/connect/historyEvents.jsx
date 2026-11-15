@@ -10,6 +10,8 @@ export const eventOf = (h, size = 18) => {
   if (h.qrType === 'consumer') return { label: 'Consumer scan', short: 'Consumer', tone: 'info', homeTone: 'neutral', icon: <UserIcon size={size} /> };
   if (h.actorType === 'retailer') return { label: 'Retailer scan', short: 'Retailer', tone: 'muted', homeTone: 'muted', icon: <PinIcon size={size} /> };
   if (h.actorType === 'distributor') return { label: 'Distributor scan', short: 'Distrib.', tone: 'muted', homeTone: 'muted', icon: <PinIcon size={size} /> };
+  // Another producer scanning the QR counts as the trade (distributor-level access).
+  if (h.actorType === 'producer' && h.ownTeam === false) return { label: 'Producer scan', short: 'Producer', tone: 'muted', homeTone: 'muted', icon: <PinIcon size={size} /> };
   if (h.actorType === 'producer') return { label: 'Team scan', short: 'Team', tone: 'muted', homeTone: 'muted', icon: <ShieldIcon size={size} /> };
   if (h.actorType === 'admin') return { label: 'OriginHash scan', short: 'Admin', tone: 'muted', homeTone: 'muted', icon: <ShieldIcon size={size} /> };
   return { label: 'Retailer QR opened', short: 'Opened', tone: 'muted', homeTone: 'muted', icon: <QrIcon size={size} /> };
@@ -24,6 +26,6 @@ export const whatHappened = (h) => {
 export const byText = (h) => (h.isYou ? 'You' : h.by?.name || roleLabel(h.actorType));
 
 export const bySub = (h) => {
-  const role = h.actorType === 'producer' ? 'Your team' : roleLabel(h.actorType);
+  const role = h.actorType === 'producer' ? (h.ownTeam === false ? 'Another producer' : 'Producer team') : roleLabel(h.actorType);
   return [role !== byText(h) ? role : null, h.by?.city].filter(Boolean).join(' · ');
 };
