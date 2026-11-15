@@ -292,35 +292,15 @@ export const ProducerBatch = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [productId, setProductId] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
 
-  const load = useCallback(() => {
-    Promise.all([connectApi.get(`/producer/batches/${id}`), connectApi.get('/producer/products')])
-      .then(([b, p]) => {
-        setData(b.data);
-        setProducts(p.data.products);
-        setProductId(b.data.batch.productId ? String(b.data.batch.productId) : '');
-      })
+  // The batch's product is fixed when OriginHash allots it, so there's nothing to change here.
+  useEffect(() => {
+    connectApi
+      .get(`/producer/batches/${id}`)
+      .then(({ data: d }) => setData(d))
       .catch((err) => setError(errorText(err, 'Could not load the batch.')));
   }, [id]);
-  useEffect(load, [load]);
-
-  const saveProduct = async () => {
-    setSaving(true);
-    try {
-      const { data: d } = await connectApi.put(`/producer/batches/${id}`, { productId: productId || null });
-      setNotice(d.message);
-      load();
-    } catch (err) {
-      setError(errorText(err));
-    } finally {
-      setSaving(false);
-    }
-  };
 
   if (error && !data) return <ErrorNote>{error}</ErrorNote>;
   if (!data) return <Loading />;
@@ -330,40 +310,20 @@ export const ProducerBatch = () => {
       <PageHead
         eyebrow={<Link to="/producer/batches">QR batches</Link>}
         title={`Batch ${batch.batchNo}`}
-        subtitle={batch.productName || 'No product linked yet'}
+        subtitle={batch.productName || 'No product linked'}
         actions={<DownloadButtons base={`/producer/batches/${batch.id}`} batchNo={batch.batchNo} />}
       />
-      {notice && <Notice tone="success">{notice}</Notice>}
       <ErrorNote>{error}</ErrorNote>
-      {!batch.productId && <Notice tone="warning">Link this batch to a product so its QR codes show the product to retailers and consumers.</Notice>}
+      {!batch.productId && <Notice tone="warning">This batch has no product, so its QR codes don’t show one. Contact OriginHash to link it.</Notice>}
       <div className="cx-stats">
         <Stat label="Units" value={num(batch.quantity)} note={`${num(batch.quantity * 2)} QR codes`} />
         <Stat label="Sold" value={num(batch.sold)} note={`${num(batch.quantity - batch.sold)} still in the supply chain`} />
         <Stat label="Coupons claimed" value={num(batch.couponsClaimed)} note={discountText(batch.maxDiscountPercent)} />
         <Stat label="Consumer scans" value={num(batch.consumerScans)} note={`${num(batch.tradeScans)} trade scans`} />
       </div>
-      <div className="cx-grid-2">
-        <Card title="Batch">
-          <BatchFacts batch={batch} />
-        </Card>
-        <Card title="Product shown on these QR codes">
-          <div className="cx-stack" style={{ gap: 10 }}>
-            <select className="cx-input" value={productId} onChange={(e) => setProductId(e.target.value)} aria-label="Product">
-              <option value="">No product</option>
-              {products.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            <div>
-              <Button busy={saving} onClick={saveProduct} disabled={productId === (batch.productId ? String(batch.productId) : '')}>
-                Save product
-              </Button>
-            </div>
-          </div>
-        </Card>
-      </div>
+      <Card title="Batch">
+        <BatchFacts batch={batch} />
+      </Card>
       <Card title="Units" flush>
         <UnitsTable units={units} qrBase="/producer/units" onOpen={(u) => navigate(`/producer/units/${u.id}`)} />
       </Card>

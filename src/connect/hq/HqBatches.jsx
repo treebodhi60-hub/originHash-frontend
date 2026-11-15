@@ -34,10 +34,13 @@ const BatchFields = ({ form, setForm, error, products }) => {
           setForm={setForm}
           name="productId"
           label="Product"
+          required
           wide
-          placeholder="Producer assigns later"
-          options={products.map((p) => ({ value: String(p.id), label: p.name }))}
-          error={fe('productId')}
+          placeholder="Choose the product"
+          options={products
+            .filter((p) => p.isActive || String(p.id) === form.productId)
+            .map((p) => ({ value: String(p.id), label: p.isActive ? p.name : `${p.name} (inactive)` }))}
+          error={fe('productId') || (!products.length ? 'This producer has no products yet.' : null)}
         />
       )}
       <Input form={form} setForm={setForm} name="notes" label="Notes" wide />
