@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import connectApi, { CHAIN_ADMIN, errorText } from '../api';
-import { Badge, Button, Card, Empty, ErrorNote, Input, Loading, Modal, Notice, PageHead, Select, Stat, Tabs, fmtDate, fmtDateTime, num, useFormError } from '../ui.jsx';
+import { Badge, Button, Card, Empty, ErrorNote, Field, Input, Loading, Modal, Notice, PageHead, Select, Stat, Tabs, fmtDate, fmtDateTime, num, useFormError } from '../ui.jsx';
 import { BatchFacts, DownloadButtons, UnitsTable, discountText } from '../shared.jsx';
 import { PRINT_DEFAULTS, PairPrintLayout } from '../printLayout.jsx';
 import { SoldAccessCard } from '../retailers.jsx';
@@ -11,7 +11,8 @@ import { SoldAccessCard } from '../retailers.jsx';
 // unique coupon per unit), and every batch's units.
 
 // The batch fields: quantity, max discount (0 = no discount), expiry, batch number, product.
-const BatchFields = ({ form, setForm, error, products }) => {
+// `fixedProduct` (a producer's request): the product they chose, shown but not changeable.
+const BatchFields = ({ form, setForm, error, products, fixedProduct }) => {
   const fe = (f) => (error.field === f ? error.message : null);
   return (
     <div className="cx-form two">
@@ -30,7 +31,11 @@ const BatchFields = ({ form, setForm, error, products }) => {
       />
       <Input form={form} setForm={setForm} name="expiryDate" label="Expiry date" type="date" required hint="Coupons are valid until this date." error={fe('expiryDate')} />
       <Input form={form} setForm={setForm} name="batchNo" label="Batch number" placeholder="Auto if empty" error={fe('batchNo')} />
-      {products && (
+      {fixedProduct ? (
+        <Field label="Product" wide hint="Chosen by the producer in their request; it can’t be changed here.">
+          {(id) => <input id={id} value={fixedProduct} readOnly disabled />}
+        </Field>
+      ) : products && (
         <Select
           form={form}
           setForm={setForm}
@@ -171,7 +176,13 @@ const RequestModal = ({ request, onClose, onDone }) => {
           Requested by {request.requestedBy || 'the producer'} on {fmtDateTime(request.createdAt)}. Check the details below and adjust them if needed.
         </p>
         {request.note && <Notice>“{request.note}”</Notice>}
-        <BatchFields form={form} setForm={setForm} error={error} products={products || []} />
+        <BatchFields
+          form={form}
+          setForm={setForm}
+          error={error}
+          products={products || []}
+          fixedProduct={request.productId ? request.productName || products?.find((p) => p.id === request.productId)?.name || `Product #${request.productId}` : null}
+        />
         <Input form={form} setForm={setForm} name="decisionNote" label="Message to the producer" wide hint="Shown with the request (e.g. why it was rejected)." />
         {error.message && !['quantity', 'maxDiscountPercent', 'expiryDate', 'batchNo', 'productId'].includes(error.field) && <ErrorNote>{error.message}</ErrorNote>}
       </div>
