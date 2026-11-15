@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { FileSpreadsheet, Plus } from 'lucide-react';
 import connectApi, { errorText } from '../api';
 import { isProducerAdmin, useAppUser } from '../useChain';
-import { Button, Card, Empty, ErrorNote, Input, Loading, Modal, Notice, PageHead, fmtDate, num, useFormError } from '../ui.jsx';
+import { Button, Card, Empty, ErrorNote, Field, FileUpload, Input, Loading, Modal, Notice, PageHead, fmtDate, num, useFormError } from '../ui.jsx';
 import { BulkUploadModal } from '../retailers.jsx';
 
 // Producer: their retailers — people who may mark the producer's products sold. The producer admin
@@ -17,6 +17,7 @@ const RetailerForm = ({ retailer, onClose, onSaved }) => {
       ? { name: retailer.name || '', mobile: retailer.mobile || '', email: retailer.email || '', businessName: retailer.businessName || '', city: retailer.city || '', address: retailer.address || '' }
       : BLANK
   );
+  const [identityDoc, setIdentityDoc] = useState(retailer?.identityDoc || null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useFormError();
   const fe = (f) => (error.field === f ? error.message : null);
@@ -24,7 +25,8 @@ const RetailerForm = ({ retailer, onClose, onSaved }) => {
     setBusy(true);
     setError(null);
     try {
-      const { data } = retailer ? await connectApi.put(`/producer/retailers/${retailer.id}`, form) : await connectApi.post('/producer/retailers', form);
+      const body = { ...form, identityDoc };
+      const { data } = retailer ? await connectApi.put(`/producer/retailers/${retailer.id}`, body) : await connectApi.post('/producer/retailers', body);
       onSaved(data);
     } catch (err) {
       setError(err, 'Could not save the retailer.');
@@ -64,6 +66,9 @@ const RetailerForm = ({ retailer, onClose, onSaved }) => {
         <Input form={form} setForm={setForm} name="businessName" label="Business / shop name" wide />
         <Input form={form} setForm={setForm} name="city" label="City" />
         <Input form={form} setForm={setForm} name="address" label="Address" />
+        <Field label="Identity document" hint="Optional: an image or PDF of their ID, up to 10 MB." error={fe('identityDoc')} wide>
+          <FileUpload endpoint="/producer/uploads" folder="identity" value={identityDoc} onChange={setIdentityDoc} label="Upload ID (image or PDF)" />
+        </Field>
       </div>
       {error.message && !error.field && <ErrorNote>{error.message}</ErrorNote>}
     </Modal>
@@ -139,6 +144,7 @@ export const ProducerRetailers = () => {
                   <th>Retailer</th>
                   <th>Mobile</th>
                   <th>City</th>
+                  <th>ID</th>
                   <th className="num">Sold</th>
                   <th>Added</th>
                   {isAdmin && <th />}
@@ -155,6 +161,15 @@ export const ProducerRetailers = () => {
                     </td>
                     <td className="cx-mono">{r.mobile}</td>
                     <td>{r.city || '—'}</td>
+                    <td>
+                      {r.identityDoc?.url ? (
+                        <a className="cx-link" href={r.identityDoc.url} target="_blank" rel="noreferrer">
+                          View
+                        </a>
+                      ) : (
+                        <span className="cx-muted">—</span>
+                      )}
+                    </td>
                     <td className="num">{num(r.sold)}</td>
                     <td>{fmtDate(r.createdAt)}</td>
                     {isAdmin && (

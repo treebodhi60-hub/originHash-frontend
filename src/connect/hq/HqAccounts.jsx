@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { FileSpreadsheet, Plus } from 'lucide-react';
 import connectApi, { errorText } from '../api';
 import { BulkUploadModal } from '../retailers.jsx';
-import { Badge, Button, Card, Empty, ErrorNote, Input, Loading, Modal, Notice, PageHead, Select, Tabs, fmtDate, useFormError } from '../ui.jsx';
+import { Badge, Button, Card, Empty, ErrorNote, Field, FileUpload, Input, Loading, Modal, Notice, PageHead, Select, Tabs, fmtDate, useFormError } from '../ui.jsx';
 
 // Superadmin: distributors, retailers and consumers (one page per role). They log in with their
 // mobile and an OTP; consumers can also sign themselves up.
@@ -37,6 +37,7 @@ const AccountForm = ({ role, account, producers, onClose, onSaved }) => {
       ? { ...account, producerId: account.producerId ? String(account.producerId) : '' }
       : { mobile: '', name: '', businessName: '', email: '', city: '', address: '', producerId: '' }
   );
+  const [identityDoc, setIdentityDoc] = useState(account?.identityDoc?.ref ? account.identityDoc : null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useFormError();
   const fe = (f) => (error.field === f ? error.message : null);
@@ -44,7 +45,7 @@ const AccountForm = ({ role, account, producers, onClose, onSaved }) => {
     setBusy(true);
     setError(null);
     try {
-      const body = { ...form, role };
+      const body = { ...form, role, ...(role === 'retailer' ? { identityDoc } : {}) };
       const { data } = account ? await connectApi.put(`/admin/accounts/${account.id}`, body) : await connectApi.post('/admin/accounts', body);
       onSaved(data);
     } catch (err) {
@@ -87,11 +88,26 @@ const AccountForm = ({ role, account, producers, onClose, onSaved }) => {
         )}
         <Input form={form} setForm={setForm} name="city" label="City" />
         <Input form={form} setForm={setForm} name="address" label="Address" wide />
+        {role === 'retailer' && (
+          <Field label="Identity document" hint="Optional: an image or PDF of their ID, up to 10 MB." error={fe('identityDoc')} wide>
+            <FileUpload endpoint="/admin/uploads" folder="identity" value={identityDoc} onChange={setIdentityDoc} label="Upload ID (image or PDF)" />
+          </Field>
+        )}
       </div>
       {error.message && !error.field && <ErrorNote>{error.message}</ErrorNote>}
     </Modal>
   );
 };
+
+// A link to someone's identity document, or a dash.
+const IdLink = ({ doc }) =>
+  doc?.url ? (
+    <a className="cx-link" href={doc.url} target="_blank" rel="noreferrer">
+      View ID
+    </a>
+  ) : (
+    <span className="cx-muted">—</span>
+  );
 
 // Approving a retailer's application: confirm (or change) the producer and their shop details.
 const ApproveModal = ({ application, producers, onClose, onDone }) => {
@@ -216,6 +232,7 @@ const RetailerRequests = ({ producers, onChanged }) => {
                   <th>Mobile</th>
                   <th>City</th>
                   <th>Sells for</th>
+                  <th>ID</th>
                   <th>Applied</th>
                   <th>{status === 'pending' ? 'Note' : 'Decision'}</th>
                   {status === 'pending' && <th />}
@@ -238,6 +255,9 @@ const RetailerRequests = ({ producers, onChanged }) => {
                       </div>
                     </td>
                     <td>{a.producer?.name || '—'}</td>
+                    <td>
+                      <IdLink doc={a.user?.identityDoc} />
+                    </td>
                     <td>{fmtDate(a.createdAt)}</td>
                     <td className="cx-muted">{status === 'pending' ? a.note || '—' : `${fmtDate(a.decidedAt)}${a.decisionNote ? ` · ${a.decisionNote}` : ''}`}</td>
                     {status === 'pending' && (
@@ -402,7 +422,16 @@ export const HqAccounts = () => {
                       {fmtDate(a.createdAt)}
                     </td>
                     {role === 'retailer' ? (
-                      <td>{a.producerName || <Badge>General</Badge>}</td>
+                      <td>
+                        <div className="cx-cell-main">
+                          <strong>{a.producerName || <Badge>General</Badge>}</strong>
+                          {a.identityDoc?.url && (
+                            <a className="cx-link" href={a.identityDoc.url} target="_blank" rel="noreferrer" style={{ fontSize: '0.78rem' }}>
+                              View ID
+                            </a>
+                          )}
+                        </div>
+                      </td>
                     ) : (
                       <td style={{ textTransform: 'capitalize' }}>{a.userType || '—'}</td>
                     )}

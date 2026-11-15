@@ -5,7 +5,7 @@ import { ChevronRight, MessageCircle, Package } from 'lucide-react';
 import connectApi, { errorText } from './api';
 import { useAppUser } from './useChain';
 import { fetchMe } from '../store/authSlice';
-import { Button, Card, Empty, ErrorNote, Input, Loading, Notice, PageHead, RoleBadge, Select, fmtDateTime, placeText, useFormError, usePoll } from './ui.jsx';
+import { Button, Card, Empty, ErrorNote, Field, FileUpload, Input, Loading, Notice, PageHead, RoleBadge, Select, fmtDateTime, placeText, useFormError, usePoll } from './ui.jsx';
 import { Conversation } from './producer/ProducerChats.jsx';
 
 // Supply-chain pages for distributors, retailers and consumers, inside the app's normal user layout:
@@ -179,6 +179,7 @@ const RetailerAccount = () => {
   const dispatch = useDispatch();
   const [data, setData] = useState(null);
   const [form, setForm] = useState(RETAILER_BLANK);
+  const [identityDoc, setIdentityDoc] = useState(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
   const [loadError, setLoadError] = useState('');
@@ -216,7 +217,7 @@ const RetailerAccount = () => {
     setBusy(true);
     setError(null);
     try {
-      const { data: d } = await connectApi.post('/me/retailer-application', form);
+      const { data: d } = await connectApi.post('/me/retailer-application', { ...form, identityDoc });
       setNotice(d.message);
       load();
     } catch (err) {
@@ -303,6 +304,19 @@ const RetailerAccount = () => {
                 options={data.producers.map((p) => ({ value: String(p.id), label: p.name }))}
                 error={fe('producerId')}
               />
+              <Field
+                label="Identity document"
+                required={!data.identityDoc}
+                wide
+                hint={
+                  data.identityDoc && !identityDoc
+                    ? `You already gave ${data.identityDoc.name || 'an ID document'}. Upload a new one only to replace it.`
+                    : 'A photo or PDF of your ID (Aadhaar, PAN, driving licence or shop licence), up to 10 MB. Only OriginHash and the producer you’re linked with can see it.'
+                }
+                error={fe('identityDoc')}
+              >
+                <FileUpload endpoint="/me/identity" folder="identity" value={identityDoc} onChange={setIdentityDoc} label="Upload ID (image or PDF)" />
+              </Field>
               <Input form={form} setForm={setForm} name="note" label="Anything else OriginHash should know" type="textarea" wide hint="e.g. GST number, the brands you sell." />
             </div>
             <p className="cx-small cx-muted">Your mobile number (+91 {user?.mobile}) is your login.</p>
