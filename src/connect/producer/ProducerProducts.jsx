@@ -68,7 +68,7 @@ export const ProducerProducts = () => {
                     <td>{p.category || '—'}</td>
                     <td>{p.nablCertificate ? <Badge tone="success">Uploaded</Badge> : <Badge>None</Badge>}</td>
                     <td>{p.images.length}</td>
-                    <td>{p.isActive ? <Badge tone="success">Active</Badge> : <Badge>Hidden</Badge>}</td>
+                    <td>{p.isActive ? <Badge tone="success">Active</Badge> : <Badge>Inactive</Badge>}</td>
                     <td>{fmtDate(p.updatedAt)}</td>
                   </tr>
                 ))}
@@ -136,6 +136,8 @@ export const ProductForm = () => {
   const [certs, setCerts] = useState([]);
   const [warrantyDocs, setWarrantyDocs] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [toggling, setToggling] = useState(false);
+  const [activeNote, setActiveNote] = useState('');
   const [saved, setSaved] = useState('');
   const [error, setError] = useFormError();
   const fe = (f) => (error.field === f ? error.message : null);
@@ -173,6 +175,22 @@ export const ProductForm = () => {
       setError(err, 'Could not save the product.');
     } finally {
       setBusy(false);
+    }
+  };
+
+  // Existing product: the Active switch saves straight away (nothing else on the page is saved).
+  const setActive = async (active) => {
+    setToggling(true);
+    setError(null);
+    setActiveNote('');
+    try {
+      const { data } = await connectApi.patch(`/producer/products/${id}/active`, { active });
+      setForm((f) => ({ ...f, isActive: data.product.isActive }));
+      setActiveNote(data.message);
+    } catch (err) {
+      setError(err, 'Could not change the product.');
+    } finally {
+      setToggling(false);
     }
   };
 
@@ -216,7 +234,22 @@ export const ProductForm = () => {
         </div>
       </Card>
       <Card>
-        <Toggle checked={form.isActive} onChange={(v) => setForm({ ...form, isActive: v })} label="Active" description="Hidden products can't be chosen for new batches." />
+        <Toggle
+          checked={form.isActive}
+          onChange={isNew ? (v) => setForm({ ...form, isActive: v }) : setActive}
+          disabled={toggling}
+          label="Active"
+          description={
+            isNew
+              ? "Inactive products can't be chosen for new QR batch requests."
+              : "Inactive products can't be chosen for new QR batch requests. Saved as soon as you switch it."
+          }
+        />
+        {activeNote && (
+          <div style={{ marginTop: 12 }}>
+            <Notice tone="success">{activeNote}</Notice>
+          </div>
+        )}
       </Card>
       {error.message && !error.field && <ErrorNote>{error.message}</ErrorNote>}
       <div className="cx-page-actions">
