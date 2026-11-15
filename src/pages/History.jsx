@@ -494,8 +494,24 @@ const VerificationHistory = () => {
 // distributors / retailers their own supply-chain scans (and sales).
 const ProducerHistory = lazy(() => import('../connect/producer/ProducerHistory.jsx'));
 
+// Consumers: their supply-chain products by default, and their sticker verifications one tap away.
+const ConsumerHistorySwitch = ({ view, onView }) => (
+  <div className="oh-history-filters oh-history-switch" role="tablist" aria-label="Which history">
+    {[
+      ['products', 'My products'],
+      ['stickers', 'Sticker verifications'],
+    ].map(([key, label]) => (
+      <button key={key} type="button" role="tab" aria-selected={view === key} className={`oh-history-chip ${view === key ? 'active' : ''}`} onClick={() => onView(key)}>
+        {label}
+      </button>
+    ))}
+  </div>
+);
+
 const History = () => {
   const { user } = useSelector((state) => state.auth);
+  const [searchParams, setSearchParams] = useSearchParams();
+  if (user?.isAdmin) return <VerificationHistory />;
   if (user?.producerId || user?.partnerRole) {
     return (
       <Suspense fallback={<LoadingState label="Loading history…" />}>
@@ -503,7 +519,20 @@ const History = () => {
       </Suspense>
     );
   }
-  return <VerificationHistory />;
+  const view = searchParams.get('view') === 'stickers' ? 'stickers' : 'products';
+  const switchView = (next) => setSearchParams(next === 'stickers' ? { view: 'stickers' } : {}, { replace: true });
+  return (
+    <>
+      <ConsumerHistorySwitch view={view} onView={switchView} />
+      {view === 'stickers' ? (
+        <VerificationHistory />
+      ) : (
+        <Suspense fallback={<LoadingState label="Loading history…" />}>
+          <ProducerHistory scope="consumer" />
+        </Suspense>
+      )}
+    </>
+  );
 };
 
 export default History;

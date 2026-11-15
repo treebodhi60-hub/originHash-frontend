@@ -11,6 +11,7 @@ import { formatCoords, formatDateTimeShort } from '../../utils/format';
 import '../../styles/app-shell.css';
 import '../../styles/scan.css';
 import '../../styles/history.css';
+import '../../styles/home.css';
 
 // Supply chain history: everything that happened to retailer / consumer QR codes, newest first —
 // distributor / retailer scans, sales, consumer scans and producer teams' scans. Same look and
@@ -18,9 +19,12 @@ import '../../styles/history.css';
 //   scope="producer" (default): the producer user's History tab — their company's QR codes.
 //   scope="admin": the OriginHash superadmin's — every producer, with a producer filter.
 //   scope="trade": a distributor's or retailer's History tab — their own scans (and sales).
+//   scope="consumer": a consumer's History tab — the products they checked (consumer QR scans).
 
 const filtersFor = (scope, retailer) =>
-  scope === 'trade'
+  scope === 'consumer'
+    ? [['all', 'All']]
+    : scope === 'trade'
     ? [
         ['all', 'All'],
         ['trade', 'Retailer QR scans'],
@@ -47,7 +51,30 @@ const COPY = {
   producer: { title: 'Supply chain history', sub: 'Every scan and sale of your company’s QR codes', search: 'Search serial (OH000123), product, batch, retailer or place' },
   admin: { title: 'Supply chain history', sub: 'Every scan and sale of every producer’s QR codes', search: 'Search serial, product, producer, batch, retailer or place' },
   trade: { title: 'My supply chain history', sub: 'The retailer and consumer QR codes you scanned', search: 'Search serial (OH000123), product, producer, batch or place' },
+  consumer: {
+    title: 'My product history',
+    sub: 'Products you checked by scanning their consumer QR. Open one for its details, coupon, warranty and chat.',
+    search: 'Search product, brand, serial or place',
+  },
 };
+
+// A consumer's own scan: the product they checked.
+const consumerEventOf = (h) => ({ ...eventOf(h), label: 'Product checked', short: 'Checked' });
+
+// The totals above an own history (GET /me/supply-history → summary).
+const summaryTiles = (scope, retailer, s) =>
+  scope === 'consumer'
+    ? [
+        ['Products checked', s.products],
+        ['Brands', s.brands],
+        ['Coupons claimed', s.coupons],
+      ]
+    : [
+        ['Scans', s.scans],
+        ['Products', s.products],
+        ['Brands', s.brands],
+        ...(retailer ? [['Sold by me', s.sold]] : []),
+      ];
 const PAGE_SIZES = [10, 20, 50];
 const DEFAULT_PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 350;
@@ -59,12 +86,16 @@ const positiveInt = (value, fallback) => {
 
 const ProducerHistory = ({ scope = 'producer' }) => {
   const admin = scope === 'admin';
-  const trade = scope === 'trade';
+  const consumerScope = scope === 'consumer';
+  // `trade`: someone's own history (a distributor's, retailer's or consumer's), not a producer's.
+  const trade = scope === 'trade' || consumerScope;
   const user = useAppUser();
   const retailer = user?.partnerRole === 'retailer';
   const FILTERS = filtersFor(scope, retailer);
-  const copy = trade && retailer ? { ...COPY.trade, sub: 'The QR codes you scanned and the products you marked sold' } : COPY[scope] || COPY.producer;
-  const eventFor = trade ? tradeEventOf : eventOf;
+  const copy =
+    scope === 'trade' && retailer ? { ...COPY.trade, sub: 'The QR codes you scanned and the products you marked sold' } : COPY[scope] || COPY.producer;
+  const eventFor = consumerScope ? consumerEventOf : trade ? tradeEventOf : eventOf;
+  const [summary, setSummary] = useState(null);
   const { openMenu } = useOutletContext() || {};
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -127,6 +158,7 @@ const ProducerHistory = ({ scope = 'producer' }) => {
         if (request !== requestRef.current) return;
         setRows(data.history);
         setPaging({ page: data.page, total: data.total, totalPages: data.totalPages });
+        if (data.summary) setSummary(data.summary);
         setStatus('ready');
       })
       .catch(() => {
@@ -153,7 +185,19 @@ const ProducerHistory = ({ scope = 'producer' }) => {
   const refreshing = loading && rows.length > 0;
   const showResults = rows.length > 0 && status !== 'failed';
 
-  const filterChips = (
+  // Own histories: the person's supply-chain totals above the list.
+  const summaryRow = trade && summary && (
+    <div className="cx-history-summary">
+      {summaryTiles(scope, retailer, summary).map(([label, value]) => (
+        <div key={label} className="oh-home-stat plain">
+          <div className="oh-home-stat-label">{label}</div>
+          <div className="oh-home-stat-value">{Number(value || 0).toLocaleString('en-IN')}</div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const filterChips = FILTERS.length > 1 && (
     <div className="oh-history-filters" role="group" aria-label="Filter history">
       {FILTERS.map(([key, label]) => (
         <button key={key} type="button" className={`oh-history-chip ${filter === key ? 'active' : ''}`} aria-pressed={filter === key} onClick={() => updateParams({ filter: key })}>
@@ -213,7 +257,9 @@ const ProducerHistory = ({ scope = 'producer' }) => {
       </button>
     </>
   ) : filter === 'all' ? (
-    trade
+    consumerScope
+      ? 'Nothing yet. Scan the consumer QR on a product you bought (from the Scan tab) to check it — it shows up here.'
+      : trade
       ? 'Nothing yet. Retailer and consumer QR codes you scan from the Scan tab show up here.'
       : admin
       ? 'Nothing yet. Scans of producers’ QR codes by distributors, retailers and consumers, and every sale, show up here.'
@@ -231,6 +277,7 @@ const ProducerHistory = ({ scope = 'producer' }) => {
         </div>
         {searchBox}
       </div>
+      <div className="oh-only-desktop">{summaryRow}</div>
       <div className="oh-history-desk-toolbar oh-only-desktop">
         {filterChips}
         {producerPicker}
@@ -251,6 +298,7 @@ const ProducerHistory = ({ scope = 'producer' }) => {
 
         <div className="oh-result-body oh-history-body">
           <div className="oh-only-mobile">
+            {summaryRow}
             {searchBox}
             {producerPicker}
             {filterChips}
@@ -284,7 +332,7 @@ const ProducerHistory = ({ scope = 'producer' }) => {
                           </div>
                           <div className="oh-history-producer">
                             {(admin || trade) && `${h.producer.name} · `}
-                            {trade ? (h.action === 'sold' ? 'You marked it sold' : `You scanned the ${h.qrType} QR`) : whatHappened(h)} · Batch {h.batch.batchNo}
+                            {consumerScope ? 'You checked this product' : trade ? (h.action === 'sold' ? 'You marked it sold' : `You scanned the ${h.qrType} QR`) : whatHappened(h)} · Batch {h.batch.batchNo}
                           </div>
                           {!trade && (
                             <div className="oh-history-by">

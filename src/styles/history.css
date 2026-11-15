@@ -1090,3 +1090,15 @@
   font-size: 0.78rem;
   color: var(--oh-text-muted);
 }
+
+/* Consumers: switch between their supply-chain products and sticker verifications. */
+.oh-history-switch {
+  margin: 0 0 18px;
+}
+
+@media (max-width: 1023px) {
+  .oh-history-switch {
+    margin: 4px 0 12px;
+    padding: 0 2px;
+  }
+}

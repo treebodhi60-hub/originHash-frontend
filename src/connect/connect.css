@@ -578,6 +578,27 @@
   opacity: 0.6;
 }
 
+/* Own supply chain history: the person's totals above the list (home-page stat tiles). */
+.cx-history-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.cx-history-summary .oh-home-stat {
+  border: 1px solid var(--oh-border);
+  border-radius: 12px;
+  background: var(--oh-white);
+  box-shadow: none;
+}
+
+.oh-only-mobile .cx-history-summary {
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
 /* Superadmin supply chain history: the producer filter beside the chips. */
 .cx-history-producer {
   width: auto;
