@@ -159,11 +159,12 @@
 
 // export default Profile;
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Camera, LogOut, Mail, MapPin, Pencil, Phone, UserRound, UsersRound } from "lucide-react";
+import { AtSign, Camera, LogOut, Mail, MapPin, Pencil, Phone, UserRound, UsersRound } from "lucide-react";
 import { updateProfile, logout } from "../store/authSlice";
+import connectApi from "../connect/api";
 import { Spinner } from "../components/Loader.jsx";
 import { userCode } from "../utils/format";
 import "../styles/app-shell.css";
@@ -175,24 +176,33 @@ const USER_TYPES = [
   { value: "supplier", label: "Supplier" },
 ];
 
-const FIELDS = [
+const TYPE_LABELS = { ...Object.fromEntries(USER_TYPES.map((t) => [t.value, t.label])), consumer: "Consumer" };
+
+// Producer users (admin and staff) sign in with a username, have no editable user type (their role
+// comes from their producer), and fall back to the company's address.
+const fieldsFor = (isProducer) => [
   { key: "name", label: "Full name", Icon: UserRound, placeholder: "Nil" },
-  { key: "mobile", label: "Mobile number", Icon: Phone, readOnly: true },
+  ...(isProducer ? [{ key: "username", label: "Username", Icon: AtSign, readOnly: true, lock: "Sign-in" }] : []),
+  { key: "mobile", label: "Mobile number", Icon: Phone, readOnly: true, lock: isProducer ? "Set by admin" : "Sign-in" },
   {
     key: "userType",
     label: "User type",
     Icon: UsersRound,
     placeholder: "Nil",
     isSelect: true,
+    ...(isProducer ? { readOnly: true, lock: "Set by admin" } : {}),
   },
   { key: "email", label: "Email", Icon: Mail, placeholder: "Nil" },
   {
     key: "address",
-    label: "Address (optional)",
+    label: isProducer ? "Address" : "Address (optional)",
     Icon: MapPin,
     placeholder: "Nil",
   },
 ];
+
+const producerRoleLabel = (user) =>
+  user.producerRole === "admin" ? "Producer admin" : user.producerRole === "staff" ? "Producer staff" : null;
 
 // The signed-in user's own account: photo, details (edited one at a time, each saved on its
 // own), and Log out. Unfilled details read "Nil".
@@ -208,14 +218,42 @@ const Profile = () => {
   const [saveError, setSaveError] = useState("");
   const [photoSaving, setPhotoSaving] = useState(false);
   const [photoError, setPhotoError] = useState("");
+  const [producer, setProducer] = useState(null);
+
+  const producerId = user?.producerId;
+  useEffect(() => {
+    if (!producerId) return undefined;
+    let live = true;
+    connectApi
+      .get("/producer/me")
+      .then(({ data }) => live && setProducer(data.producer || null))
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [producerId]);
 
   if (!user) return null;
+
+  const isProducer = Boolean(user.producerId);
+  const fields = fieldsFor(isProducer);
+  const roleLabel = producerRoleLabel(user);
+  const typeText = roleLabel
+    ? [roleLabel, producer?.name].filter(Boolean).join(" · ")
+    : TYPE_LABELS[user.userType] || user.userType;
+
+  const valueOf = (key) => {
+    if (key === "mobile") return user.mobile ? `+91 ${user.mobile}` : "";
+    if (key === "userType") return typeText;
+    if (key === "address") return user.address || (isProducer ? producer?.address : "") || "";
+    return user[key];
+  };
 
   const startEdit = (field) => {
     if (field.readOnly) return;
     setSaveError("");
     setEditingField(field.key);
-    setDraft(user[field.key] || "");
+    setDraft(valueOf(field.key) || "");
   };
 
   const cancelEdit = () => {
@@ -261,7 +299,6 @@ const Profile = () => {
   };
 
   const initial = (user.name || user.mobile || "?").charAt(0).toUpperCase();
-  const typeLabel = USER_TYPES.find((t) => t.value === user.userType)?.label;
 
   return (
     <div className="oh-account">
@@ -290,10 +327,16 @@ const Profile = () => {
             <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handlePhotoChange} />
           </div>
           <div className="oh-account-name">{user.name || "Nil"}</div>
-          <div className="oh-account-sub">+91 {user.mobile}</div>
+          <div className="oh-account-sub">
+            {user.mobile ? `+91 ${user.mobile}` : user.username ? `@${user.username}` : ""}
+          </div>
           <div className="oh-account-stamps">
             <span className="oh-user-code">{userCode(user.id)}</span>
-            {user.userType && <span className={`oh-badge ${user.userType}`}>{typeLabel || user.userType}</span>}
+            {roleLabel ? (
+              <span className="oh-badge">{roleLabel}</span>
+            ) : (
+              user.userType && <span className={`oh-badge ${user.userType}`}>{typeText}</span>
+            )}
           </div>
           {photoError && (
             <div className="oh-error" role="alert">
@@ -309,13 +352,16 @@ const Profile = () => {
         <section className="oh-account-card" aria-labelledby="oh-account-details">
           <div className="oh-account-card-head">
             <h2 id="oh-account-details">Account details</h2>
-            <p>Edit one detail at a time. Your mobile number is your sign-in and can&apos;t be changed here.</p>
+            <p>
+              {isProducer
+                ? "Edit one detail at a time. You sign in with your username; your admin manages your mobile and role."
+                : "Edit one detail at a time. Your mobile number is your sign-in and can’t be changed here."}
+            </p>
           </div>
 
           <dl className="oh-account-list">
-            {FIELDS.map((field) => {
-              const raw = field.key === "mobile" ? `+91 ${user.mobile}` : user[field.key];
-              const value = field.key === "userType" ? USER_TYPES.find((t) => t.value === raw)?.label || raw : raw;
+            {fields.map((field) => {
+              const value = valueOf(field.key);
               const editing = editingField === field.key;
               return (
                 <div key={field.key} className={`oh-account-row ${editing ? "editing" : ""}`}>
@@ -375,7 +421,7 @@ const Profile = () => {
                     <dd>
                       <span className={`oh-account-value ${!value ? "empty" : ""}`}>{value || field.placeholder || "Nil"}</span>
                       {field.readOnly ? (
-                        <span className="oh-account-locked">Sign-in</span>
+                        <span className="oh-account-locked">{field.lock || "Sign-in"}</span>
                       ) : (
                         <button type="button" className="oh-account-edit" onClick={() => startEdit(field)}>
                           <Pencil size={14} strokeWidth={1.75} aria-hidden="true" />
