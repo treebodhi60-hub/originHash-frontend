@@ -62,6 +62,8 @@ export const gridFor = (pageSize, splitType, perPage) => {
 // retailer and a consumer label. Horizontal: side by side (retailer, consumer). Vertical: stacked
 // (consumer on top, retailer below). `pairCols` is pairs per row.
 export const MAX_PAIR_LABELS_PER_PAGE = MAX_BULK_PER_PAGE;
+// The most QR labels a page of pairs takes, per orientation — also the default (mirrors the backend).
+export const PAIR_MAX_PER_PAGE = { horizontal: 42, vertical: 48 };
 export const pairGridFor = (pageSize, perPage, orientation = 'horizontal') => {
   const [pw, ph] = PAGE_SIZES[pageSize] || PAGE_SIZES.A4;
   const { w, h } = stickerSize('bulk');

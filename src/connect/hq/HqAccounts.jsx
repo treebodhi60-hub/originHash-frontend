@@ -17,12 +17,12 @@ const COPY = {
   retailer: {
     title: 'Retailers',
     one: 'retailer',
-    note: 'A retailer of a producer can press Sold on that producer’s products; any retailer — general or another producer’s — on batches open to all retailers (the default). Retailers you or producers add are approved at once; people who register themselves are general retailers until you approve them under Requests and choose their producer.',
+    note: 'A retailer of a producer can press Sold on that producer’s products; any retailer — general or another producer’s — on batches open to all retailers (the default). Retailers you or producers add are approved at once (without a producer they are general retailers). People who register themselves need your approval under Requests: approve them as a general retailer or a retailer of a producer.',
   },
   consumer: {
     title: 'Consumers',
     one: 'consumer',
-    note: 'Every customer of the app. Anyone who logs in with a new mobile number is one; you can also add them here.',
+    note: 'Consumer accounts only: people whose profile type is Consumer and who aren’t a retailer, distributor, producer user or admin. Anyone who signs up as a consumer is listed; you can also add them here.',
   },
 };
 
@@ -109,7 +109,8 @@ const IdLink = ({ doc }) =>
     <span className="cx-muted">—</span>
   );
 
-// Approving a retailer's application: confirm (or change) the producer and their shop details.
+// Approving a retailer's application: as a general retailer (no producer) or a retailer of a
+// producer, and their shop details.
 const ApproveModal = ({ application, producers, onClose, onDone }) => {
   const [form, setForm] = useState({
     producerId: application.producer ? String(application.producer.id) : '',
@@ -141,15 +142,15 @@ const ApproveModal = ({ application, producers, onClose, onDone }) => {
             Cancel
           </Button>
           <Button busy={busy} onClick={save}>
-            Approve retailer
+            {form.producerId ? 'Approve as their retailer' : 'Approve as general retailer'}
           </Button>
         </>
       }
     >
       <div className="cx-stack" style={{ gap: 14 }}>
         <p className="cx-muted" style={{ margin: 0 }}>
-          {application.user?.name || 'The applicant'} · <span className="cx-mono">{application.user?.mobile}</span> becomes a retailer. They can press Sold only on the chosen
-          producer&apos;s products.
+          {application.user?.name || 'The applicant'} · <span className="cx-mono">{application.user?.mobile}</span> becomes a retailer. Leave the producer as General
+          for a general retailer (Sold on batches open to all retailers), or choose the producer they sell for.
         </p>
         <div className="cx-form two">
           <Select
@@ -157,9 +158,8 @@ const ApproveModal = ({ application, producers, onClose, onDone }) => {
             setForm={setForm}
             name="producerId"
             label="Producer"
-            required
             wide
-            placeholder="Choose the producer"
+            placeholder="General retailer (no producer)"
             options={producerOptions(producers, form.producerId)}
             error={fe('producerId')}
           />
@@ -173,14 +173,72 @@ const ApproveModal = ({ application, producers, onClose, onDone }) => {
   );
 };
 
-// Retailers' own applications, waiting for OriginHash (and the decided ones).
-const RetailerRequests = ({ producers, onChanged }) => {
+// General retailers (no producer): added by OriginHash without one, or approved as general.
+// "Associate" opens their account to choose a producer.
+const GeneralRetailers = ({ refreshKey, onEdit }) => {
+  const [accounts, setAccounts] = useState(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    setAccounts(null);
+    connectApi
+      .get('/admin/accounts', { params: { role: 'retailer', scope: 'general' } })
+      .then(({ data }) => setAccounts(data.accounts))
+      .catch((err) => setError(errorText(err, 'Could not load general retailers.')));
+  }, [refreshKey]);
+  if (error) return <ErrorNote>{error}</ErrorNote>;
+  if (!accounts) return <Loading />;
+  if (!accounts.length) return <Empty title="No general retailers.">Retailers added without a producer, or approved as general, show here.</Empty>;
+  return (
+    <div className="cx-table-wrap">
+      <table className="cx-table">
+        <thead>
+          <tr>
+            <th>Retailer</th>
+            <th>Mobile</th>
+            <th>City</th>
+            <th>ID</th>
+            <th>Since</th>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          {accounts.map((a) => (
+            <tr key={a.id}>
+              <td>
+                <div className="cx-cell-main">
+                  <strong>{a.businessName || a.name || '—'}</strong>
+                  {a.businessName && a.name && <span>{a.name}</span>}
+                </div>
+              </td>
+              <td className="cx-mono">{a.mobile}</td>
+              <td>{a.city || '—'}</td>
+              <td>
+                <IdLink doc={a.identityDoc} />
+              </td>
+              <td>{fmtDate(a.createdAt)}</td>
+              <td className="actions">
+                {a.isBlocked && <Badge tone="danger">Blocked</Badge>}
+                <Button variant="ghost" className="small" onClick={() => onEdit(a)}>
+                  Associate with producer
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+// Retailers' own applications, waiting for OriginHash (and the decided ones), and the general retailers.
+const RetailerRequests = ({ producers, onChanged, onEdit, refreshKey, generalCount }) => {
   const [status, setStatus] = useState('pending');
   const [data, setData] = useState(null);
   const [approving, setApproving] = useState(null);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const load = useCallback(() => {
+    if (status === 'general') return;
     connectApi
       .get('/admin/retailer-applications', { params: { status } })
       .then(({ data: d }) => setData(d))
@@ -197,7 +255,10 @@ const RetailerRequests = ({ producers, onChanged }) => {
     onChanged();
   };
   const reject = async (a) => {
-    const note = window.prompt(`Decline ${a.businessName}? They stay a general retailer (no producer). Add a short reason for them (optional):`, '');
+    const note = window.prompt(
+      `Decline ${a.businessName}? ${a.user?.partnerRole === 'retailer' ? 'They stay a general retailer (no producer).' : 'They stay a customer and won’t be a retailer.'} Add a short reason for them (optional):`,
+      ''
+    );
     if (note === null) return;
     try {
       done((await connectApi.post(`/admin/retailer-applications/${a.id}/reject`, { decisionNote: note })).data);
@@ -218,10 +279,13 @@ const RetailerRequests = ({ producers, onChanged }) => {
               { value: 'pending', label: 'Waiting', count: data?.pending },
               { value: 'approved', label: 'Approved' },
               { value: 'rejected', label: 'Declined' },
+              { value: 'general', label: 'General', count: generalCount },
             ]}
           />
         </div>
-        {!data ? (
+        {status === 'general' ? (
+          <GeneralRetailers refreshKey={refreshKey} onEdit={onEdit} />
+        ) : !data ? (
           <Loading />
         ) : data.applications.length ? (
           <div className="cx-table-wrap">
@@ -278,7 +342,7 @@ const RetailerRequests = ({ producers, onChanged }) => {
         ) : (
           <Empty title={status === 'pending' ? 'No requests waiting.' : `No ${status === 'rejected' ? 'declined' : status} requests.`}>
             {status === 'pending' &&
-              'Anyone signed in to the app can register as a retailer from their menu. They are general retailers until you approve them and choose their producer.'}
+              'Anyone signed in to the app can register as a retailer from their menu. They become retailers only when you approve them — as a general retailer or a retailer of a producer.'}
           </Empty>
         )}
       </Card>
@@ -300,6 +364,7 @@ export const HqAccounts = () => {
   const [uploading, setUploading] = useState(false);
   const [bulkProducer, setBulkProducer] = useState({ producerId: '' });
   const [pendingRequests, setPendingRequests] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0); // reloads the General list after an edit
 
   const loadRequestCount = useCallback(() => {
     if (role !== 'retailer') return;
@@ -373,18 +438,26 @@ export const HqAccounts = () => {
           ]}
         />
       )}
+      {notice && <Notice tone="success">{notice}</Notice>}
+      <ErrorNote>{error}</ErrorNote>
       {role === 'retailer' && view === 'requests' ? (
         <RetailerRequests
           producers={producers}
+          refreshKey={refreshKey}
+          // From the full list (no search): retailers without a producer.
+          generalCount={accounts && !search ? accounts.filter((a) => !a.producerId).length : undefined}
+          onEdit={(a) => {
+            setNotice('');
+            setEditing(a);
+          }}
           onChanged={() => {
             loadRequestCount();
             load();
+            setRefreshKey((k) => k + 1);
           }}
         />
       ) : (
       <>
-      {notice && <Notice tone="success">{notice}</Notice>}
-      <ErrorNote>{error}</ErrorNote>
       <Card flush>
         <div className="cx-card-head">
           <div className="cx-search">
@@ -489,6 +562,7 @@ export const HqAccounts = () => {
             setEditing(null);
             setNotice(d.message);
             load();
+            setRefreshKey((k) => k + 1);
           }}
         />
       )}

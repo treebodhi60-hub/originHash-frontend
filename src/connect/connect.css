@@ -1825,21 +1825,95 @@
   border-radius: var(--oh-radius-md, 10px);
 }
 
-/* Min / Max rupee sliders on the discount form. */
-.cx-range {
+/* Min / Max rupee sliders on the discount form (one per row). */
+.cx-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px 10px;
+  border: 1px solid var(--oh-border);
+  border-radius: var(--oh-radius-control);
+  background: var(--oh-surface-2, var(--oh-white));
+}
+.cx-slider-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
-.cx-range input[type='range'] {
+.cx-slider input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
   flex: 1;
   min-width: 0;
-  accent-color: var(--oh-cobalt);
+  width: auto;
+  height: 6px;
+  min-height: 0; /* the form's inputs have a min height */
+  margin: 0;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--oh-cobalt) var(--pct, 0%), var(--oh-well) var(--pct, 0%));
+  cursor: pointer;
 }
-.cx-range output {
-  min-width: 72px;
-  text-align: right;
+.cx-slider input[type='range']:focus {
+  border: 0;
+  box-shadow: none;
+}
+.cx-slider input[type='range']:focus-visible {
+  outline: 2px solid var(--oh-cobalt);
+  outline-offset: 6px;
+}
+.cx-slider input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--oh-white);
+  border: 3px solid var(--oh-cobalt);
+  box-shadow: 0 1px 4px rgba(16, 24, 40, 0.18);
+  transition: transform var(--oh-dur-quick, 120ms) var(--oh-ease, ease);
+}
+.cx-slider input[type='range']:active::-webkit-slider-thumb {
+  transform: scale(1.12);
+}
+.cx-slider input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--oh-white);
+  border: 3px solid var(--oh-cobalt);
+  box-shadow: 0 1px 4px rgba(16, 24, 40, 0.18);
+}
+.cx-slider input[type='range']::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: transparent;
+}
+.cx-slider output {
+  flex: none;
+  min-width: 92px;
+  padding: 6px 12px;
+  border-radius: var(--oh-radius-pill, 999px);
+  background: var(--oh-blue-soft, #e8eefc);
+  color: var(--oh-cobalt);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.cx-slider output.none {
+  background: var(--oh-well);
+  color: var(--oh-text-muted);
   font-weight: 600;
+}
+.cx-slider-scale {
+  display: flex;
+  justify-content: space-between;
+  /* lines the labels up under the track (the badge sits to its right) */
+  margin-right: 108px;
+  color: var(--oh-text-muted);
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
 }
 

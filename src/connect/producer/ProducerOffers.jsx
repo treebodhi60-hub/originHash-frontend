@@ -8,25 +8,40 @@ import { amountText, discountText, limitsText } from '../shared.jsx';
 // and rupee limits). Shown on the consumer QR — the image if there is one, else the percentage — and
 // used to fill "Max discount %" when requesting a QR batch.
 
-
-const AmountSlider = ({ form, setForm, name, label, hint, error }) => (
-  <Field label={label} hint={hint} error={error}>
-    {(id) => (
-      <div className="cx-range">
-        <input
-          id={id}
-          type="range"
-          min={0}
-          max={500}
-          step={10}
-          value={Number(form[name]) || 0}
-          onChange={(e) => setForm((f) => ({ ...f, [name]: Number(e.target.value) }))}
-        />
-        <output htmlFor={id}>{amountText(Number(form[name]) || 0)}</output>
-      </div>
-    )}
-  </Field>
-);
+// A rupee slider, one per row: filled track, the value as a badge, and a ₹0–500 scale underneath.
+const SCALE = [0, 100, 200, 300, 400, 500];
+const AmountSlider = ({ form, setForm, name, label, hint, error }) => {
+  const value = Number(form[name]) || 0;
+  return (
+    <Field label={label} hint={hint} error={error} wide>
+      {(id) => (
+        <div className="cx-slider">
+          <div className="cx-slider-row">
+            <input
+              id={id}
+              type="range"
+              min={0}
+              max={500}
+              step={10}
+              value={value}
+              style={{ '--pct': `${(value / 500) * 100}%` }}
+              aria-valuetext={amountText(value)}
+              onChange={(e) => setForm((f) => ({ ...f, [name]: Number(e.target.value) }))}
+            />
+            <output htmlFor={id} className={value ? '' : 'none'}>
+              {amountText(value)}
+            </output>
+          </div>
+          <div className="cx-slider-scale" aria-hidden="true">
+            {SCALE.map((s) => (
+              <span key={s}>₹{s}</span>
+            ))}
+          </div>
+        </div>
+      )}
+    </Field>
+  );
+};
 
 const OfferForm = ({ offer, products, offers, onClose, onSaved }) => {
   const [form, setForm] = useState(
@@ -116,6 +131,10 @@ const OfferForm = ({ offer, products, offers, onClose, onSaved }) => {
           )}
         </Field>
       </div>
+      <Notice>
+        Saving also updates this product&apos;s QR batches: the discount % and expiry date apply to their coupons, so a scan shows the new discount right away.
+        Coupons a consumer has already claimed keep the discount they were claimed at.
+      </Notice>
       {offer && (!offer.isActive || (offer.validTill && offer.validTill < todayStr())) && (
         <Notice tone="warning">This discount is {offer.isActive ? 'expired' : 'inactive'}. Saving it with a future expiry date makes it active again.</Notice>
       )}

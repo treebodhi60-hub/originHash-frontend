@@ -1,11 +1,13 @@
 import { useId } from 'react';
-import { GAP, MAX_PAIR_LABELS_PER_PAGE, PAGE_SIZE_NAMES, pairGridFor, pairSlot, stickerMm } from '../utils/stickerLayout';
+import { GAP, PAGE_SIZE_NAMES, PAIR_MAX_PER_PAGE, pairGridFor, pairSlot, stickerMm } from '../utils/stickerLayout';
 import '../styles/print-layout.css';
 
 // A QR batch's print layout (set by the OriginHash superadmin; producers download with it): paper,
 // QR codes per page (even: each unit is a retailer + consumer pair) and the pair orientation.
+// Per page: at most 42 horizontal / 48 vertical, and that maximum is the default.
 
-export const PRINT_DEFAULTS = { pageSize: 'A4', perPage: 40, orientation: 'horizontal' };
+export const maxPerPage = (orientation) => PAIR_MAX_PER_PAGE[orientation] || PAIR_MAX_PER_PAGE.horizontal;
+export const PRINT_DEFAULTS = { pageSize: 'A4', perPage: maxPerPage('horizontal'), orientation: 'horizontal' };
 export const ORIENTATIONS = [
   { value: 'horizontal', label: 'Horizontal', hint: 'Retailer QR left, consumer QR right' },
   { value: 'vertical', label: 'Vertical', hint: 'Consumer QR on top, retailer QR below' },
@@ -25,7 +27,7 @@ const along = (n, min, max) => {
 // The most QR codes (even) a page holds at full size.
 const fullSizeCount = (pageSize, orientation) => {
   let n = 2;
-  while (n < MAX_PAIR_LABELS_PER_PAGE && pairGridFor(pageSize, n + 2, orientation).scale >= 0.999) n += 2;
+  while (n < maxPerPage(orientation) && pairGridFor(pageSize, n + 2, orientation).scale >= 0.999) n += 2;
   return n;
 };
 
@@ -81,8 +83,9 @@ export const PairPrintLayout = ({ value, onChange, units = 0 }) => {
   const id = useId();
   const { pageSize, orientation } = value;
   const min = 2;
-  const max = MAX_PAIR_LABELS_PER_PAGE;
-  const perPage = Math.min(max, Math.max(min, Math.round((value.perPage || PRINT_DEFAULTS.perPage) / 2) * 2));
+  const max = maxPerPage(orientation);
+  const fallback = max; // the default is the most a page takes
+  const perPage = Math.min(max, Math.max(min, Math.round((value.perPage || fallback) / 2) * 2));
   const grid = pairGridFor(pageSize, perPage, orientation);
   const full = fullSizeCount(pageSize, orientation);
   const size = stickerMm('bulk', grid.scale);
@@ -128,7 +131,8 @@ export const PairPrintLayout = ({ value, onChange, units = 0 }) => {
                 aria-checked={orientation === o.value}
                 className={orientation === o.value ? 'active' : ''}
                 title={o.hint}
-                onClick={() => set({ orientation: o.value })}
+                // Switching orientation starts from its default (its maximum).
+                onClick={() => o.value !== orientation && set({ orientation: o.value, perPage: maxPerPage(o.value) })}
               >
                 {o.label}
               </button>
@@ -145,9 +149,9 @@ export const PairPrintLayout = ({ value, onChange, units = 0 }) => {
           </label>
           <span className="oh-print-value" aria-hidden="true">
             <b key={perPage}>{perPage}</b>
-            {perPage !== PRINT_DEFAULTS.perPage && (
-              <button type="button" className="oh-print-reset" onClick={() => setCount(PRINT_DEFAULTS.perPage)}>
-                Reset to {PRINT_DEFAULTS.perPage}
+            {perPage !== fallback && (
+              <button type="button" className="oh-print-reset" onClick={() => setCount(fallback)}>
+                Reset to {fallback}
               </button>
             )}
           </span>

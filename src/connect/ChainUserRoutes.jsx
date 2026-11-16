@@ -178,8 +178,8 @@ const Chat = () => {
   );
 };
 
-// /chain/retailer — register as a retailer (any ordinary user): they're a general retailer at once,
-// and OriginHash's approval links them with a producer. Retailers see which products they can sell.
+// /chain/retailer — register as a retailer (any ordinary user). It's a request: OriginHash approves it
+// as a general retailer or a retailer of a producer (or declines it). Retailers see what they can sell.
 const RETAILER_BLANK = { name: '', email: '', businessName: '', city: '', address: '', producerId: '', note: '' };
 const RetailerAccount = () => {
   const user = useAppUser();
@@ -250,7 +250,7 @@ const RetailerAccount = () => {
         subtitle={
           retailer
             ? 'Scan the retailer QR on a product from the Scan tab; press Sold when you sell it, which unlocks the consumer QR for the buyer.'
-            : 'Register as a retailer to press Sold when you sell a product, which unlocks its consumer QR for the buyer. You can start right away as a general retailer; OriginHash then links you with the producer you sell for.'
+            : 'Register as a retailer to press Sold when you sell a product, which unlocks its consumer QR for the buyer. OriginHash reviews your request and approves you as a general retailer or as the retailer of the producer you sell for.'
         }
       />
       {notice && <Notice tone="success">{notice}</Notice>}
@@ -284,6 +284,24 @@ const RetailerAccount = () => {
               Your last request wasn&apos;t approved{app.decisionNote ? `: “${app.decisionNote}”` : '.'} You stay a general retailer and can ask again below.
             </p>
           )}
+        </Card>
+      )}
+      {!retailer && pending && (
+        <Card title="Request sent">
+          <Notice>Waiting for OriginHash to approve you as a retailer. Until then you can scan products like any customer.</Notice>
+          <dl className="cx-dl" style={{ marginTop: 12 }}>
+            <dt>Producer asked for</dt>
+            <dd>{app.producer?.name || 'None — a general retailer'}</dd>
+            <dt>Sent</dt>
+            <dd>{fmtDateTime(app.createdAt)}</dd>
+          </dl>
+        </Card>
+      )}
+      {!retailer && app?.status === 'rejected' && (
+        <Card>
+          <p className="cx-small cx-muted" style={{ margin: 0 }}>
+            Your last request wasn&apos;t approved{app.decisionNote ? `: “${app.decisionNote}”` : '.'} You can ask again below.
+          </p>
         </Card>
       )}
       {!retailer && !data.canApply && (
