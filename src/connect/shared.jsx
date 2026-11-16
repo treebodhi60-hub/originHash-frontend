@@ -1,13 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Download, QrCode, X } from 'lucide-react';
 import connectApi from './api';
 import { downloadFile, errorText } from './api';
-import { Badge, Button, Empty, ErrorNote, Field, FileUpload, Loading, Modal, StatusBadge, fmtDate, fmtDateTime, num, roleLabel, todayStr, useFormError } from './ui.jsx';
+import { Badge, Button, Empty, ErrorNote, Field, FileUpload, Input, Loading, Modal, StatusBadge, fmtDate, fmtDateTime, num, roleLabel, todayStr, useFormError } from './ui.jsx';
 import { printLayoutText } from './printLayout.jsx';
 
 // Pieces shared by the superadmin console and the producer portal.
 
 export const discountText = (pct) => (pct ? `${Number(pct)}%` : 'No discount');
+
+// A discount's rupee limits (the Min / Max sliders; 0 = no limit), as one line.
+export const amountText = (v) => (v ? `₹${v}` : 'No limit');
+export const limitsText = (o) =>
+  [o.minAmount ? `On purchases of ₹${o.minAmount} or more` : null, o.maxAmount ? `up to ₹${o.maxAmount} off` : null].filter(Boolean).join(' · ');
 
 // A product's discount that applies today (active, not expired), from the producer's offers.
 export const currentOfferFor = (offers, productId) =>
@@ -390,23 +395,37 @@ export const CategoryInput = ({ value, onChange }) => {
   );
 };
 
-// Batch numbers are one sequence across OriginHash (OHB-0001, OHB-0002…), assigned when a batch is
-// allotted, so nobody types them. This shows the number the next batch will get.
-export const BatchNoField = ({ endpoint, hint = 'Assigned automatically — one sequence across OriginHash.' }) => {
+// Batch number: typed in by the producer or the superadmin, and not unique. The next number in the
+// OriginHash sequence (OHB-0001, OHB-0002…) is the suggestion: with `prefill` it fills the empty field
+// (superadmin), otherwise it only shows as the placeholder (producer: left empty, OriginHash sets it).
+export const BatchNoInput = ({ form, setForm, endpoint, prefill = false, hint, error }) => {
   const [next, setNext] = useState('');
+  const setFormRef = useRef(setForm);
+  setFormRef.current = setForm;
   useEffect(() => {
     let live = true;
     connectApi
       .get(endpoint)
-      .then(({ data }) => live && setNext(data.batchNo || ''))
+      .then(({ data }) => {
+        if (!live || !data.batchNo) return;
+        setNext(data.batchNo);
+        if (prefill) setFormRef.current((f) => (f.batchNo ? f : { ...f, batchNo: data.batchNo }));
+      })
       .catch(() => {});
     return () => {
       live = false;
     };
-  }, [endpoint]);
+  }, [endpoint, prefill]);
   return (
-    <Field label="Batch number" hint={hint}>
-      {(id) => <input id={id} className="cx-mono" value={next || 'Assigned automatically'} readOnly disabled />}
-    </Field>
+    <Input
+      form={form}
+      setForm={setForm}
+      name="batchNo"
+      label="Batch number"
+      maxLength={80}
+      placeholder={next ? `e.g. ${next}` : 'e.g. OHB-0001'}
+      hint={hint || `Suggested: ${next || 'the next OHB- number'}. You can enter your own; batch numbers don’t have to be unique.`}
+      error={error}
+    />
   );
 };

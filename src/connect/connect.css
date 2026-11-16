@@ -1815,6 +1815,48 @@
   color: var(--oh-cobalt);
 }
 
+/* A producer's discount image, shown instead of the bare percentage. */
+.cx-coupon-image {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  max-height: 220px;
+  object-fit: contain;
+  border-radius: var(--oh-radius-md, 10px);
+}
+
+/* Min / Max rupee sliders on the discount form. */
+.cx-range {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cx-range input[type='range'] {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--oh-cobalt);
+}
+.cx-range output {
+  min-width: 72px;
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Discount column: thumbnail + percentage and limits. */
+.cx-offer-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cx-offer-cell img {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: var(--oh-radius-sm);
+  border: 1px solid var(--oh-line, #e3e6ee);
+}
+
 .cx-coupon code {
   padding: 4px 10px;
   border-radius: var(--oh-radius-sm);

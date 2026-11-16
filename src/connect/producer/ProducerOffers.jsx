@@ -1,11 +1,32 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import connectApi, { errorText } from '../api';
-import { Badge, Button, Card, Empty, ErrorNote, Input, Loading, Modal, Notice, PageHead, Select, fmtDate, todayStr, useFormError } from '../ui.jsx';
-import { discountText } from '../shared.jsx';
+import { Badge, Button, Card, Empty, ErrorNote, Field, FileUpload, Input, Loading, Modal, Notice, PageHead, Select, fmtDate, todayStr, useFormError } from '../ui.jsx';
+import { amountText, discountText, limitsText } from '../shared.jsx';
 
-// Producer: one discount per product (coupon code, discount %, expiry date). Shown to signed-in
-// consumers on the consumer QR, and used to fill "Max discount %" when requesting a QR batch.
+// Producer: one discount per product (coupon code, discount %, expiry date, and optionally an image
+// and rupee limits). Shown on the consumer QR — the image if there is one, else the percentage — and
+// used to fill "Max discount %" when requesting a QR batch.
+
+
+const AmountSlider = ({ form, setForm, name, label, hint, error }) => (
+  <Field label={label} hint={hint} error={error}>
+    {(id) => (
+      <div className="cx-range">
+        <input
+          id={id}
+          type="range"
+          min={0}
+          max={500}
+          step={10}
+          value={Number(form[name]) || 0}
+          onChange={(e) => setForm((f) => ({ ...f, [name]: Number(e.target.value) }))}
+        />
+        <output htmlFor={id}>{amountText(Number(form[name]) || 0)}</output>
+      </div>
+    )}
+  </Field>
+);
 
 const OfferForm = ({ offer, products, offers, onClose, onSaved }) => {
   const [form, setForm] = useState(
@@ -15,8 +36,11 @@ const OfferForm = ({ offer, products, offers, onClose, onSaved }) => {
           couponCode: offer.couponCode || '',
           discountPercent: offer.discountPercent ?? '',
           validTill: offer.validTill || '',
+          image: offer.image || null,
+          minAmount: offer.minAmount || 0,
+          maxAmount: offer.maxAmount || 0,
         }
-      : { productId: '', couponCode: '', discountPercent: '', validTill: '' }
+      : { productId: '', couponCode: '', discountPercent: '', validTill: '', image: null, minAmount: 0, maxAmount: 0 }
   );
   // Active products without a discount yet (plus this offer's own product when editing).
   const taken = new Set(offers.filter((o) => o.id !== offer?.id && o.productId).map((o) => String(o.productId)));
@@ -73,10 +97,24 @@ const OfferForm = ({ offer, products, offers, onClose, onSaved }) => {
           max={100}
           step="0.01"
           required
-          hint="Fills “Max discount %” when you request a QR batch for this product."
+          hint={form.image ? 'Needed with the image too. Fills “Max discount %” when you request a QR batch.' : 'Fills “Max discount %” when you request a QR batch for this product.'}
           error={fe('discountPercent')}
         />
+        <AmountSlider form={form} setForm={setForm} name="minAmount" label="Min (minimum purchase)" hint="0 = no minimum." error={fe('minAmount')} />
+        <AmountSlider form={form} setForm={setForm} name="maxAmount" label="Max (maximum discount)" hint="0 = no cap on the amount taken off." error={fe('maxAmount')} />
         <Input form={form} setForm={setForm} name="validTill" label="Expiry date" type="date" required min={todayStr()} wide error={fe('validTill')} />
+        <Field label="Discount image" wide hint="Optional. Consumers see this image when they scan the product's consumer QR; without one they see the discount %." error={fe('image')}>
+          {() => (
+            <FileUpload
+              endpoint="/producer/uploads"
+              folder="offers"
+              accept="image/*"
+              value={form.image}
+              onChange={(image) => setForm((f) => ({ ...f, image }))}
+              label="Upload image"
+            />
+          )}
+        </Field>
       </div>
       {offer && (!offer.isActive || (offer.validTill && offer.validTill < todayStr())) && (
         <Notice tone="warning">This discount is {offer.isActive ? 'expired' : 'inactive'}. Saving it with a future expiry date makes it active again.</Notice>
@@ -154,7 +192,15 @@ export const ProducerOffers = () => {
                       </div>
                     </td>
                     <td className="cx-mono">{o.couponCode}</td>
-                    <td>{o.discountPercent !== null ? discountText(o.discountPercent) : '—'}</td>
+                    <td>
+                      <div className="cx-offer-cell">
+                        {o.image && <img src={o.image.url} alt="" />}
+                        <div className="cx-cell-main">
+                          <strong>{o.discountPercent !== null ? discountText(o.discountPercent) : '—'}</strong>
+                          {limitsText(o) && <span>{limitsText(o)}</span>}
+                        </div>
+                      </div>
+                    </td>
                     <td>{o.validTill ? fmtDate(o.validTill) : 'No end date'}</td>
                     <td>
                       {!o.isActive ? (

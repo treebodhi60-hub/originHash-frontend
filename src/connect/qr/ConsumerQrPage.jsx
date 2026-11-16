@@ -8,7 +8,7 @@ import { PhoneShell } from '../Shells.jsx';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import { Badge, Button, Empty, ErrorNote, Loading, Notice, fmtDate, fmtDateTime, placeText, roleLabel } from '../ui.jsx';
-import { WarrantyList } from '../shared.jsx';
+import { WarrantyList, limitsText } from '../shared.jsx';
 
 // What a consumer QR opens. Locked until a retailer marks the unit sold; then: authentic &
 // verified, product info and certificates, discounts / loyalty (the unit's unique coupon and the
@@ -112,7 +112,9 @@ const DiscountSection = ({ info, token, onClaimed }) => {
       <h3>Discounts / loyalty</h3>
       {discount.hasCoupon ? (
         <div className="cx-coupon">
-          <strong>{discount.percent}% off</strong>
+          {/* The producer's discount image if there is one, else the percentage. */}
+          {discount.image ? <img className="cx-coupon-image" src={discount.image.url} alt={`${discount.percent}% off`} /> : <strong>{discount.percent}% off</strong>}
+          {limitsText(discount) && <span>{limitsText(discount)}</span>}
           <span className="cx-muted">Your unique coupon for this product · valid till {fmtDate(discount.validTill)}</span>
           {discount.code ? (
             <code>{discount.code}</code>
@@ -139,7 +141,9 @@ const DiscountSection = ({ info, token, onClaimed }) => {
           <h3 style={{ marginTop: 6 }}>Offers from {info.producer.name}</h3>
           {offers.map((o) => (
             <div key={o.id} className="cx-doc-link" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
-              <strong>{o.title}</strong>
+              {/* The product's own image already shows on the coupon above. */}
+              {o.image && !(discount.hasCoupon && o.id === discount.offerId) ? <img className="cx-coupon-image" src={o.image.url} alt={o.title} /> : <strong>{o.title}</strong>}
+              {limitsText(o) && <span style={{ fontWeight: 400 }}>{limitsText(o)}</span>}
               {o.details && <span className="cx-muted" style={{ fontWeight: 400 }}>{o.details}</span>}
               <span>
                 {o.couponCode ? <code className="cx-mono">{o.couponCode}</code> : <span className="cx-muted">Log in to see the coupon</span>}

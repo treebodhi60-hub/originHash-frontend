@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import connectApi, { CHAIN_ADMIN, errorText } from '../api';
 import { Badge, Button, Card, Empty, ErrorNote, Field, Input, Loading, Modal, Notice, PageHead, Select, Stat, Tabs, fmtDate, fmtDateTime, num, useFormError } from '../ui.jsx';
-import { BatchFacts, BatchNoField, DownloadButtons, UnitsTable, discountText } from '../shared.jsx';
+import { BatchFacts, BatchNoInput, DownloadButtons, UnitsTable, discountText } from '../shared.jsx';
 import { PRINT_DEFAULTS, PairPrintLayout } from '../printLayout.jsx';
 import { BatchFeaturesCard, SoldAccessCard } from '../retailers.jsx';
 
@@ -11,10 +11,10 @@ import { BatchFeaturesCard, SoldAccessCard } from '../retailers.jsx';
 // unique coupon per unit), and every batch's units.
 
 // The batch fields: quantity, max discount (0 = no discount), expiry, product, and the batch number
-// (automatic, shown only). `fromRequest` (a producer's request): the units, max discount and expiry
+// (typed in, not unique; pre-filled with the next OHB- number). `fromRequest` (a producer's request): the units, max discount and expiry
 // date they set — and `fixedProduct`, the product they chose — are shown but not changeable.
 const FIXED_HINT = 'Set by the producer in their request; it can’t be changed here.';
-const BatchFields = ({ form, setForm, error, products, fixedProduct, fromRequest = false }) => {
+const BatchFields = ({ form, setForm, error, products, fixedProduct, fromRequest = false, batchNoHint }) => {
   const fe = (f) => (error.field === f ? error.message : null);
   return (
     <div className="cx-form two">
@@ -50,7 +50,7 @@ const BatchFields = ({ form, setForm, error, products, fixedProduct, fromRequest
       ) : (
         <Input form={form} setForm={setForm} name="expiryDate" label="Expiry date" type="date" required hint="Coupons are valid until this date." error={fe('expiryDate')} />
       )}
-      <BatchNoField endpoint="/admin/batches/next-number" />
+      <BatchNoInput form={form} setForm={setForm} endpoint="/admin/batches/next-number" prefill hint={batchNoHint} error={fe('batchNo')} />
       {fixedProduct ? (
         <Field label="Product" wide hint={FIXED_HINT}>
           {(id) => <input id={id} value={fixedProduct} readOnly disabled />}
@@ -77,7 +77,7 @@ const BatchFields = ({ form, setForm, error, products, fixedProduct, fromRequest
 
 // Allot a batch directly. `producers` to choose from (one = fixed); products load per producer.
 export const AllotBatchModal = ({ producers, products: givenProducts, onClose, onDone }) => {
-  const [form, setForm] = useState({ producerId: producers.length === 1 ? String(producers[0].id) : '', quantity: '', maxDiscountPercent: '', expiryDate: '', productId: '', notes: '' });
+  const [form, setForm] = useState({ producerId: producers.length === 1 ? String(producers[0].id) : '', quantity: '', maxDiscountPercent: '', expiryDate: '', batchNo: '', productId: '', notes: '' });
   const [products, setProducts] = useState(givenProducts || null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useFormError();
@@ -144,6 +144,7 @@ const RequestModal = ({ request, onClose, onDone }) => {
     quantity: String(request.quantity),
     maxDiscountPercent: request.maxDiscountPercent === null ? '' : String(request.maxDiscountPercent),
     expiryDate: request.expiryDate,
+    batchNo: request.batchNo || '',
     productId: request.productId ? String(request.productId) : '',
     notes: '',
     decisionNote: '',
@@ -165,7 +166,7 @@ const RequestModal = ({ request, onClose, onDone }) => {
     try {
       const { data } =
         action === 'allot'
-          ? await connectApi.post(`/admin/batch-requests/${request.id}/allot`, { notes: form.notes, decisionNote: form.decisionNote })
+          ? await connectApi.post(`/admin/batch-requests/${request.id}/allot`, { batchNo: form.batchNo, notes: form.notes, decisionNote: form.decisionNote })
           : await connectApi.post(`/admin/batch-requests/${request.id}/reject`, { decisionNote: form.decisionNote });
       onDone(data);
     } catch (err) {
@@ -192,7 +193,7 @@ const RequestModal = ({ request, onClose, onDone }) => {
     >
       <div className="cx-stack" style={{ gap: 14 }}>
         <p className="cx-muted" style={{ margin: 0 }}>
-          Requested by {request.requestedBy || 'the producer'} on {fmtDateTime(request.createdAt)}. The details below are fixed by the producer; allot or reject the request.
+          Requested by {request.requestedBy || 'the producer'} on {fmtDateTime(request.createdAt)}. The details below are fixed by the producer (you can set the batch number); allot or reject the request.
         </p>
         {request.note && <Notice>“{request.note}”</Notice>}
         <BatchFields
@@ -201,6 +202,7 @@ const RequestModal = ({ request, onClose, onDone }) => {
           error={error}
           products={products || []}
           fromRequest
+          batchNoHint={request.batchNo ? 'Entered by the producer; you can change it. Batch numbers don’t have to be unique.' : undefined}
           fixedProduct={request.productId ? request.productName || products?.find((p) => p.id === request.productId)?.name || `Product #${request.productId}` : null}
         />
         <Input form={form} setForm={setForm} name="decisionNote" label="Message to the producer" wide hint="Shown with the request (e.g. why it was rejected)." />
@@ -235,6 +237,7 @@ export const HqBatches = () => {
   useEffect(load, [load]);
 
   const pending = (requests || []).filter((r) => r.status === 'pending');
+  const activeProducers = producers.filter((p) => !p.isBlocked);
   const done = (d) => {
     setOpen(null);
     setAllotting(false);
@@ -249,11 +252,25 @@ export const HqBatches = () => {
         title="QR batches"
         subtitle="Producers request retailer QR batches; each unit is a retailer QR plus its consumer QR."
         actions={
-          <Button onClick={() => setAllotting(true)} disabled={!producers.length}>
+          <Button
+            onClick={() => setAllotting(true)}
+            disabled={!activeProducers.length}
+            title={activeProducers.length ? undefined : 'Add a producer first'}
+          >
             <Plus size={16} /> Allot batch
           </Button>
         }
       />
+      {/* Allotting needs a producer to allot to (and one of its products). */}
+      {requests && !activeProducers.length && (
+        <Notice>
+          {producers.length ? 'Every producer is blocked, so there is nobody to allot a batch to.' : 'There are no producers yet, so there is nobody to allot a batch to.'}{' '}
+          <Link className="cx-link" to="/admin/chain/producers">
+            {producers.length ? 'Unblock a producer' : 'Add a producer'}
+          </Link>{' '}
+          (with at least one product) to use Allot batch.
+        </Notice>
+      )}
       {notice && <Notice tone="success">{notice}</Notice>}
       <ErrorNote>{error}</ErrorNote>
       <Tabs
